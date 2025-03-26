@@ -24,7 +24,7 @@ const props=defineProps({
             @input="$emit('update:model', $event.target.value)"
             class="mt-1 block w-full rounded-md border-gray-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
             
-            <option v-for="option in options" :value="option.name" :key="option.name">{{ option.name }}</option>
+            <option v-for="option in options" :value="option.id" :key="option.name">{{ option.name }}</option>
         </select>
    
 </template>

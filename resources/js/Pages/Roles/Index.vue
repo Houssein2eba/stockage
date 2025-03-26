@@ -5,8 +5,16 @@ import {router} from '@inertiajs/vue3';
 import {useToast} from "vue-toastification";
 import {Link} from '@inertiajs/vue3';
 const props = defineProps({
-    roles: Object,
+    roles: {
+        type: Array,
+        required: true,
+        default: () => []
+    }
 })
+const numberUsers = (role) => {
+    console.log(role)
+    return role.users.length
+}
 const toast=useToast();
 const showDeleteModal = ref(false)
 const roleToDelete = ref(null)
@@ -60,6 +68,7 @@ defineOptions({
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Permissions</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Users</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
@@ -78,8 +87,12 @@ defineOptions({
                             </span>
                         </div>
                     </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ role.users_count }}
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
+                            @click="router.visit(`/roles/${role.id}`)"
                             
                             class="text-blue-600 hover:text-blue-900 mr-3"
                         >

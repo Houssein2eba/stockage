@@ -46,6 +46,23 @@ const deleteUser=(user)=> {
   <template>
   <Head title="Users index" />
 
+  <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Roles & Permissions</h1>
+        <Link
+            :href="route('users.create')"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            
+          
+          
+          Add User</Link>
+    
+        
+        
+    </div>
   
     <div class=" max-w-7xl m-auto py-4">
       <div class="flex justify-between">
@@ -75,7 +92,7 @@ const deleteUser=(user)=> {
               <TableDataCell>{{ user.email }}</TableDataCell>
               <TableDataCell class="space-x-4">
                 <Link
-                  :href="route('users.create', user.id)"
+                  :href="route('users.edit', user.id)"
                   class="text-green-400 hover:text-green-600"
                   >Edit</Link
                 >
