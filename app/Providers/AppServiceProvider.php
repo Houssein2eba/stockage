@@ -24,8 +24,10 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
         
-        Gate::define('admin', function ($user) {
-            return Auth::guard('admin')->check();
-        });
+        Gate::before(function ($user, $ability) {
+           return Auth::guard('admin')->check() ? true : null;
+});
+       
+        
     }
 }
