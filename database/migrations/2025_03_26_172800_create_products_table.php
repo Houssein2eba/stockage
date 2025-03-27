@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('products', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('name')->index();
             $table->text('description');
             $table->decimal('price', 8, 2);
@@ -20,12 +20,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Sceama::create('product_has_category', function (Blueprint $table) {
-            $table->id();
-            $table->integer('product_id');
-            $table->integer('category_id');
-            $table->timestamps();
-        });
+        
     }
 
     /**

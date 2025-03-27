@@ -77,6 +77,7 @@ onMounted(() => {
             <SidebarLink 
               href="/dashboard" 
               :active="route().current('dashboard')"
+              class="hover:bg-gray-100"
             >
               <template #icon>
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
@@ -212,8 +213,20 @@ onMounted(() => {
             </svg>
           </button>
           
-          <div class="flex items-center gap-4">
+          <div class="flex items-between gap-4">
             <!-- User profile or other header content -->
+             <Link
+             :href="route('activity.index')"
+             class="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+             :class="{ 'bg-gray-100 ': route().current('activity.index') }"
+             >Activities</Link>
+             <Link
+             :href="route('profile.edit')"
+             class="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+             :class="{ 'bg-gray-100 ': route().current('profile.edit') }"
+             >
+              Profile
+            </Link>
           </div>
         </div>
       </header>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\Users\UsersController;
@@ -41,6 +42,9 @@ Route::post('/roles/create',[RolesController::class,'store'])->name('roles.store
 Route::delete('/roles/{id}',[RolesController::class,'destroy'])->name('roles.destroy');
 Route::get('/roles/{id}',[RolesController::class,'edit'])->name('roles.edit');
 Route::put('/roles/{id}',[RolesController::class,'update'])->name('roles.update');
+
+Route::get('/activity',[ActivityLogController::class,'index'])->name('activity.index');
+Route::get('/activity/{id}',[ActivityLogController::class,'view'])->name('activity.view');
 });
 
 

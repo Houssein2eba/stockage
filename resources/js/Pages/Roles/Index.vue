@@ -1,9 +1,16 @@
+
+
 <script setup>
 import AuthLayout from '@/layouts/AuthLayout.vue'
 import { ref } from 'vue'
 import {router} from '@inertiajs/vue3';
 import {useToast} from "vue-toastification";
-import {Link} from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
+
+import DatePicker from 'primevue/datepicker';
+
+
+const date = ref();
 const props = defineProps({
     roles: {
         type: Array,
@@ -45,6 +52,20 @@ defineOptions({
 <template>
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold">Roles & Permissions</h1>
+        
+
+    
+
+    <div class="card flex justify-center">
+        <DatePicker v-model="date" />
+    </div>
+
+
+
+
+
+
+
         <Link
             :href="route('roles.create')"
             class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center"

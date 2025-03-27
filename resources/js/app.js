@@ -12,7 +12,8 @@ import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
-
+import PrimeVue from "primevue/config";
+import Aura from "@primeuix/themes/aura";
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const vuetify = createVuetify({
     components,
@@ -29,6 +30,12 @@ createInertiaApp({
         return createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
+            .use(PrimeVue, {
+                
+                theme: {
+                    preset: Aura,
+                },
+            })
             .use(vuetify)
             .use(Toast, {
                 position: POSITION.TOP_RIGHT,

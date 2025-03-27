@@ -23,7 +23,10 @@
     "dependencies": {
         "@inertiajs/vue3": "^2.0.5",
         "@kyvg/vue3-notification": "^3.4.1",
+        "@primeuix/themes": "^1.0.0",
         "@vitejs/plugin-vue": "^5.2.3",
+        "date-fns": "^4.1.0",
+        "primevue": "^4.3.3",
         "vue": "^3.5.13",
         "vue-multiselect": "^3.0.0-beta.3",
         "vue-toastification": "^2.0.0-rc.5",

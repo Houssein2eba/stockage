@@ -16,25 +16,7 @@ class RolesController extends Controller
      public function index()
     {
 
-        // $roleCounts = DB::table('model_has_roles')
-        //     ->select('role_id', DB::raw('count(*) as user_count'))
-        //     ->groupBy('role_id')
-        //     ->get();
-
-        // foreach ($roleCounts as $roleCount) {
-        //     dd($roleCount);
-        // }
         
-       
-
-// $managerRole = Role::findByName('manager','web');
-// $cashierRole = Role::findByName('cachier','web');
-
-// // Check if any users are assigned
-// dd([
-//     'manager_users' => $managerRole->users()->count(),
-//     'cashier_users' => $cashierRole->users()->count()
-// ]);
    
   $roles=Role::with(['permissions']) // This adds a 'users_count' property
                 ->get();
@@ -63,14 +45,23 @@ class RolesController extends Controller
 
     public function store(StoreRoleRequest $request)
     {
+       
         
         $role = Role::create([
             'name' => $request->input('name'),
             'guard_name' => 'web',
         ]);
         $role->syncPermissions($request->permissions);
-        
-        return redirect()->route('roles.index');
+
+        activity()
+        ->causedBy(auth()->user())
+        ->performedOn($role)
+        ->withProperties([
+            'new' => $request->validated(),
+            'old' => [],
+        ])
+        ->log('create role');
+        return to_route('roles.index');
     }
     public function edit($id){
         
@@ -89,17 +80,36 @@ class RolesController extends Controller
             'permissions' => 'required|array',
             'permissions.*' => 'exists:permissions,name',
         ]);
-        $role = Role::findOrFail($id);
+        $role = Role::with('permissions')->find($id);
+        
+        $oldRoleData = [
+        'name' => $role->name,
+        'permissions' => $role->permissions->pluck('name')->toArray()
+    ];
+
         $role->update($request->only('name'));
         $role->syncPermissions($request->permissions);
-        
-        return redirect()->route('roles.index');
+        activity()
+        ->causedBy(auth()->user())
+        ->performedOn(new Role())
+        ->withProperties(['new' => $request->all(), 'old' => $oldRoleData])->log('updated role');
+
+        return to_route('roles.index');
     }
-    public function destroy($role)
+    public function destroy($id)
     {
         
           
-        Role::find($role)->delete();
-        return redirect()->back();
+        $role=Role::find($id);
+        $role->delete();
+
+        activity()
+        ->causedBy(auth()->user())
+        ->performedOn(new Role())
+        ->withProperties(['new'=>[],'old'=>['role name'=>$role->name]])
+        ->log('delete role')
+        ;
+
+        return to_route('roles.index');
     }
 }
