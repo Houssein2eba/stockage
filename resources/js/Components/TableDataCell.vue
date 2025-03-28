@@ -1,5 +1,5 @@
 <template>
-  <th class="px-6 py-4 bg-teal-600 text-white hover:bg-yellow-200 border-2">
+  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
     <slot />
-  </th>
+  </td>
 </template>

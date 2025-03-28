@@ -47,7 +47,7 @@ const deleteUser=(user)=> {
   <Head title="Users index" />
 
   <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Roles & Permissions</h1>
+        <h1 class="text-2xl font-bold">Employees</h1>
         <Link
             :href="route('users.create')"
             class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center"
@@ -74,6 +74,54 @@ const deleteUser=(user)=> {
         > -->
       </div>
       <div class="mt-6">
+        <!-- <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                ID
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Name
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Role
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Email
+              </th>
+              <th scope="col" colspan="2" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Action
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr v-for="user in users" :key="user.id" class="border-b">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ user.id }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ user.name }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ user.roles.map((role) => role.name).join(', ') }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ user.email }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <Link
+                  :href="route('users.edit', user.id)"
+                  class="text-green-400 hover:text-green-600"
+                  >Edit</Link
+                >
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <button @click="showConfirmDeleteUserModal = true" class="text-red-400 hover:text-red-600">Delete</button>
+                
+              </td>
+            </tr>
+          </tbody>
+        </table> -->
         <Table>
           <template #header>
             <TableRow>

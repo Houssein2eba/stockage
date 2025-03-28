@@ -1,16 +1,18 @@
 <script setup>
 </script>
 <template>
-  <div class="max-w-fit m-auto text-center border borde-2 border-black p-4 bg-white">
-    <table class="w-7xl text-sm text-left text-gray-500 dark:text-gray-400">
+  
+    <table class="min-w-full divide-y divide-gray-200">
       <thead
-        class="text-xs  uppercase bg-gray-500 dark:bg-gray-700 dark:text-gray-400"
+        class="bg-gray-50"
       >
+      
         <slot name="header"></slot>
+      
       </thead>
-      <tbody>
+      <tbody class="bg-white divide-y divide-gray-200">
         <slot></slot>
       </tbody>
     </table>
-  </div>
+ 
 </template>
