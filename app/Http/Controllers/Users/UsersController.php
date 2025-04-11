@@ -3,48 +3,49 @@
 namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UpdateUserRequest;
+
+use App\Http\Requests\UserRequest;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Inertia\Response;
 use Spatie\Permission\Models\Role;
 
 class UsersController extends Controller
 {
-    public function index(){
+    public function index(Request $request):Response{
         
-        $users=User::with('roles')->get()->toArray();
+       
+        $users=User::with('roles')->when($request->search, function ($query) use ($request) {
+            $query->where('name', 'LIKE', "%{$request->search}%");
+        })->paginate(PAGINATION)->withQueryString();
+        
         return inertia('Users/Index', ['users'=>$users]);
     }
 
-      public function create(){
+      public function create():Response{
         $roles=Role::get()->toArray();
         
 
         return inertia('Users/Create',['roles'=>$roles]);
       }
 
-    public function store(Request $request)
+    public function store(UserRequest $request):RedirectResponse
     {
-        $request->validate([
-            'name' => 'required|string|min:3',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|confirmed',
-            'password_confirmation' => 'required|string|same:password',
-            'number' => 'required|string|regex:/^([2-4][0-9]{7})$/',
-            'role' => 'required|integer|exists:roles,id',
-        ]);
+       
+        $request->validated();
+        
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'number' => $request->number,
             'password' => $request->password,
             
-        ]);
-        $user->roles()->attach($request->role);
+        ])->assignRole($request->role);
 
         
 
-        return redirect()->route('users.index');
+        return to_route('Users/Index');
     }
 
     public function edit($id){
@@ -53,27 +54,31 @@ class UsersController extends Controller
             return redirect()->route('users.index');
         }
         //$user = User::findOrFail($id)->roles()->add($id); 5 stars
-        $user=User::with('roles')->findOrFail($id);
+        // $user=User::with('roles')->findOrFail($id);
+        $user=User::all()->withRelatio
         $roles=Role::get()->toArray();
         
         return inertia('Users/Edit', ['user'=>$user,'roles'=>$roles]);
     }
-     public function update(Request $request,$id){
+     public function update(UserRequest $request,$id){
 
-        $request->validate([
-            'name' => 'required|string|min:3',
-            'email' => 'required|email|unique:users,email,' . $id,
-            'number' => 'required|string|regex:/^([2-4][0-9]{7})$/',
-            'role' => 'required|string|exists:roles,name',
-        ]);
+        $request->validated();
+       
         
-        $user=User::findOrFail($id);
+        $user=User::with('roles')->findOrFail($id);
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
             'number' => $request->number,
         ]);
         $user->syncRoles([$request->role]);
+
+       activity()
+       ->causedBy(auth()->user())
+       ->performedOn(new User())
+       ->withProperties(['new'=>$request->all(),'old'=>$user->getOriginale()])
+       ->log('updated user');
+
         return redirect()->route('users.index');
      }
 

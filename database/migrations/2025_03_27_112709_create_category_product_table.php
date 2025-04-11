@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('category_product', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('category_id')->constrained()->onDelete('cascade');
             $table->foreignUuid('product_id')->constrained()->onDelete('cascade');
-            $table->unique(['category_id', 'product_id'])->index();
+            $table->foreignUuid('category_id')->constrained()->onDelete('cascade');
+            
             $table->timestamps();
         });
     }

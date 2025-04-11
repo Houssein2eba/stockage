@@ -26,9 +26,10 @@ const form = useForm({
 
 const submit = () => {
   form.post(route("users.store"), {
-    onFinish: () => form.reset(),
+    
     onSuccess: () =>{
       toast.success('User created successfully');
+
     } ,
   });
 };
@@ -39,7 +40,7 @@ const submit = () => {
     <Head title="Create user" />
    
     <div class="max-w-7xl mx-auto mt-4">
-        {{roles}}
+       
       <div class="flex justify-between">
         <Link
           :href="route('users.index')"
@@ -136,7 +137,7 @@ const submit = () => {
             class="mt-2"
             :message="form.errors.role"
           />
-          <span>{{form.errors.role}}</span>
+          
           </div>
           
 

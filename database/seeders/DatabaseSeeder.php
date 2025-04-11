@@ -49,5 +49,6 @@ class DatabaseSeeder extends Seeder
         $role->syncPermissions($permissions);
         $user->syncPermissions($permissions);
 
+        //$this->call(PermissionSeeder::class);
     }
 }

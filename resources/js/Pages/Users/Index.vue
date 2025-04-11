@@ -11,7 +11,9 @@ import DangerButton from "@/Components/DangerButton.vue";
 import SecondaryButton from "@/Components/SecondaryButton.vue";
 import { router } from '@inertiajs/vue3';
 import { useToast } from 'vue-toastification'
-import { defineProps, ref } from 'vue';
+import { ref, computed, watch } from 'vue';
+import { defineOptions, defineProps } from 'vue';
+import { debounce } from 'lodash';
 
 defineOptions({
     layout:AuthLayout
@@ -35,11 +37,21 @@ const deleteUser=(user)=> {
     onError: (errors) => {
       // Show error message
       toast.error('Failed to delete user')
+    },
+    onFinish: () => {
+      showConfirmDeleteUserModal = false;
     }
   }
 )
     
 }
+const search = ref('');
+watch(search, debounce((value) => {
+  router.get(`/users`, { search: value }, {
+    preserveState: true,
+    preserveScroll: true,
+  });
+}, 500));
 </script>
 
 
@@ -47,6 +59,7 @@ const deleteUser=(user)=> {
   <Head title="Users index" />
 
   <div class="flex justify-between items-center mb-6">
+        <input type="text" v-model="search" placeholder="Search..." class="border border-gray-300 rounded-md px-4 py-2">
         <h1 class="text-2xl font-bold">Employees</h1>
         <Link
             :href="route('users.create')"
@@ -65,76 +78,22 @@ const deleteUser=(user)=> {
     </div>
   
     <div class=" max-w-7xl m-auto py-4">
-      <div class="flex justify-between">
-        <h1>Users Index Page</h1>
-        <!-- <Link
-          :href="route('users.create')"
-          class="px-3 py-2 text-white font-semibold bg-indigo-500 hover:bg-indigo-700 rounded"
-          >New User</Link
-        > -->
-      </div>
+      
       <div class="mt-6">
-        <!-- <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                ID
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Name
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Role
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Email
-              </th>
-              <th scope="col" colspan="2" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="user in users" :key="user.id" class="border-b">
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {{ user.id }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {{ user.name }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {{ user.roles.map((role) => role.name).join(', ') }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {{ user.email }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <Link
-                  :href="route('users.edit', user.id)"
-                  class="text-green-400 hover:text-green-600"
-                  >Edit</Link
-                >
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <button @click="showConfirmDeleteUserModal = true" class="text-red-400 hover:text-red-600">Delete</button>
-                
-              </td>
-            </tr>
-          </tbody>
-        </table> -->
+        
         <Table>
           <template #header>
             <TableRow>
-              <TableHeaderCell>ID</TableHeaderCell>
+              
               <TableHeaderCell>Name</TableHeaderCell>
               <TableHeaderCell>Role</TableHeaderCell>
               <TableHeaderCell>Email</TableHeaderCell>
-              <TableHeaderCell>Action</TableHeaderCell>
+              <TableHeaderCell :colspan=2 >Action</TableHeaderCell>
             </TableRow>
           </template>
           <template #default>
-            <TableRow v-for="user in users" :key="user.id" class="border-b">
-              <TableDataCell>{{ user.id }}</TableDataCell>
+            <TableRow v-for="user in props.users.data" :key="user.id" class="border-b">
+              
               <TableDataCell>{{ user.name }}</TableDataCell>
               <TableDataCell>{{ user.roles.map((role) => role.name).join(', ') }}</TableDataCell>
               <TableDataCell>{{ user.email }}</TableDataCell>
@@ -144,7 +103,11 @@ const deleteUser=(user)=> {
                   class="text-green-400 hover:text-green-600"
                   >Edit</Link
                 >
-               <button @click="showConfirmDeleteUserModal = true"  class="text-red-400 hover:text-red-600">
+               
+              </TableDataCell>
+
+              <TableDataCell>
+<button @click="showConfirmDeleteUserModal = true"  class="text-red-400 hover:text-red-600">
                  Delete
                </button>
                <Modal :show="showConfirmDeleteUserModal" >

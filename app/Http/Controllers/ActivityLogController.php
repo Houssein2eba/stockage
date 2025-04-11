@@ -10,17 +10,14 @@ class ActivityLogController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Activity::with('causer');
         
-        if ($request->has('dates')) {
+        $activities=Activity::with(['causer','subject'])->when($request->dates, function ($query) use ($request) {
             $date = Carbon::parse($request->dates);
             $query->whereDate('created_at', $date);
-        }
-  
-        $activities = $query->paginate(5);
-
-        return inertia('Activitys/Index', ['activities' => $activities]);
+        })->latest()->paginate(PAGINATION)->withQueryString();
+        return inertia('Activitys/Index', ['activities' => $activities,'dates'=>$request->dates]);
     }
+
     public function view($id){
         $activity=Activity::find($id);
         

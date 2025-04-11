@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\Products\CategoriesController;
+use App\Http\Controllers\Products\ProductsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\Users\UsersController;
@@ -9,6 +11,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
+
+define('PAGINATION', 10);
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -45,6 +49,11 @@ Route::put('/roles/{id}',[RolesController::class,'update'])->name('roles.update'
 
 Route::get('/activity',[ActivityLogController::class,'index'])->name('activity.index');
 Route::get('/activity/{id}',[ActivityLogController::class,'view'])->name('activity.view');
+
+    Route::get('/categories/create', [CategoriesController::class, 'create'])->name('categories.create');
+    Route::post('/categories/create', [CategoriesController::class, 'store'])->name('categories.store');
+
+    Route::get('/products/create', [ProductsController::class, 'create'])->name('products.create');
 });
 
 

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('description');
             $table->decimal('price', 8, 2);
             $table->integer('min_quantity');
-            $table->timestamps();
+          
         });
 
         

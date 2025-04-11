@@ -15,26 +15,15 @@ class RolesController extends Controller
     
      public function index()
     {
-
-        
-   
-  $roles=Role::with(['permissions']) // This adds a 'users_count' property
-                ->get();
-    
-     $rolesData = [];
-     foreach ($roles as $role) {
-         $rolesData[] = [
-            'id' => $role->id,
-             'name' => $role->name,
-             'users_count' => $role->users()->count(),
-             'permissions' => $role->permissions
-         ];
-     }
-    
-           
         return Inertia::render('Roles/Index', [
-            'roles' => $rolesData,
-            
+            'roles' => Role::with(['permissions'])->paginate(10)->through(function ($role) {
+                return [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'users_count' => $role->users()->count(),
+                    'permissions' => $role->permissions
+                ];
+            }),
         ]);
     }
    
@@ -92,7 +81,8 @@ class RolesController extends Controller
         activity()
         ->causedBy(auth()->user())
         ->performedOn(new Role())
-        ->withProperties(['new' => $request->all(), 'old' => $oldRoleData])->log('updated role');
+        ->withProperties(['new' => $request->all(), 'old' => $oldRoleData])
+        ->log('updated role');
 
         return to_route('roles.index');
     }

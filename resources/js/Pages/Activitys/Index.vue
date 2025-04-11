@@ -12,7 +12,8 @@ import Pagination from '@/Components/Pagination.vue';
 import DatePicker from 'primevue/datepicker';
 
 const props = defineProps({
-    activities: Object
+    activities: Object,
+    dates: String
 });
 
 defineOptions({
@@ -27,7 +28,7 @@ const filteredActivities = computed(() => {
         activity.description.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
 });
-const date = ref();
+const date = ref(props.dates);
 const formatDate = (dateString) => {
     const date = new Date(dateString);
     return format(date, 'EEEE, MMMM d, yyyy - h:mm a');
@@ -48,18 +49,13 @@ const formatModelName = (modelType) => {
 
 <template>
     <Head title="Activities" />
-    <div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
+    
         <h2 class="text-2xl font-semibold text-gray-800 mb-4">Activity Log</h2>
 
         <div class="mb-4 w-1/2">
             
             <h1>Select Date</h1>
-
-        <DatePicker v-model="date" />
-    
-
-
-            
+        <DatePicker v-model="date" />   
         </div>
 
         <Table class="w-full">
@@ -108,5 +104,5 @@ const formatModelName = (modelType) => {
             </div>
             <Pagination :links="activities.links" />
         </div>
-    </div>
+   
 </template>

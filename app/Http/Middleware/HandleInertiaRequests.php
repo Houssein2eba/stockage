@@ -35,6 +35,7 @@ class HandleInertiaRequests extends Middleware
         $guard = $auth['guard'] ?? null;
 
     return array_merge(parent::share($request), [
+        
         'auth' => [
             'user' => $auth ?? null,
             'guard' => $guard ?? null,
