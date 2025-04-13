@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Vite;
@@ -27,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function ($user, $ability) {
            return Auth::guard('admin')->check() ? true : null;
 });
-       
+       JsonResource::withoutWrapping();
         
     }
 }

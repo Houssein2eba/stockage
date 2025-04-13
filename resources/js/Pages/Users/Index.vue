@@ -87,6 +87,7 @@ watch(search, debounce((value) => {
               
               <TableHeaderCell>Name</TableHeaderCell>
               <TableHeaderCell>Role</TableHeaderCell>
+              <TableHeaderCell>Phone</TableHeaderCell>
               <TableHeaderCell>Email</TableHeaderCell>
               <TableHeaderCell :colspan=2 >Action</TableHeaderCell>
             </TableRow>
@@ -95,7 +96,8 @@ watch(search, debounce((value) => {
             <TableRow v-for="user in props.users.data" :key="user.id" class="border-b">
               
               <TableDataCell>{{ user.name }}</TableDataCell>
-              <TableDataCell>{{ user.roles.map((role) => role.name).join(', ') }}</TableDataCell>
+              <TableDataCell>{{ user.roles }}</TableDataCell>
+              <TableDataCell>{{ user.number }}</TableDataCell>
               <TableDataCell>{{ user.email }}</TableDataCell>
               <TableDataCell class="space-x-4">
                 <Link

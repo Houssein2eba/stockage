@@ -9,12 +9,12 @@ import TextInput from '@/Components/TextInput.vue'
 
 import { defineProps } from 'vue'
 import { useToast } from 'vue-toastification'
-
+import MultiSelect from 'vue-multiselect'
 import { Link, Head, router,useForm } from '@inertiajs/vue3'
 
 const toast = useToast();
 const props = defineProps({
-  user:Object,
+  user:Array,
   roles:Array
 })
 console.log(props.user);
@@ -22,7 +22,7 @@ const form = useForm({
   name: props.user.name,
   email: props.user.email,
   number: props.user.number,
-  role: props.user.roles[0].name
+  role: props.user.roles
 })
 
 const submit = () => {
@@ -102,18 +102,21 @@ const submit = () => {
         </div>
 
         <div class="mt-4">
-            <InputLabel for="roles" value="Roles" />
-            <SelectInput :options="roles" v-model="form.role">
+          <InputLabel for="role" value="Role" />
 
-            </SelectInput>
-            <InputError
-            class="mt-2"
-            :message="form.errors.role"
+          <MultiSelect
+            v-model="form.role"
+            :options="props.roles"
+            :multiple="false"
+            :close-on-select="true"
+            placeholder="Pick some"
+            label="name"
+            track-by="id"
+            class="w-full"
           />
-          <span>{{form.errors.role}}</span>
-          </div>
+          <InputError class="mt-2" :message="form.errors.role" />
           
-
+        </div>
         <div class="flex items-center justify-end mt-4">
           <PrimaryButton
             class="ml-4"
@@ -127,3 +130,5 @@ const submit = () => {
     </div>
   </AuthLayout>
 </template>
+<style src="vue-multiselect/dist/vue-multiselect.css"></style>
+

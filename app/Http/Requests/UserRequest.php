@@ -23,6 +23,7 @@ class UserRequest extends FormRequest
     public function rules(): array
     {
         $id=$this->route('id') ?? null;
+       
         return [
             'name' => 'required',
             'email' => ['required','email','not_in:admin',Rule::unique('users','email')
@@ -30,7 +31,8 @@ class UserRequest extends FormRequest
             'number'=>['required','regex:/^([2-4][0-9]{7})$/',Rule::unique('users','number')->ignore($id)],
             'password' => $this->isMethod('PUT') ? 'sometimes|confirmed' : 'required|confirmed',
             'password_confirmation' => 'sometimes|required_with:password',
-            'role'=>'required|integer|exists:roles,id',
+            'role'=>'required|array',
+            'role.name'=>'exists:roles,name',
         ];
     }
 }

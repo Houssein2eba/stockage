@@ -3,6 +3,7 @@ import { useForm } from '@inertiajs/vue3'
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import {useToast} from "vue-toastification";
 import InputError from "@/Components/InputError.vue";
+import VueMultiselect from 'vue-multiselect';
 defineOptions({
     layout:AuthLayout
 })
@@ -17,7 +18,7 @@ const form = useForm({
   name: '',
   permissions: []
 })
-
+console.log(props.permissions)
 const saveRole = () => {
   form.post(route('roles.store'), {
     preserveScroll: true,
@@ -54,8 +55,8 @@ const saveRole = () => {
 
           <div class="mb-6">
             <h3 class="block text-gray-700 text-sm font-bold mb-2">Permissions</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <div v-for="permission in permissions" :key="permission.id" class="flex items-center">
+            <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-2"> -->
+              <!-- <div v-for="permission in permissions" :key="permission.id" class="flex items-center">
                 <input
                   :id="`permission-${permission.id}`"
                   v-model="form.permissions"
@@ -67,8 +68,24 @@ const saveRole = () => {
                   {{ permission.name }}
                 </label>
                 <inputError :message="form.errors.permissions" class="mt-2" />
+              </div> -->
+              <div class="mb-4">
+                <InputLabel for="permissions"  value="Permissions"/>
+                <VueMultiselect
+  v-model="form.permissions"
+  :options="permissions"
+  :multiple="true"
+  :close-on-select="true"
+  placeholder="Pick some"
+  label="name"
+  track-by="id"
+  class="w-full"
+/>
+                <p v-if="form.errors.permissions" class="text-red-500 text-xs italic mt-1">
+                  {{ form.errors.permissions }}
+                </p>
               </div>
-            </div>
+            <!-- </div> -->
           </div>
 
           <div class="flex justify-end">
@@ -87,4 +104,5 @@ const saveRole = () => {
     </div>
   </div>
 </template>
+<style src="vue-multiselect/dist/vue-multiselect.css"></style>
 

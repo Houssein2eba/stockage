@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
+use App\Http\Resources\PermissionsResource;
+use App\Http\Resources\RolesResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -16,33 +18,33 @@ class RolesController extends Controller
      public function index()
     {
         return Inertia::render('Roles/Index', [
-            'roles' => Role::with(['permissions'])->paginate(10)->through(function ($role) {
-                return [
-                    'id' => $role->id,
-                    'name' => $role->name,
-                    'users_count' => $role->users()->count(),
-                    'permissions' => $role->permissions
-                ];
-            }),
+            'roles' => RolesResource::collection(
+                Role::paginate(PAGINATION)
+            
+            ),
         ]);
     }
    
     public function create(){
 
-        return inertia('Roles/Create',['permissions'=>Permission::all()]);
+        return inertia('Roles/Create',['permissions'=>PermissionsResource::collection(
+            Permission::all()
+        )]);
     }
 
     public function store(StoreRoleRequest $request)
     {
        
         
-        $role = Role::create([
-            'name' => $request->input('name'),
-            'guard_name' => 'web',
-        ]);
-        $role->syncPermissions($request->permissions);
-
-        activity()
+        DB::transaction(function () use ($request) {
+            $role = Role::create([
+                'name' => $request->input('name'),
+                'guard_name' => 'web',
+            ]);
+            $role->permissions()->sync(
+                Permission::whereIn('name', $request->input('permissions.*.name'))->get()
+            );
+            activity()
         ->causedBy(auth()->user())
         ->performedOn($role)
         ->withProperties([
@@ -50,6 +52,10 @@ class RolesController extends Controller
             'old' => [],
         ])
         ->log('create role');
+        });
+        
+
+        
         return to_route('roles.index');
     }
     public function edit($id){
