@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
-
 use App\Http\Requests\UserRequest;
 use App\Http\Resources\RolesResource;
 use App\Http\Resources\UserResource;
@@ -11,84 +10,81 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
 
 class UsersController extends Controller
 {
-    public function index(Request $request):Response{
-        
-        // $users=User::with('roles')->when($request->search, function ($query) use ($request) {
-        //     $query->where('name', 'LIKE', "%{$request->search}%");
-        // })->paginate(PAGINATION)->withQueryString();
-       
-        $users=UserResource::collection(
-            User::with('roles')->when($request->search, function ($query) use ($request) {
-                $query->where('name', 'LIKE', "%{$request->search}%");
-            })->paginate(PAGINATION)->withQueryString()
-        );
-        
-        return inertia('Users/Index', ['users'=>$users]);
+    public function index(Request $request): Response
+    {
+        $users = User::with('roles')
+            ->when($request->search, fn($query) =>
+                $query->where('name', 'like', "%{$request->search}%")
+            )
+            ->paginate(PAGINATION)
+            ->withQueryString();
+
+        return Inertia::render('Users/Index', [
+            'users' => UserResource::collection($users),
+            'filters' => $request->only('search'),
+        ]);
     }
 
-      public function create():Response{
-        $roles=RolesResource::collection(
-            Role::all()
-        );
-        
-
-        return inertia('Users/Create',['roles'=>$roles]);
-      }
-
-    public function store(UserRequest $request):RedirectResponse
+    public function create(): Response
     {
-       
-        $request->validated();
-        
+        $roles = RolesResource::collection(Role::all());
+
+        return Inertia::render('Users/Create', [
+            'roles' => $roles,
+        ]);
+    }
+
+    public function store(UserRequest $request): RedirectResponse
+    {
         DB::transaction(function () use ($request) {
             $user = User::create([
-                'name' => $request->input('name'),
-                'email' => $request->input('email'),
-                'number' => $request->input('number'),
-                'password' => bcrypt($request->input('password')),
+                'name' => $request->name,
+                'email' => $request->email,
+                'number' => $request->number,
+                'password' => bcrypt($request->password),
             ]);
-            $user->assignRole($request->role);
-            
-            activity()
-            ->causedBy(auth()->user())
-            ->performedOn(new User())
-            ->withProperties(['new'=>$request->all(),'old'=>[]])
-            ->log('created user');
-        });
 
-        
+            $user->assignRole($request->role);
+
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($user)
+                ->withProperties([
+                    'new' => $request->validated(),
+                    'old' => [],
+                ])
+                ->log('Created user');
+        });
 
         return to_route('users.index');
     }
 
-    public function edit($id){
-        
+    public function edit($id): Response|RedirectResponse
+    {
+        $user = User::with('roles')->find($id);
 
-        if (!$user = User::find($id)) {
-            return redirect()->route('users.index');
+        if (!$user) {
+            return redirect()->route('users.index')->with('error', 'User not found.');
         }
-        
-        $user = new UserResource(User::with('roles')->find($id));
-        $roles=RolesResource::collection(
-            Role::all()
-        );
-        
-        return inertia('Users/Edit', ['user'=>$user,'roles'=>$roles]);
-    }
-     public function update(UserRequest $request,$id){
 
-        $request->validated();
-       
-        
+        return Inertia::render('Users/Edit', [
+            'user' => new UserResource($user),
+            'roles' => RolesResource::collection(Role::all()),
+        ]);
+    }
+
+    public function update(UserRequest $request, $id): RedirectResponse
+    {
         DB::transaction(function () use ($request, $id) {
             $user = User::findOrFail($id);
 
-            $oldData = $user->getOriginal();
+            $oldData = $user->only(['name', 'email', 'number']);
 
             $user->update([
                 'name' => $request->name,
@@ -101,18 +97,32 @@ class UsersController extends Controller
             activity()
                 ->causedBy(auth()->user())
                 ->performedOn(new User)
-                ->withProperties(['new' => $request->all(), 'old' => $oldData])
-                ->log('updated user');
+                ->withProperties([
+                    'new' => $request->validated(),
+                    'old' => $oldData,
+                ])
+                ->log('Updated user');
         });
 
         return redirect()->route('users.index');
-     }
+    }
 
-    public function delete($id){
+    public function delete($id): RedirectResponse
+    {
+        $user = User::findOrFail($id);
+        $userName = $user->name;
 
-        
-        $user=User::findOrFail($id);
         $user->delete();
-        return redirect()->route('users.index')->with('success','User deleted successfully');
+
+        activity()
+            ->causedBy(auth()->user())
+            ->performedOn(new User)
+            ->withProperties([
+                'old' => ['name' => $userName],
+                'new' => [],
+            ])
+            ->log('Deleted user');
+
+        return redirect()->route('users.index')->with('success', 'User deleted successfully.');
     }
 }

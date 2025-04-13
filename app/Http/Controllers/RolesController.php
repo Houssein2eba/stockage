@@ -14,97 +14,97 @@ use Spatie\Permission\Models\Role;
 
 class RolesController extends Controller
 {
-    
-     public function index()
+    public function index()
     {
+        $roles = Role::with(['permissions', 'users'])->paginate(PAGINATION);
+
         return Inertia::render('Roles/Index', [
-            'roles' => RolesResource::collection(
-                Role::paginate(PAGINATION)
-            
-            ),
+            'roles' => RolesResource::collection($roles),
         ]);
     }
-   
-    public function create(){
 
-        return inertia('Roles/Create',['permissions'=>PermissionsResource::collection(
-            Permission::all()
-        )]);
+    public function create()
+    {
+        $permissions = Permission::all();
+
+        return Inertia::render('Roles/Create', [
+            'permissions' => PermissionsResource::collection($permissions),
+        ]);
     }
 
     public function store(StoreRoleRequest $request)
     {
-       
-        
         DB::transaction(function () use ($request) {
             $role = Role::create([
-                'name' => $request->input('name'),
+                'name' => $request->name,
                 'guard_name' => 'web',
             ]);
-            $role->permissions()->sync(
-                Permission::whereIn('name', $request->input('permissions.*.name'))->get()
-            );
-            activity()
-        ->causedBy(auth()->user())
-        ->performedOn($role)
-        ->withProperties([
-            'new' => $request->validated(),
-            'old' => [],
-        ])
-        ->log('create role');
-        });
-        
 
-        
+            $permissions = Permission::whereIn('name', $request->input('permissions.*.name'))->get();
+            $role->syncPermissions($permissions);
+
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($role)
+                ->withProperties([
+                    'new' => $request->validated(),
+                    'old' => [],
+                ])
+                ->log('Created role');
+        });
+
         return to_route('roles.index');
     }
-    public function edit($id){
-        
-        $role=Role::with('permissions')->find($id);
-        
-        $permissions=Permission::all();
-        
-        return inertia('Roles/Edit', ['role'=>$role,'permissions'=>$permissions]);
-    }
-     public function update(Request $request,$id)
-    {
-        
 
-        $request->validate([
-            'name' => 'required|string|max:255|unique:roles,name,' . $id,
-            'permissions' => 'required|array',
-            'permissions.*' => 'exists:permissions,name',
+    public function edit($id)
+    {
+        $role = Role::with('permissions')->findOrFail($id);
+        $permissions = Permission::all();
+
+        return Inertia::render('Roles/Edit', [
+            'role' => $role,
+            'permissions' => PermissionsResource::collection($permissions),
         ]);
-        $role = Role::with('permissions')->find($id);
-        
-        $oldRoleData = [
-        'name' => $role->name,
-        'permissions' => $role->permissions->pluck('name')->toArray()
-    ];
+    }
+
+    public function update(UpdateRoleRequest $request, $id)
+    {
+        $role = Role::with('permissions')->findOrFail($id);
+
+        $oldData = [
+            'name' => $role->name,
+            'permissions' => $role->permissions->pluck('name')->toArray(),
+        ];
 
         $role->update($request->only('name'));
         $role->syncPermissions($request->permissions);
+
         activity()
-        ->causedBy(auth()->user())
-        ->performedOn(new Role())
-        ->withProperties(['new' => $request->all(), 'old' => $oldRoleData])
-        ->log('updated role');
+            ->causedBy(auth()->user())
+            ->performedOn($role)
+            ->withProperties([
+                'new' => $request->validated(),
+                'old' => $oldData,
+            ])
+            ->log('Updated role');
 
         return to_route('roles.index');
     }
+
     public function destroy($id)
     {
-        
-          
-        $role=Role::find($id);
+        $role = Role::findOrFail($id);
+        $roleName = $role->name;
         $role->delete();
 
         activity()
-        ->causedBy(auth()->user())
-        ->performedOn(new Role())
-        ->withProperties(['new'=>[],'old'=>['role name'=>$role->name]])
-        ->log('delete role')
-        ;
+            ->causedBy(auth()->user())
+            ->performedOn(new Role)
+            ->withProperties([
+                'new' => [],
+                'old' => ['role_name' => $roleName],
+            ])
+            ->log('Deleted role');
 
         return to_route('roles.index');
     }

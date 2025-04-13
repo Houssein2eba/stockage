@@ -5,13 +5,15 @@ import InputLabel from "@/Components/InputLabel.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
-import SelectInput from '@/Components/SelectInput.vue';
+
 import {useToast} from "vue-toastification";
-// import 'vue-multiselect/dist/vue-multiselect.css'
+import MultiSelect from 'vue-multiselect'
 const toast = useToast();
-defineProps({
-  roles: Array,
-  
+const props = defineProps({
+  roles: {
+    type: Array,
+    required: true
+  }
 })
 
 const form = useForm({
@@ -130,13 +132,17 @@ const submit = () => {
         </div>
         <div class="mt-4">
             <InputLabel for="roles" value="Roles" />
-            <SelectInput :options="roles" v-model="form.role">
-
-            </SelectInput>
-            <InputError
-            class="mt-2"
-            :message="form.errors.role"
-          />
+            <MultiSelect
+              v-model="form.role"
+              :options="props.roles"
+              :multiple="false"
+              :close-on-select="true"
+              placeholder="Pick some"
+              label="name"
+              track-by="id"
+              class="w-full"
+            />
+            <InputError class="mt-2" :message="form.errors.role" />
           
           </div>
           
