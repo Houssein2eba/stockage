@@ -50,10 +50,11 @@ Route::put('/roles/{id}',[RolesController::class,'update'])->name('roles.update'
 Route::get('/activity',[ActivityLogController::class,'index'])->name('activity.index');
 Route::get('/activity/{id}',[ActivityLogController::class,'view'])->name('activity.view');
 
-    Route::get('/categories/create', [CategoriesController::class, 'create'])->name('categories.create');
+    Route::get('/categories', [CategoriesController::class, 'index'])->name('categories.index');
     Route::post('/categories/create', [CategoriesController::class, 'store'])->name('categories.store');
 
-    Route::get('/products/create', [ProductsController::class, 'create'])->name('products.create');
+    Route::get('/products', [ProductsController::class, 'index'])->name('products.index');
+    Route::post('/products/create', [ProductsController::class, 'store'])->name('products.store');
 });
 
 

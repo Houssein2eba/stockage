@@ -9,7 +9,7 @@ import { useAdmin } from '@/composables/admins';
 const isSidebarOpen = ref(false);
 const isUsersDropdownOpen = ref(false);
 const isPostsDropdownOpen = ref(false);
-
+const isProductsDropdownOpen = ref(false);
 // Composable functions
 const { hasPermission } = usePermission();
 const { hasRole } = usePermission();
@@ -23,11 +23,18 @@ const toggleSidebar = () => {
 const toggleUsersDropdown = () => {
   isUsersDropdownOpen.value = !isUsersDropdownOpen.value;
   isPostsDropdownOpen.value = false;
+  isProductsDropdownOpen.value = false;
 };
 
 const togglePostsDropdown = () => {
   isPostsDropdownOpen.value = !isPostsDropdownOpen.value;
   isUsersDropdownOpen.value = false;
+  isProductsDropdownOpen.value = false;
+};
+const toggleProductsDropdown = () => {
+  isProductsDropdownOpen.value = !isProductsDropdownOpen.value;
+  isUsersDropdownOpen.value = false;
+  isPostsDropdownOpen.value = false;
 };
 
 // Handle body overflow on mobile
@@ -177,6 +184,58 @@ onMounted(() => {
               </div>
             </div>
           </li>
+          <!-- Products Dropdown -->
+<li>
+  <div class="relative">
+    <button
+      @click="toggleProductsDropdown"
+      class="w-full flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 transition-colors"
+    >
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+        </svg>
+        <span class="text-sm font-medium">Products</span>
+      </div>
+      <svg 
+        class="w-4 h-4 transition-transform text-gray-400"
+        :class="{ 'rotate-180': isProductsDropdownOpen }"
+        fill="none" 
+        viewBox="0 0 24 24" 
+        stroke="currentColor"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+      </svg>
+    </button>
+
+    <div v-if="isProductsDropdownOpen" class="ml-8 mt-1 space-y-1">
+      <!-- Categories Section -->
+      <div class="pl-2">
+        
+        <SidebarLink
+          :href="route('categories.index')"
+          :active="route().current('categories.index')"
+          class="text-sm"
+        >
+          All Categories
+        </SidebarLink>
+      </div>
+      
+      <!-- Products Section -->
+      <div class="pl-2 pt-1">
+        
+        <SidebarLink
+          :href="route('products.index')"
+          :active="route().current('products.index')"
+          class="text-sm"
+        >
+          All Products
+        </SidebarLink>
+        
+      </div>
+    </div>
+  </div>
+</li>
         </ul>
       </div>
 

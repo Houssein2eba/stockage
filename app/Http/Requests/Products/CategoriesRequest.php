@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Products;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CategoriesRequest extends FormRequest
 {
@@ -23,7 +24,7 @@ class CategoriesRequest extends FormRequest
     {
         $id = $this->route('id');
         return [
-            'name'=>'required|string|min:3',
+            'name'=>['required','string','max:255',Rule::unique('categories')->ignore($id)],
             'description'=>'string|nullable',
         ];
     }

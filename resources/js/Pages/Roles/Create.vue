@@ -48,9 +48,7 @@ const saveRole = () => {
               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               :class="{ 'border-red-500': form.errors.name }"
             >
-            <p v-if="form.errors.name" class="text-red-500 text-xs italic mt-1">
-              {{ form.errors.name }}
-            </p>
+            <InputError :message="form.errors.name" class="mt-2" />
           </div>
 
           <div class="mb-6">
@@ -81,9 +79,7 @@ const saveRole = () => {
   track-by="id"
   class="w-full"
 />
-                <p v-if="form.errors.permissions" class="text-red-500 text-xs italic mt-1">
-                  {{ form.errors.permissions }}
-                </p>
+                <InputError :message="form.errors.permissions" class="mt-2" />
               </div>
             <!-- </div> -->
           </div>
