@@ -23,8 +23,9 @@ class CategoriesRequest extends FormRequest
     public function rules(): array
     {
         $id = $this->route('id');
+        
         return [
-            'name'=>['required','string','max:255',Rule::unique('categories')->ignore($id)],
+            'name'=>['required','string','max:255',Rule::unique('categories','name')->ignore($id)],
             'description'=>'string|nullable',
         ];
     }

@@ -13,9 +13,7 @@ class CategoriesController extends Controller
 {
     public function index(){
         $category=CategoryResource::collection(Category::all());
-        // return Inertia::render('Categories/Index', [
-        //     'categories' => $category,
-        // ]);
+        
         return inertia('Categories/Index', [
             'categories' => $category,
         ]);
@@ -24,6 +22,19 @@ class CategoriesController extends Controller
 
         Category::create($request->all());
 
+        return back();
+    }
+    public function destroy($id){
+        
+        $category=Category::find($id);
+        if($category){
+            $category->delete();
+        }
+        return back()->withErrors('Category not found');
+    }
+
+    public function update(CategoriesRequest $request){
+        $category=Category::find($request->id)->update($request->all());
         return back();
     }
 }

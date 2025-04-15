@@ -52,6 +52,8 @@ Route::get('/activity/{id}',[ActivityLogController::class,'view'])->name('activi
 
     Route::get('/categories', [CategoriesController::class, 'index'])->name('categories.index');
     Route::post('/categories/create', [CategoriesController::class, 'store'])->name('categories.store');
+    Route::delete('/categories/{id}', [CategoriesController::class, 'destroy'])->name('categories.destroy');
+    Route::put('/categories/{id}', [CategoriesController::class, 'update'])->name('categories.update');
 
     Route::get('/products', [ProductsController::class, 'index'])->name('products.index');
     Route::post('/products/create', [ProductsController::class, 'store'])->name('products.store');

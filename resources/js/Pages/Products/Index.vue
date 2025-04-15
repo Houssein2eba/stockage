@@ -17,7 +17,8 @@ const form = useForm({
     name: "",
     description: "",
     price: "",
-    quantity: "",
+  quantity: "",
+    min_quantity: "",
     category: null,
     image: null
 });
@@ -226,7 +227,7 @@ const formatPrice = (price) => {
                 <InputError class="mt-2" :message="form.errors.image" />
               </div>
 
-              <div class="grid grid-cols-2 gap-4">
+              
                 <div>
                   <InputLabel for="price" value="Price" />
                   <div class="mt-1 relative rounded-md shadow-sm">
@@ -256,7 +257,22 @@ const formatPrice = (price) => {
                   />
                   <InputError class="mt-2" :message="form.errors.quantity" />
                 </div>
-              </div>
+
+                <div>
+                  <InputLabel for="weight" value="Min Quantity" />
+                  <TextInput
+                    id="weight"
+                    type="number"
+                    step="1"
+                    min="1"
+                    class="mt-1 block w-full"
+                    v-model="form.min_quantity"
+                    placeholder="1"
+                  />
+                  <InputError class="mt-2" :message="form.errors.min_quantity" />
+                </div>
+              
+              
 
               <div>
                 <InputLabel for="category" value="Category" />

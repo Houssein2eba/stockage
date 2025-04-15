@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Products;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ProductsRequest extends FormRequest
 {
@@ -21,9 +22,16 @@ class ProductsRequest extends FormRequest
      */
     public function rules(): array
     {
+        
         return [
-            'name'=>'required|string|min:3|max:255',
-            'price'=>'required|min:10|max:1000000|integer'
+            'name'=>['required','string','min:3','max:255'],
+            'description'=>['string','nullable'],
+            'category'=>['required','array'],
+            'category.*.name'=>$this->isMethod('PUT')?Rule::unique('categories','name')->ignore($this->route('id')):'required|exists:categories,name',
+            'image'=>['required','image','mimes:jpeg,png,jpg,gif','max:2048'],
+            'price'=>['required','min:10','max:1000000','numeric'],
+            'quantity'=>['required','min:1','max:10000','integer'],
+            'min_quantity'=>['required','min:1','integer'],
         ];
     }
 }
