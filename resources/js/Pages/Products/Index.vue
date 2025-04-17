@@ -86,7 +86,7 @@ const cancelDelete = () => {
 <template>
   <AuthLayout>
     <Head title="Product Management" />
-    
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Header with stats -->
       <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
@@ -99,7 +99,7 @@ const cancelDelete = () => {
             <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
           </svg>
           <span class="text-sm font-medium text-blue-800">
-            Total Products: <span class="font-semibold">{{ props.products.length }}</span>
+            Total Products: <span class="font-semibold">{{ props.products.data.length }}</span>
           </span>
         </div>
       </div>
@@ -124,7 +124,7 @@ const cancelDelete = () => {
                     </TableRow>
                   </thead>
                   <tbody class="divide-y divide-gray-200">
-                    <TableRow v-for="product in props.products" :key="product.id" class="hover:bg-gray-50/50 transition-colors">
+                    <TableRow v-for="product in props.products.data" :key="product.id" class="hover:bg-gray-50/50 transition-colors">
                       <TableDataCell class="py-4 pl-6">
                         <div class="font-medium text-gray-900">{{ product.name }}</div>
                       </TableDataCell>
@@ -133,9 +133,9 @@ const cancelDelete = () => {
                       </TableDataCell>
                       <TableDataCell class="text-center">
                         <div class="flex justify-center">
-                          <img 
-                            :src="getImage(product.image) || 'https://i0.wp.com/georgiaautomation.com/wp-content/uploads/2018/09/image-placeholder.png?ssl=1'" 
-                            alt="Product" 
+                          <img
+                            :src="getImageLink(product.image) || 'https://i0.wp.com/georgiaautomation.com/wp-content/uploads/2018/09/image-placeholder.png?ssl=1'"
+                            alt="Product"
                             class="w-10 h-10 object-cover rounded-md border border-gray-200"
                           />
                         </div>
@@ -144,7 +144,7 @@ const cancelDelete = () => {
                         {{ formatPrice(product.price) }}
                       </TableDataCell>
                       <TableDataCell class="text-center">
-                        <span 
+                        <span
                           :class="{
                             'bg-green-100 text-green-800': product.quantity > 10,
                             'bg-yellow-100 text-yellow-800': product.quantity > 0 && product.quantity <= 10,
@@ -166,8 +166,8 @@ const cancelDelete = () => {
                       </TableDataCell>
                       <TableDataCell class="text-center text-sm">
                         <div class="flex flex-wrap gap-1 justify-center">
-                          <span 
-                            v-for="category in product.categories" 
+                          <span
+                            v-for="category in product.categories"
                             :key="category.id"
                             class="px-2.5 py-1 bg-blue-100/80 text-blue-800 rounded-full text-xs"
                           >
@@ -177,8 +177,8 @@ const cancelDelete = () => {
                       </TableDataCell>
                       <TableDataCell class="text-right pr-6">
                         <div class="flex items-center justify-end gap-3">
-                          <Link 
-                            :href="route('products.update', product.id)" 
+                          <Link
+                            :href="route('products.update', product.id)"
                             class="text-blue-600 hover:text-blue-900 transition-colors flex items-center gap-1"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -198,7 +198,7 @@ const cancelDelete = () => {
                         </div>
                       </TableDataCell>
                     </TableRow>
-                    <TableRow v-if="products.length === 0">
+                    <TableRow v-if=" props.products.data.length === 0">
                       <TableDataCell colspan="7" class="text-center py-12 text-gray-500">
                         <div class="flex flex-col items-center justify-center">
                           <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,7 +218,7 @@ const cancelDelete = () => {
 
         <!-- Sidebar form - unchanged -->
         <div class="lg:w-96">
-            
+
           <div class="bg-white rounded-lg border border-gray-200 shadow-xs sticky top-6">
             <div class="p-5 border-b border-gray-200 bg-gray-50/50">
               <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -338,7 +338,7 @@ const cancelDelete = () => {
 
               <div>
                 <InputLabel for="category" value="Category" class="mb-1.5" />
-                <VueMultiselect 
+                <VueMultiselect
                   v-model="form.category"
                   :options="categories"
                   :multiple="true"
@@ -373,7 +373,7 @@ const cancelDelete = () => {
               </div>
             </form>
           </div>
-        
+
         </div>
       </div>
     </div>
@@ -403,8 +403,8 @@ const cancelDelete = () => {
               </div>
             </div>
             <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-              <button
-                type="button"
+              <PrimaryButton
+
                 @click="deleteProduct"
                 class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
                 :disabled="form.processing"
@@ -417,11 +417,11 @@ const cancelDelete = () => {
                   </svg>
                   Deleting...
                 </span>
-              </button>
+              </PrimaryButton>
               <button
-                type="button"
-                @click="cancelDelete"
-                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+
+                @click="showDeleteModal = false"
+                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-700 text-base font-medium text-white  focus:outline-none focus:ring-2 focus:ring-offset-2  sm:ml-3 sm:w-auto sm:text-sm"
               >
                 Cancel
               </button>
