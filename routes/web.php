@@ -6,14 +6,13 @@ use App\Http\Controllers\Products\ProductsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\Users\UsersController;
-use App\Models\User;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use Spatie\Permission\Models\Role;
 
 define('PAGINATION', 10);
 
+// Public Routes
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -23,43 +22,64 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth:web,admin', 'verified'])->name('dashboard');
+// Authenticated Routes
+Route::middleware(['auth:web,admin', 'verified'])->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
 
-Route::middleware(['auth:web,admin','can:admin'])->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    Route::get('/users',[UsersController::class,'index'])->name('users.index');
-Route::get('/users/create',[UsersController::class,'create'])->name('users.create');
-Route::post('/users/create',[UsersController::class,'store'])->name('users.store');
-Route::delete('/users/{id}',[UsersController::class,'delete'])->name('users.delete');
-Route::get('/users/{id}',[UsersController::class,'edit'])->name('users.edit');
-Route::put('/users/{id}',[UsersController::class,'update'])->name('users.update');
-
-
-Route::get('/roles',[RolesController::class,'index'])->name('roles.index');
-Route::get('/roles/create',[RolesController::class,'create'])->name('roles.create')->can('create');
-Route::post('/roles/create',[RolesController::class,'store'])->name('roles.store');
-Route::delete('/roles/{id}',[RolesController::class,'destroy'])->name('roles.destroy');
-Route::get('/roles/{id}',[RolesController::class,'edit'])->name('roles.edit');
-Route::put('/roles/{id}',[RolesController::class,'update'])->name('roles.update');
-
-Route::get('/activity',[ActivityLogController::class,'index'])->name('activity.index');
-Route::get('/activity/{id}',[ActivityLogController::class,'view'])->name('activity.view');
-
-    Route::get('/categories', [CategoriesController::class, 'index'])->name('categories.index');
-    Route::post('/categories/create', [CategoriesController::class, 'store'])->name('categories.store');
-    Route::delete('/categories/{id}', [CategoriesController::class, 'destroy'])->name('categories.destroy');
-    Route::put('/categories/{id}', [CategoriesController::class, 'update'])->name('categories.update');
-
-    Route::get('/products', [ProductsController::class, 'index'])->name('products.index');
-    Route::post('/products/create', [ProductsController::class, 'store'])->name('products.store');
-    Route::delete('/products/{id}', [ProductsController::class, 'destroy'])->name('products.destroy');
-    Route::put('/products/{id}', [ProductsController::class, 'update'])->name('products.update');
+    // Profile Routes
+    Route::prefix('profile')->group(function () {
+        Route::get('/', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('/', [ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('/', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    });
 });
 
+// Admin Routes
+Route::middleware(['auth:web,admin'])->group(function () {
+    // Users Routes
+    Route::prefix('users')->name('users.')->group(function () {
+        Route::get('/', [UsersController::class, 'index'])->name('index');
+        Route::get('/create', [UsersController::class, 'create'])->name('create');
+        Route::post('/', [UsersController::class, 'store'])->name('store');
+        Route::get('/{id}', [UsersController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [UsersController::class, 'update'])->name('update');
+        Route::delete('/{id}', [UsersController::class, 'delete'])->name('delete');
+    });
+
+    // Roles Routes
+    Route::prefix('roles')->name('roles.')->middleware(['guard:admin'])->group(function () {
+        Route::get('/', [RolesController::class, 'index'])->name('index');
+        Route::get('/create', [RolesController::class, 'create'])->name('create');
+        Route::post('/', [RolesController::class, 'store'])->name('store');
+        Route::get('/{id}', [RolesController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [RolesController::class, 'update'])->name('update');
+        Route::delete('/{id}', [RolesController::class, 'destroy'])->name('destroy');
+    });
+
+    // Activity Log Routes
+    Route::prefix('activity')->name('activity.')->group(function () {
+        Route::get('/', [ActivityLogController::class, 'index'])->name('index');
+        Route::get('/{activity}', [ActivityLogController::class, 'view'])->name('view');
+    });
+
+    // Categories Routes
+    Route::prefix('categories')->name('categories.')->group(function () {
+        Route::get('/', [CategoriesController::class, 'index'])->name('index');
+        Route::post('/', [CategoriesController::class, 'store'])->name('store');
+        Route::put('/{id}', [CategoriesController::class, 'update'])->name('update');
+        Route::delete('/{id}', [CategoriesController::class, 'destroy'])->name('destroy');
+    });
+
+    // Products Routes
+    Route::prefix('products')->name('products.')->group(function () {
+        Route::get('/', [ProductsController::class, 'index'])->name('index');
+        Route::post('/', [ProductsController::class, 'store'])->name('store');
+        Route::get('/{id}', [ProductsController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ProductsController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ProductsController::class, 'destroy'])->name('destroy');
+    });
+});
 
 require __DIR__.'/auth.php';

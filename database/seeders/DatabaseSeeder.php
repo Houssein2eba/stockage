@@ -29,25 +29,51 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('0000'), // password
         ])->assignRole($role);
         $permissions=[
-            'view_users',
-            'create_users',
-            'edit_users',
-            'delete_users',
-            'view_roles',
+            'create product',
+            'edit product',
+            'delete product',
+            'show product',
+            'create category',
+            'edit category',
+            'delete category',
+            'show category',
+            'create user',
+            'edit user',
+            'delete user',
+            'show user',
+            'create role',
+            'edit role',
+            'delete role',
+            'show role',
+            'create permission',
+            'edit permission',
+            'delete permission',
+            'show permission',
+            'create admin',
+            'edit admin',
+            'delete admin',
+            'show admin',
         ];
         foreach($permissions as $permission){
             Permission::create(['name' => $permission]);
         }
-        Admin::create([
+        $admin=Admin::create([
             'name'=>'houssein',
             'email'=>'hanimation410@gmail.com',
             'email_verified_at'=>now(),
             'password'=>bcrypt('0000')
         ]);
-        
 
-        $role->syncPermissions($permissions);
-        $user->syncPermissions($permissions);
+         $admin->syncPermissions($permissions);
+        $role->syncPermissions([
+            'create product',
+            'edit product',
+            'delete product',
+            'show product',
+            'create category',
+            'edit category',
+        ]);
+        $user->syncPermissions($permissions,);
 
         //$this->call(PermissionSeeder::class);
     }

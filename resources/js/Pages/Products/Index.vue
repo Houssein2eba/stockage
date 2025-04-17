@@ -178,7 +178,7 @@ const cancelDelete = () => {
                       <TableDataCell class="text-right pr-6">
                         <div class="flex items-center justify-end gap-3">
                           <Link
-                            :href="route('products.update', product.id)"
+                            :href="route('products.edit', product.id)"
                             class="text-blue-600 hover:text-blue-900 transition-colors flex items-center gap-1"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

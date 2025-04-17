@@ -28,7 +28,7 @@ class ProductsController extends Controller
 
 
         $request->validated();
-        
+
         DB::transaction(function () use ($request) {
         $url = $request->file('image')->store('products', 'public');
 
@@ -45,6 +45,42 @@ class ProductsController extends Controller
 
 
         return back();
+    }
+    public function edit($id){
+        $product = Product::with('categories')->findOrFail($id);
+        return inertia('Products/Edit',[
+            'categories'=>CategoryResource::collection(Category::all()),
+            'product'=>new productResource($product),
+        ]);
+    }
+
+    public function update(ProductsRequest $request,$id){
+        $request->validated();
+        $product = Product::findOrFail($id);
+        DB::transaction(function () use ($request, $product) {
+            if ($request->hasFile('image')) {
+                $url = $request->file('image')->store('products', 'public');
+                $product->update([
+                    'name'=>$request->name,
+                    'description'=>$request->description,
+                    'price'=>$request->price,
+                    'quantity'=>$request->quantity,
+                    'image'=>$url,
+                    'min_quantity'=>$request->min_quantity,
+                ]);
+            }else{
+                $product->update([
+                    'name'=>$request->name,
+                    'description'=>$request->description,
+                    'price'=>$request->price,
+                    'quantity'=>$request->quantity,
+                    'min_quantity'=>$request->min_quantity,
+                ]);
+            }
+            $product->categories()->sync(collect($request->category)->pluck('id'));
+        });
+
+        return to_route('products.index');
     }
 
     public function destroy($id){

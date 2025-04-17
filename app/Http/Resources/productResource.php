@@ -21,6 +21,7 @@ class productResource extends JsonResource
             'description'=>$this->description,
             'price'=>$this->price,
             'quantity'=>$this->quantity,
+            'min_quantity'=>$this->min_quantity,
             'image'=>$this->image,
             'categories'=>CategoryResource::collection($this->categories),
             'created_at'=>$this->created_at,
