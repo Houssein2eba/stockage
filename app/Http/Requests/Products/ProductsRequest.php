@@ -22,13 +22,13 @@ class ProductsRequest extends FormRequest
      */
     public function rules(): array
     {
-        
+
         return [
             'name'=>['required','string','min:3','max:255'],
             'description'=>['string','nullable'],
             'category'=>['required','array'],
             'category.*.name'=>$this->isMethod('PUT')?Rule::unique('categories','name')->ignore($this->route('id')):'required|exists:categories,name',
-            'image'=>['required','image','mimes:jpeg,png,jpg,gif','max:2048'],
+            'image'=>['required','image'],
             'price'=>['required','min:10','max:1000000','numeric'],
             'quantity'=>['required','min:1','max:10000','integer'],
             'min_quantity'=>['required','min:1','integer'],

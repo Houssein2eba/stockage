@@ -15,7 +15,7 @@ import { router } from "@inertiajs/vue3";
 
 const form = useForm({
     name: "",
-    description: ""
+    description: "",
 });
 
 const props = defineProps({
@@ -79,7 +79,7 @@ const updateCategory = () => {
 <template>
   <AuthLayout>
     <Head title="Categories" />
-    
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="flex items-center justify-between mb-8 pt-6">
@@ -118,13 +118,13 @@ const updateCategory = () => {
                       <button @click="openEditModal(category)" class="text-blue-600 hover:text-blue-900">
                         Edit
                       </button>
-                      <button 
+                      <button
                         @click="confirmDelete(category.id)"
                         class="text-red-600 hover:text-red-900"
                       >
                         Delete
                       </button>
-                     
+
                     </div>
                   </TableDataCell>
                 </TableRow>
@@ -158,21 +158,21 @@ const updateCategory = () => {
                 Are you sure you want to delete this category? This action cannot be undone.
             </p>
             <div class="flex justify-end space-x-3">
-                <button 
-                    @click="showDeleteModal = false" 
+                <button
+                    @click="showDeleteModal = false"
                     class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
                     Cancel
                 </button>
-                <button 
-                    @click="deleteCategory" 
+                <button
+                    @click="deleteCategory"
                     class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
                 >
                     Delete
                 </button>
             </div>
         </div>
-    
+
       </div>
        <!-- Edit Category Modal -->
   <div v-if="showEditModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -185,7 +185,7 @@ const updateCategory = () => {
           </svg>
         </button>
       </div>
-      
+
       <form @submit.prevent="updateCategory">
         <div class="mb-4">
           <InputLabel for="edit-name" value="Name" class="block text-sm font-medium text-gray-700 mb-1" />
@@ -199,7 +199,7 @@ const updateCategory = () => {
           />
           <InputError class="mt-2" :message="editForm.errors.name" />
         </div>
-        
+
         <div class="mb-4">
           <InputLabel for="edit-description" value="Description" class="block text-sm font-medium text-gray-700 mb-1" />
           <textarea
@@ -210,11 +210,11 @@ const updateCategory = () => {
           ></textarea>
           <InputError class="mt-2" :message="editForm.errors.description" />
         </div>
-        
+
         <div class="flex justify-end space-x-3">
-          <button 
+          <button
             type="button"
-            @click="showEditModal = false" 
+            @click="showEditModal = false"
             class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
           >
             Cancel

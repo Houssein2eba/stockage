@@ -13,19 +13,22 @@ class CategoriesController extends Controller
 {
     public function index(){
         $category=CategoryResource::collection(Category::all());
-        
+
         return inertia('Categories/Index', [
             'categories' => $category,
         ]);
     }
     public function store(CategoriesRequest $request){
 
-        Category::create($request->all());
+        Category::create([
+            'name'=>$request->name,
+            'description'=>$request->description,
+        ]);
 
         return back();
     }
     public function destroy($id){
-        
+
         $category=Category::find($id);
         if($category){
             $category->delete();

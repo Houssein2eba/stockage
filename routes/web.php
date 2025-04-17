@@ -57,6 +57,8 @@ Route::get('/activity/{id}',[ActivityLogController::class,'view'])->name('activi
 
     Route::get('/products', [ProductsController::class, 'index'])->name('products.index');
     Route::post('/products/create', [ProductsController::class, 'store'])->name('products.store');
+    Route::delete('/products/{id}', [ProductsController::class, 'destroy'])->name('products.destroy');
+    Route::put('/products/{id}', [ProductsController::class, 'update'])->name('products.update');
 });
 
 

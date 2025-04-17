@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -29,6 +30,9 @@ class AppServiceProvider extends ServiceProvider
            return Auth::guard('admin')->check() ? true : null;
 });
        JsonResource::withoutWrapping();
+
+    //    Model::automaticallyEagerLoadRelationships(); 
+
         
     }
 }
