@@ -82,9 +82,9 @@ onMounted(() => {
           <!-- Dashboard Link -->
           <li>
             <SidebarLink
-              href="/dashboard" 
+              href="/dashboard"
               :active="route().current('dashboard')"
-              class="hover:bg-gray-100" 
+              class="hover:bg-gray-100"
             >
               <template #icon>
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
@@ -99,7 +99,7 @@ onMounted(() => {
           </li>
 
           <!-- Users Dropdown -->
-          <li v-if="isAdmin || hasPermission('view_users')">
+          <li >
             <div class="relative">
               <button
                 @click="toggleUsersDropdown"
@@ -111,11 +111,11 @@ onMounted(() => {
                   </svg>
                   <span class="text-sm font-medium">Users</span>
                 </div>
-                <svg 
+                <svg
                   class="w-4 h-4 transition-transform text-gray-400"
                   :class="{ 'rotate-180': isUsersDropdownOpen }"
-                  fill="none" 
-                  viewBox="0 0 24 24" 
+                  fill="none"
+                  viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -155,11 +155,11 @@ onMounted(() => {
                   </svg>
                   <span class="text-sm font-medium">Roles</span>
                 </div>
-                <svg 
+                <svg
                   class="w-4 h-4 transition-transform text-gray-400"
                   :class="{ 'rotate-180': isPostsDropdownOpen }"
-                  fill="none" 
-                  viewBox="0 0 24 24" 
+                  fill="none"
+                  viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -197,11 +197,11 @@ onMounted(() => {
         </svg>
         <span class="text-sm font-medium">Products</span>
       </div>
-      <svg 
+      <svg
         class="w-4 h-4 transition-transform text-gray-400"
         :class="{ 'rotate-180': isProductsDropdownOpen }"
-        fill="none" 
-        viewBox="0 0 24 24" 
+        fill="none"
+        viewBox="0 0 24 24"
         stroke="currentColor"
       >
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -211,7 +211,7 @@ onMounted(() => {
     <div v-if="isProductsDropdownOpen" class="ml-8 mt-1 space-y-1">
       <!-- Categories Section -->
       <div class="pl-2">
-        
+
         <SidebarLink
           :href="route('categories.index')"
           :active="route().current('categories.index')"
@@ -220,10 +220,10 @@ onMounted(() => {
           All Categories
         </SidebarLink>
       </div>
-      
+
       <!-- Products Section -->
       <div class="pl-2 pt-1">
-        
+
         <SidebarLink
           :href="route('products.index')"
           :active="route().current('products.index')"
@@ -231,7 +231,7 @@ onMounted(() => {
         >
           All Products
         </SidebarLink>
-        
+
       </div>
     </div>
   </div>
@@ -256,7 +256,7 @@ onMounted(() => {
     </aside>
 
     <!-- Main Content -->
-    <div 
+    <div
       class="flex-1 flex flex-col overflow-hidden transition-all duration-300"
       :class="{ 'lg:ml-64': isSidebarOpen }"
     >
@@ -271,7 +271,7 @@ onMounted(() => {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
             </svg>
           </button>
-          
+
           <div class="flex items-between gap-4">
             <!-- User profile or other header content -->
              <Link

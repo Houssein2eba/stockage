@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,14 +29,17 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
 
-        Gate::before(function ($user, $ability) {
-           return Auth::guard('admin')->check() ? true : null;
-});
+        Gate::before(function($user,$ability){
+            if($user->hasRole('admin')){
+                return true;
+            }
+        });
+
        JsonResource::withoutWrapping();
 
     //    Model::automaticallyEagerLoadRelationships();
 
-    
+
 
 
 

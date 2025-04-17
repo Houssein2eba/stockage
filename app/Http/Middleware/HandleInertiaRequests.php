@@ -2,6 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Resources\PermissionsResource;
+use App\Http\Resources\RolesResource;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -29,23 +32,18 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $auth=currentAuth();
 
-        $user = $auth['user'] ?? null;
-        $guard = $auth['guard'] ?? null;
+    $user = User::find(1) ?? null;
+
 
     return array_merge(parent::share($request), [
-        
+
         'auth' => [
-            'user' => $auth ?? null,
-            'guard' => $guard ?? null,
-            'permissions' => $guard==='web' ? $user->getAllPermissions() : [],
-            'roles' => $guard==='web' ? $user->roles : [],
+            'user' => $user ?? null,
+            'permissions' =>$user ? PermissionsResource::collection($user->getPermissionsViaRoles())  : [],
+            'roles' => $user ? new RolesResource($user->roles->first()) : [],
         ],
-        'flash' => [
-            'success' => $request->session()->get('success'),
-            'error' => $request->session()->get('error'),
-        ],
+        
     ]);
     }
 }

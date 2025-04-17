@@ -37,10 +37,9 @@ class RolesController extends Controller
         DB::transaction(function () use ($request) {
             $role = Role::create([
                 'name' => $request->name,
-                'guard_name' => 'web',
             ]);
 
-            $permissions = Permission::whereIn('name', $request->input('permissions.*.name'))->get();
+            $permissions = collect($request->permissions)->pluck('name');
             $role->syncPermissions($permissions);
 
             activity()

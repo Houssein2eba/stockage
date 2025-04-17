@@ -43,7 +43,7 @@ const deleteUser=(user)=> {
     }
   }
 )
-    
+
 }
 const search = ref('');
 watch(search, debounce((value) => {
@@ -68,23 +68,23 @@ watch(search, debounce((value) => {
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
             </svg>
-            
-          
-          
+
+
+
           Add User</Link>
-    
-        
-        
+
+
+
     </div>
-  
+
     <div class=" max-w-7xl m-auto py-4">
-      
+
       <div class="mt-6">
-        
+
         <Table>
           <template #header>
             <TableRow>
-              
+
               <TableHeaderCell>Name</TableHeaderCell>
               <TableHeaderCell>Role</TableHeaderCell>
               <TableHeaderCell>Phone</TableHeaderCell>
@@ -94,7 +94,7 @@ watch(search, debounce((value) => {
           </template>
           <template #default>
             <TableRow v-for="user in props.users.data" :key="user.id" class="border-b">
-              
+              <template v-if="user.roles !=='admin'">
               <TableDataCell>{{ user.name }}</TableDataCell>
               <TableDataCell>{{ user.roles }}</TableDataCell>
               <TableDataCell>{{ user.number }}</TableDataCell>
@@ -105,7 +105,7 @@ watch(search, debounce((value) => {
                   class="text-green-400 hover:text-green-600"
                   >Edit</Link
                 >
-               
+
               </TableDataCell>
 
               <TableDataCell>
@@ -122,10 +122,11 @@ watch(search, debounce((value) => {
                  </div>
                </Modal>
               </TableDataCell>
+            </template>
             </TableRow>
           </template>
         </Table>
       </div>
     </div>
-  
+
 </template>

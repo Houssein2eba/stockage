@@ -44,17 +44,15 @@ class LoginRequest extends FormRequest
     $credentials = $this->only('email', 'password');
     $remember = $this->boolean('remember');
 
-    // Try web guard first
-    if (Auth::guard('web')->attempt($credentials, $remember)) {
-        RateLimiter::clear($this->throttleKey());
+    // Attempt to authenticate the user
+    if (Auth::attempt($credentials, $remember)) {
+        // If authentication is successful, regenerate the session
+        $this->session()->regenerate();
+
         return;
     }
 
-    // If web guard fails, try admin guard
-    if (Auth::guard('admin')->attempt($credentials, $remember)) {
-        RateLimiter::clear($this->throttleKey());
-        return;
-    }
+
 
     // If both guards fail
     RateLimiter::hit($this->throttleKey());

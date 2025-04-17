@@ -23,7 +23,7 @@ Route::get('/', function () {
 });
 
 // Authenticated Routes
-Route::middleware(['auth:web,admin', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
@@ -37,7 +37,7 @@ Route::middleware(['auth:web,admin', 'verified'])->group(function () {
 });
 
 // Admin Routes
-Route::middleware(['auth:web,admin'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     // Users Routes
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/', [UsersController::class, 'index'])->name('index');
@@ -49,7 +49,7 @@ Route::middleware(['auth:web,admin'])->group(function () {
     });
 
     // Roles Routes
-    Route::prefix('roles')->name('roles.')->middleware(['guard:admin'])->group(function () {
+    Route::prefix('roles')->name('roles.')->group(function () {
         Route::get('/', [RolesController::class, 'index'])->name('index');
         Route::get('/create', [RolesController::class, 'create'])->name('create');
         Route::post('/', [RolesController::class, 'store'])->name('store');

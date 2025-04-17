@@ -29,8 +29,8 @@ const {isAdmin} = useAdmin();
                 >
                     <div class="p-6 text-gray-900">
                         You're logged in!
-                        <span >{{ $page.props.auth }}-{{ isAdmin }}</span>
-                        <Link 
+                        <span >{{ $page.props.auth.roles }}-{{ isAdmin }}</span>
+                        <Link
                         :href="route('users.index')"
                         >
                     Index

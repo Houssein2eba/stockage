@@ -17,9 +17,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // User::factory(10)->create();
-        $role = Role::create([
+        $manager = Role::create([
             'name' => 'manager',
-            'guard_name' => 'web',
+        ]);
+
+        $admin=Role::create([
+            'name' => 'admin',
         ]);
         $user=User::create([
             'name' => 'manager',
@@ -27,7 +30,7 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
             'number'=>'12345678',
             'password' => bcrypt('0000'), // password
-        ])->assignRole($role);
+        ])->assignRole($manager);
         $permissions=[
             'create product',
             'edit product',
@@ -57,15 +60,16 @@ class DatabaseSeeder extends Seeder
         foreach($permissions as $permission){
             Permission::create(['name' => $permission]);
         }
-        $admin=Admin::create([
+        $user=User::create([
             'name'=>'houssein',
             'email'=>'hanimation410@gmail.com',
+            'number'=>'22345678',
             'email_verified_at'=>now(),
             'password'=>bcrypt('0000')
-        ]);
+        ])->assignRole($admin);
 
          $admin->syncPermissions($permissions);
-        $role->syncPermissions([
+        $manager->syncPermissions([
             'create product',
             'edit product',
             'delete product',
@@ -73,7 +77,7 @@ class DatabaseSeeder extends Seeder
             'create category',
             'edit category',
         ]);
-        $user->syncPermissions($permissions,);
+
 
         //$this->call(PermissionSeeder::class);
     }
