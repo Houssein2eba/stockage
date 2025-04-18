@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\ClientsController;
 use App\Http\Controllers\Products\CategoriesController;
 use App\Http\Controllers\Products\ProductsController;
 use App\Http\Controllers\ProfileController;
@@ -33,6 +34,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    });
+    //Clients Routes
+    Route::prefix('clients')->name('clients.')->group(function () {
+        Route::get('/', [ClientsController::class, 'index'])->name('index');
+        Route::get('/create', [ClientsController::class, 'create'])->name('create');
+        Route::post('/', [ClientsController::class, 'store'])->name('store');
+        Route::get('/{id}', [ClientsController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ClientsController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ClientsController::class, 'delete'])->name('delete');
     });
 });
 

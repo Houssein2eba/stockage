@@ -10,6 +10,7 @@ const isSidebarOpen = ref(false);
 const isUsersDropdownOpen = ref(false);
 const isPostsDropdownOpen = ref(false);
 const isProductsDropdownOpen = ref(false);
+const isClientsDropdownOpen = ref(false);
 // Composable functions
 const { hasPermission } = usePermission();
 const { hasRole } = usePermission();
@@ -24,17 +25,26 @@ const toggleUsersDropdown = () => {
   isUsersDropdownOpen.value = !isUsersDropdownOpen.value;
   isPostsDropdownOpen.value = false;
   isProductsDropdownOpen.value = false;
+    isClientsDropdownOpen.value = false;
 };
 
 const togglePostsDropdown = () => {
   isPostsDropdownOpen.value = !isPostsDropdownOpen.value;
   isUsersDropdownOpen.value = false;
   isProductsDropdownOpen.value = false;
+    isClientsDropdownOpen.value = false;
 };
 const toggleProductsDropdown = () => {
   isProductsDropdownOpen.value = !isProductsDropdownOpen.value;
   isUsersDropdownOpen.value = false;
   isPostsDropdownOpen.value = false;
+    isClientsDropdownOpen.value = false;
+};
+const toggleClientsDropdown = () => {
+  isClientsDropdownOpen.value = !isClientsDropdownOpen.value;
+  isUsersDropdownOpen.value = false;
+  isPostsDropdownOpen.value = false;
+    isProductsDropdownOpen.value = false;
 };
 
 // Handle body overflow on mobile
@@ -141,6 +151,48 @@ onMounted(() => {
               </div>
             </div>
           </li>
+          <!-- Clients dropdown -->
+            <li>
+                <div class="relative">
+                <button
+                    @click="toggleClientsDropdown"
+                    class="w-full flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                    <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
+                    </svg>
+                    <span class="text-sm font-medium">Clients</span>
+                    </div>
+                    <svg
+                    class="w-4 h-4 transition-transform text-gray-400"
+                    :class="{ 'rotate-180': isClientsDropdownOpen }"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                <div v-if="isClientsDropdownOpen" class="ml-8 mt-1 space-y-1">
+                    <SidebarLink
+                    :href="route('clients.index')"
+                    :active="route().current('clients.index')"
+                    class="text-sm"
+                    >
+                    All Clients
+                    </SidebarLink>
+                    <SidebarLink
+                    
+                    :href="route('clients.create')"
+                    :active="route().current('clients.create')"
+                    class="text-sm"
+                    >
+                    Create Client
+                    </SidebarLink>
+                </div>
+                </div>
+            </li>
 
           <!-- Posts Dropdown -->
           <li>
