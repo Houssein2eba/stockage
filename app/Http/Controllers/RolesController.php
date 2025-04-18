@@ -8,6 +8,7 @@ use App\Http\Resources\PermissionsResource;
 use App\Http\Resources\RolesResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -56,38 +57,28 @@ class RolesController extends Controller
     }
 
     public function edit($id)
-    {
-        $role = Role::with('permissions')->findOrFail($id);
-        $permissions = Permission::all();
+{
+    $role = Role::with('permissions')->findOrFail($id);
 
-        return Inertia::render('Roles/Edit', [
-            'role' => $role,
-            'permissions' => PermissionsResource::collection($permissions),
+    return Inertia::render('Roles/Edit', [
+        'role' => new RolesResource($role),
+        'permissions' => PermissionsResource::collection(Permission::all()),
+    ]);
+}
+
+    public function update(Request $request, $id)
+    {
+
+        dd($request->all());
+        $request->validate([
+            'id' => 'required|integer|exists:roles,id',
+            'name' => ['required', 'string', 'max:255',Rule::unique('roles')->ignore($id)],
+            'permissions' => 'required|array',
+            'permissions.*.name'=>'string|exists:permissions,name',
+            'permissions.*.id' => 'integer|exists:permissions,id',
         ]);
-    }
 
-    public function update(UpdateRoleRequest $request, $id)
-    {
-        $role = Role::with('permissions')->findOrFail($id);
-
-        $oldData = [
-            'name' => $role->name,
-            'permissions' => $role->permissions->pluck('name')->toArray(),
-        ];
-
-        $role->update($request->only('name'));
-        $role->syncPermissions($request->permissions);
-
-        activity()
-            ->causedBy(auth()->user())
-            ->performedOn($role)
-            ->withProperties([
-                'new' => $request->validated(),
-                'old' => $oldData,
-            ])
-            ->log('Updated role');
-
-        return to_route('roles.index');
+        $role = Role::findOrFail($id);
     }
 
     public function destroy($id)

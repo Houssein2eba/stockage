@@ -2,31 +2,38 @@
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { useForm } from "@inertiajs/vue3";
 import { useToast } from "vue-toastification";
-
+import VueMultiselect from 'vue-multiselect';
+import InputLabel from '@/Components/InputLabel.vue'
+import InputError from '@/Components/InputError.vue'
+import { defineOptions } from 'vue'
 defineOptions({
     layout: AuthLayout
 })
 
 const props = defineProps({
-    role: {
-        type: Object,
-        default: () => ({}),
-    },
-    permissions: {
-        type: Array,
-        default: () => [],
-    }
+    role: Object,
+    permissions: Array
 })
 
 const form = useForm({
-    name: props.role?.name || '',
-    permissions: props.role?.permissions?.map(p => p.name) || []
-})
+    id: props.role.id,
+    name: props.role.name,
+    permissions: props.role.permissions ? props.role.permissions.map(p => ({
+        id: p.id,
+        name: p.name
+    })) : []
+});
 
 const toast = useToast();
 
 const saveRole = () => {
-    form.put(route('roles.update', props.role.id), {
+    // Transform permissions array to just IDs before sending
+    const payload = {
+        ...form.data(),
+        permissions: form.permissions
+    };
+
+    form.transform(() => payload).put(route('roles.update', props.role.id), {
         preserveScroll: true,
         onSuccess: () => {
             toast.success('Role updated successfully');
@@ -36,14 +43,6 @@ const saveRole = () => {
         }
     });
 }
-
-const togglePermission = (permissionName) => {
-    if (form.permissions.includes(permissionName)) {
-        form.permissions = form.permissions.filter(p => p !== permissionName);
-    } else {
-        form.permissions.push(permissionName);
-    }
-}
 </script>
 
 <template>
@@ -51,12 +50,10 @@ const togglePermission = (permissionName) => {
     <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
       <div class="p-6">
         <h2 class="text-xl font-bold mb-4">Edit Role</h2>
-        
+
         <form @submit.prevent="saveRole">
           <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="role-name">
-              Role Name
-            </label>
+            <InputLabel for="role-name" value="Role Name" />
             <input
               id="role-name"
               v-model="form.name"
@@ -64,32 +61,23 @@ const togglePermission = (permissionName) => {
               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               :class="{ 'border-red-500': form.errors.name }"
             >
-            <p v-if="form.errors.name" class="text-red-500 text-xs italic mt-1">
-              {{ form.errors.name }}
-            </p>
+            <InputError :message="form.errors.name" class="mt-2" />
           </div>
 
           <div class="mb-6">
-            <h3 class="block text-gray-700 text-sm font-bold mb-2">Permissions</h3>
-            <div class="max-h-60 overflow-y-auto border rounded-md p-2"> <!-- Scrollable container -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <div v-for="permission in permissions" :key="permission.id" class="flex items-center">
-                  <input
-                    :id="`permission-${permission.id}`"
-                    :checked="form.permissions.includes(permission.name)"
-                    @change="togglePermission(permission.name)"
-                    type="checkbox"
-                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  >
-                  <label :for="`permission-${permission.id}`" class="ml-2 block text-sm text-gray-700">
-                    {{ permission.name }}
-                  </label>
-                </div>
-              </div>
-            </div>
-            <p v-if="form.errors.permissions" class="text-red-500 text-xs italic mt-1">
-              {{ form.errors.permissions }}
-            </p>
+            <InputLabel for="permissions" value="Permissions" />
+            <VueMultiselect
+              v-model="form.permissions"
+              :options="permissions"
+              :multiple="true"
+              :close-on-select="false"
+              placeholder="Select permissions"
+              label="name"
+              track-by="id"
+              :class="{ 'border-red-500': form.errors.permissions }"
+            />
+            <InputError :message="form.errors.permissions" class="mt-2" />
+            
           </div>
 
           <div class="flex justify-end">
@@ -107,3 +95,4 @@ const togglePermission = (permissionName) => {
     </div>
   </div>
 </template>
+<style src="vue-multiselect/dist/vue-multiselect.css"></style>

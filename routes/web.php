@@ -37,7 +37,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Admin Routes
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     // Users Routes
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/', [UsersController::class, 'index'])->name('index');

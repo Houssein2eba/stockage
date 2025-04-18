@@ -32,7 +32,7 @@ const confirmDelete = (role) => {
 }
 
 const deleteRole = () => {
-    
+
    router.delete(`/roles/${roleToDelete.value}`, {
         onSuccess: () => {
             toast.success('Role deleted successfully')
@@ -64,11 +64,11 @@ defineOptions({
           Add Role</Link>
 
     </div>
-    
+
     <div class="bg-white shadow rounded-lg overflow-hidden">
 
 
-        
+
         <Table>
             <template #header>
                 <TableRow>
@@ -83,8 +83,8 @@ defineOptions({
                     <TableDataCell>{{ role.name }}</TableDataCell>
                     <TableDataCell >
                         <div class="flex flex-wrap gap-1">
-                            <span 
-                                v-for="permission in role.permissions" 
+                            <span
+                                v-for="permission in role.permissions"
                                 :key="permission.id"
                                 class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800"
                             >
@@ -93,15 +93,16 @@ defineOptions({
                         </div>
                     </TableDataCell>
                     <TableDataCell >{{ role.users_count }}</TableDataCell>
-                    <TableDataCell class="flex space-x-2">
-                        <Link :href="route('roles.edit', role.id)" class="text-blue-600 hover:text-blue-800">
-                            Edit
-                        </Link>
-                        </TableDataCell>
+                      
                         <TableDataCell>
                             <button @click="confirmDelete(role)" class="text-red-600 hover:text-red-800">
                                   Delete
                             </button>
+                        </TableDataCell>
+                        <TableDataCell >
+                        <Link :href="route('roles.edit', role.id)" class="text-blue-600 hover:text-blue-800">
+                            Edit
+                        </Link>
                         </TableDataCell>
                 </TableRow>
             </template>
@@ -123,14 +124,14 @@ defineOptions({
                 Are you sure you want to delete this role ? This action cannot be undone.
             </p>
             <div class="flex justify-end space-x-3">
-                <button 
-                    @click="showDeleteModal = false" 
+                <button
+                    @click="showDeleteModal = false"
                     class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
                     Cancel
                 </button>
-                <button 
-                    @click="deleteRole" 
+                <button
+                    @click="deleteRole"
                     class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
                 >
                     Delete

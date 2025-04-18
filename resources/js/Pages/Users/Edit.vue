@@ -14,16 +14,20 @@ import { Link, Head, router,useForm } from '@inertiajs/vue3'
 
 const toast = useToast();
 const props = defineProps({
-  user:Array,
+  user:Object,
   roles:Array
 })
-console.log(props.user);
+
 const form = useForm({
-  name: props.user.name,
-  email: props.user.email,
-  number: props.user.number,
-  role: props.user.roles
+  name: "",
+  email: "",
+  number: "",
+  role: null
 })
+form.name = props.user.name;
+form.email = props.user.email;
+form.number = props.user.number;
+form.role = props.user.roles;
 
 const submit = () => {
   form.put(route('users.update',props.user.id),{
@@ -40,9 +44,9 @@ const submit = () => {
 <template>
   <AuthLayout>
     <Head title="Create user" />
-   
+
     <div class="max-w-7xl mx-auto mt-4">
-      
+
       <div class="flex justify-between">
         <Link
           :href="route('users.index')"
@@ -61,7 +65,7 @@ const submit = () => {
             type="text"
             class="mt-1 block w-full"
             v-model="form.name"
-            
+
             required
             autofocus
             autocomplete="name"
@@ -78,7 +82,7 @@ const submit = () => {
             type="email"
             class="mt-1 block w-full"
             v-model="form.email"
-            
+
             required
             autocomplete="username"
           />
@@ -93,7 +97,7 @@ const submit = () => {
             type="text"
             class="mt-1 block w-full"
             v-model="form.number"
-            
+
             required
             autocomplete="number"
           />
@@ -115,7 +119,7 @@ const submit = () => {
             class="w-full"
           />
           <InputError class="mt-2" :message="form.errors.role" />
-          
+
         </div>
         <div class="flex items-center justify-end mt-4">
           <PrimaryButton

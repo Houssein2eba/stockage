@@ -102,6 +102,7 @@ const closeModal = () => {
                                     class="w-full"
                                     v-model="editForm.name"
                                     placeholder="Enter product name"
+                                    :class="{ 'border-red-500': editForm.errors.name }"
                                 />
                                 <InputError class="mt-1.5" :message="editForm.errors.name" />
                             </div>

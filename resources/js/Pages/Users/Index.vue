@@ -94,22 +94,15 @@ watch(search, debounce((value) => {
           </template>
           <template #default>
             <TableRow v-for="user in props.users.data" :key="user.id" class="border-b">
-              <template v-if="user.roles !=='admin'">
+              <template v-if="user.roles.name !=='admin'">
               <TableDataCell>{{ user.name }}</TableDataCell>
-              <TableDataCell>{{ user.roles }}</TableDataCell>
+              <TableDataCell>{{ user.roles.name }}</TableDataCell>
               <TableDataCell>{{ user.number }}</TableDataCell>
               <TableDataCell>{{ user.email }}</TableDataCell>
-              <TableDataCell class="space-x-4">
-                <Link
-                  :href="route('users.edit', user.id)"
-                  class="text-green-400 hover:text-green-600"
-                  >Edit</Link
-                >
 
-              </TableDataCell>
 
               <TableDataCell>
-<button @click="showConfirmDeleteUserModal = true"  class="text-red-400 hover:text-red-600">
+                 <button @click="showConfirmDeleteUserModal = true"  class="text-red-400 hover:text-red-600">
                  Delete
                </button>
                <Modal :show="showConfirmDeleteUserModal" >
@@ -122,6 +115,15 @@ watch(search, debounce((value) => {
                  </div>
                </Modal>
               </TableDataCell>
+              <TableDataCell >
+
+                <Link
+                :href="route('users.edit', user.id)"
+                class="text-green-400 hover:text-green-600"
+                >
+                Edit
+                </Link>
+                </TableDataCell>
             </template>
             </TableRow>
           </template>
