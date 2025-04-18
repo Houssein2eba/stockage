@@ -147,8 +147,8 @@ const cancelDelete = () => {
                         <span
                           :class="{
                             'bg-green-100 text-green-800': product.quantity > 10,
-                            'bg-yellow-100 text-yellow-800': product.quantity > 0 && product.quantity <= 10,
-                            'bg-red-100 text-red-800': product.quantity === 0
+                            'bg-yellow-100 text-yellow-800': product.quantity > product.min_quantity && product.quantity <=product.min_quantity+ 10,
+                            'bg-red-100 text-red-800': product.quantity < product.min_quantity,
                           }"
                           class="px-2.5 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1"
                         >

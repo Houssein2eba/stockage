@@ -79,8 +79,7 @@ class ProductsRequest extends FormRequest
             'required',
             'integer',
             'min:1',
-            'max:1000',
-            'lte:quantity'
+            $isUpdate ? '' : 'lte:quantity'
         ]
     ];
 }
