@@ -115,6 +115,7 @@ const closeModal = () => {
                                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
                                     v-model="editForm.description"
                                     placeholder="Enter product description"
+                                    :class="{ 'border-red-500': editForm.errors.description }"
                                 ></textarea>
                                 <InputError class="mt-1.5" :message="editForm.errors.description" />
                             </div>
@@ -132,6 +133,7 @@ const closeModal = () => {
                                             accept="image/*"
                                             class="hidden"
                                             @change="handleEditImageChange"
+                                            :class="{ 'border-red-500': editForm.errors.image }"
                                         >
                                         <div class="flex flex-col items-center justify-center px-6 py-8 border-2 border-dashed border-gray-300 rounded-md hover:border-blue-500 transition-colors">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -160,6 +162,7 @@ const closeModal = () => {
                                             class="block w-full pl-14"
                                             v-model="editForm.price"
                                             placeholder="0.0"
+                                            :class="{ 'border-red-500': editForm.errors.price }"
                                         />
                                     </div>
                                     <InputError class="mt-1.5" :message="editForm.errors.price" />
@@ -174,6 +177,7 @@ const closeModal = () => {
                                         class="w-full"
                                         v-model="editForm.quantity"
                                         placeholder="0"
+                                        :class="{ 'border-red-500': editForm.errors.quantity }"
                                     />
                                     <InputError class="mt-1.5" :message="editForm.errors.quantity" />
                                 </div>
@@ -189,6 +193,7 @@ const closeModal = () => {
                                     class="w-full"
                                     v-model="editForm.min_quantity"
                                     placeholder="1"
+                                    :class="{ 'border-red-500': editForm.errors.min_quantity }"
                                 />
                                 <InputError class="mt-1.5" :message="editForm.errors.min_quantity" />
                             </div>
@@ -203,6 +208,7 @@ const closeModal = () => {
                                     placeholder="Select category"
                                     label="name"
                                     track-by="id"
+                                    :class="{ 'border-red-500': editForm.errors.category }"
                                 />
                                 <InputError class="mt-1.5" :message="editForm.errors.category" />
                             </div>

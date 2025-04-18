@@ -246,6 +246,7 @@ const cancelDelete = () => {
                   class="w-full"
                   v-model="form.name"
                   placeholder="Enter product name"
+                  :class="{ 'border-red-500': form.errors.name }"
                 />
                 <InputError class="mt-1.5" :message="form.errors.name" />
               </div>
@@ -258,6 +259,7 @@ const cancelDelete = () => {
                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
                   v-model="form.description"
                   placeholder="Enter product description"
+                  :class="{ 'border-red-500': form.errors.description }"
                 ></textarea>
                 <InputError class="mt-1.5" :message="form.errors.description" />
               </div>
@@ -275,6 +277,7 @@ const cancelDelete = () => {
                       accept="image/*"
                       class="hidden"
                       @change="handleImageChange"
+                      :class="{ 'border-red-500': form.errors.image }"
                     >
                     <div class="flex flex-col items-center justify-center px-6 py-8 border-2 border-dashed border-gray-300 rounded-md hover:border-blue-500 transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

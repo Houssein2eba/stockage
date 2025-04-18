@@ -276,7 +276,7 @@ const updateCategory = () => {
                   v-model="form.name"
                   autofocus
                   autocomplete="name"
-                  :class="{ 'border-red-500': form.errors.name }"
+                  :class="{ 'border-2 border-red-500': form.errors.name  }"
                 />
                 <InputError class="mt-2" :message="form.errors.name" />
               </div>
@@ -287,7 +287,7 @@ const updateCategory = () => {
                   rows="3"
                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   v-model="form.description"
-                  :class="{ 'border-red-500': form.errors.description }"
+                  :class="{ 'border border-red-500': form.errors.description }"
                 ></textarea>
                 <InputError class="mt-2" :message="form.errors.description" />
               </div>

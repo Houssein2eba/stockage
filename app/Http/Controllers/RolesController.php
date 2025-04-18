@@ -69,7 +69,7 @@ class RolesController extends Controller
     public function update(Request $request, $id)
     {
 
-        dd($request->all());
+
         $request->validate([
             'id' => 'required|integer|exists:roles,id',
             'name' => ['required', 'string', 'max:255',Rule::unique('roles')->ignore($id)],
@@ -79,6 +79,26 @@ class RolesController extends Controller
         ]);
 
         $role = Role::findOrFail($id);
+
+        DB::transaction(function () use ($request, $role) {
+            $role->update([
+                'name' => $request->name,
+            ]);
+
+            $permissions = collect($request->permissions)->pluck('name');
+            $role->syncPermissions($permissions);
+
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($role)
+                ->withProperties([
+                    'new' => $request->all(),
+                    'old' => []
+                ])
+                ->log('Updated role');
+        });
+
+        return to_route('roles.index');
     }
 
     public function destroy($id)

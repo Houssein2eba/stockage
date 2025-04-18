@@ -80,6 +80,7 @@ defineOptions({
             </template>
             <template #default>
                 <TableRow v-for="role in props.roles.data" :key="role.id">
+                    <template v-if="role.name !== 'admin'">
                     <TableDataCell>{{ role.name }}</TableDataCell>
                     <TableDataCell >
                         <div class="flex flex-wrap gap-1">
@@ -93,7 +94,7 @@ defineOptions({
                         </div>
                     </TableDataCell>
                     <TableDataCell >{{ role.users_count }}</TableDataCell>
-                      
+
                         <TableDataCell>
                             <button @click="confirmDelete(role)" class="text-red-600 hover:text-red-800">
                                   Delete
@@ -104,6 +105,7 @@ defineOptions({
                             Edit
                         </Link>
                         </TableDataCell>
+                    </template>
                 </TableRow>
             </template>
         </Table>
