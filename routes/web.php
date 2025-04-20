@@ -6,6 +6,8 @@ use App\Http\Controllers\Products\CategoriesController;
 use App\Http\Controllers\Products\ProductsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RolesController;
+use App\Http\Controllers\Sales\SalesController;
+
 use App\Http\Controllers\Users\UsersController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -42,7 +44,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/', [ClientsController::class, 'store'])->name('store');
         Route::get('/{id}', [ClientsController::class, 'edit'])->name('edit');
         Route::put('/{id}', [ClientsController::class, 'update'])->name('update');
-        Route::delete('/{id}', [ClientsController::class, 'delete'])->name('delete');
+        Route::delete('/{id}', [ClientsController::class, 'destroy'])->name('destroy');
+    });
+    //sells Routes
+    Route::prefix('sales')->name('sales.')->group(function () {
+        Route::get('/', [SalesController::class, 'index'])->name('index');
+        Route::get('/create', [SalesController::class, 'create'])->name('create');
+        Route::post('/', [SalesController::class, 'store'])->name('store');
+        Route::get('/{id}', [SalesController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [SalesController::class, 'update'])->name('update');
+        Route::delete('/{id}', [SalesController::class, 'destroy'])->name('destroy');
     });
 });
 

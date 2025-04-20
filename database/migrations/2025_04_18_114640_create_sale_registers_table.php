@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sell_registers', function (Blueprint $table) {
+        Schema::create('sale_registers', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('reference')->unique();
             $table->decimal('total_amount', 10, 2);
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sell_registers');
+        Schema::dropIfExists('sale_registers');
     }
 };
