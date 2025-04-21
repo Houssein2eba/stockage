@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('method');
+            $table->string('name');
+            $table->string('logo')->nullable();
             $table->timestamps();
         });
     }

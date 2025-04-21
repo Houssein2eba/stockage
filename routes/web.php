@@ -2,12 +2,13 @@
 
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\ClientsController;
+use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\Products\CategoriesController;
 use App\Http\Controllers\Products\ProductsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\Sales\SalesController;
-
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Users\UsersController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -55,6 +56,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/{id}', [SalesController::class, 'update'])->name('update');
         Route::delete('/{id}', [SalesController::class, 'destroy'])->name('destroy');
     });
+
+    // Settings Routes
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
 });
 
 // Admin Routes
@@ -100,6 +105,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('/{id}', [ProductsController::class, 'edit'])->name('edit');
         Route::put('/{id}', [ProductsController::class, 'update'])->name('update');
         Route::delete('/{id}', [ProductsController::class, 'destroy'])->name('destroy');
+    });
+
+    // Payment Methods Routes
+    Route::prefix('payment')->name('payment.')->group(function () {
+        Route::get('/', [PaymentMethodController::class, 'index'])->name('index');
+        Route::post('/', [PaymentMethodController::class, 'store'])->name('store');
+        Route::delete('/{payment}', [PaymentMethodController::class, 'destroy'])->name('destroy');
     });
 });
 

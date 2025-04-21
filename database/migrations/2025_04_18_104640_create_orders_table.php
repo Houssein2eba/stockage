@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('reference')->unique();
-            $table->foreignUuid('client_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('client_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignUuid('payment_id')->nullable()->constrained()->nullOnDelete();
             $table->timestamps();
         });
     }

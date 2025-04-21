@@ -78,6 +78,8 @@ class DatabaseSeeder extends Seeder
             'edit category',
         ]);
 
+        // Call the Stock seeder to create sample data
+        $this->call(StockSeeder::class);
 
         //$this->call(PermissionSeeder::class);
     }
