@@ -191,14 +191,26 @@ const cancelDelete = () => {
                 </option>
               </select>
             </div>
+            <!-- low stock filter -->
+            <div class="w-full sm:w-64">
+              <select
+                v-model="selectedCategory"
+                class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+              >
+                <option value="">All Stocks</option>
+                <option v-for="category in categories" :key="category.id" :value="category.id">
+                  {{ category.name }}
+                </option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Products Table -->
-      <div class="bg-white rounded-lg border border-gray-200 shadow-xs">
-        <div class="overflow-x-auto">
-          <Table class="w-full">
+      <div class="bg-white rounded-lg border border-gray-200 shadow-xs min-h-[400px] flex flex-col">
+        <div class="overflow-x-auto flex-1">
+          <Table class="w-full divide-y h-full">
             <thead class="bg-gray-50">
               <TableRow>
                 <TableHeaderCell

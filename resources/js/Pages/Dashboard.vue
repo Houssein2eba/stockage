@@ -5,22 +5,30 @@ import Table from "@/Components/Table.vue";
 import TableRow from "@/Components/TableRow.vue";
 import TableHeaderCell from "@/Components/TableHeaderCell.vue";
 import TableDataCell from "@/Components/TableDataCell.vue";
-
+import {Link} from '@inertiajs/vue3';
+import { useToast } from 'vue-toastification';
+import { ref } from 'vue';
 defineProps({
-    stats:{
-        type:Array,
-        default:[]
+    stats: {
+        type: Object,
+        required: true
     },
     chartData: {
-        type:Array,
-        default : []
+        type: Array,
+        required: true
     },
     recentSales: {
-        type:Array,
-        default:[]
+        type: Array,
+        required: true
     },
 });
 
+const formatPrice = (value) => {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    }).format(value);
+};
 </script>
 
 <template>
@@ -47,7 +55,7 @@ defineProps({
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-500">Total Products</p>
-                                <p class="text-2xl font-bold text-gray-700"> stats.totalProducts</p>
+                                <p class="text-2xl font-bold text-gray-700">{{ stats.totalProducts }}</p>
                             </div>
                         </div>
                         <div class="mt-4">
@@ -65,11 +73,15 @@ defineProps({
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-500">Low Stock Products</p>
-                                <p class="text-2xl font-bold text-gray-700"> stats.lowStockCount </p>
+                                <p class="text-2xl font-bold text-gray-700">{{ stats.lowStockCount }}</p>
                             </div>
                         </div>
                         <div class="mt-4">
-                            <a href="/low-stock" class="text-sm font-medium text-red-600 hover:text-red-500">View low stock items</a>
+                            <Link
+                            
+                            class="text-sm font-medium text-red-600 hover:text-red-500"
+                            :href="route('products.index', { filter: 'low-stock' })"
+                            >  View Low Stock</Link>
                         </div>
                     </div>
 
@@ -83,7 +95,7 @@ defineProps({
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-500">Total Sales</p>
-                                <p class="text-2xl font-bold text-gray-700"> stats.totalSales </p>
+                                <p class="text-2xl font-bold text-gray-700">{{ stats.totalSales }}</p>
                             </div>
                         </div>
                         <div class="mt-4">
@@ -101,11 +113,11 @@ defineProps({
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-500">Total Revenue</p>
-                                <p class="text-2xl font-bold text-gray-700">$ Number(stats.totalRevenue).toFixed(2) </p>
+                                <p class="text-2xl font-bold text-gray-700">{{ formatPrice(stats.totalRevenue) }}</p>
                             </div>
                         </div>
                         <div class="mt-2">
-                            <p class="text-sm font-medium text-gray-600">Profit: $ Number(stats.totalProfit).toFixed(2) </p>
+                            <p class="text-sm font-medium text-gray-600">Profit: {{ formatPrice(stats.totalProfit) }}</p>
                         </div>
                     </div>
                 </div>
@@ -118,11 +130,11 @@ defineProps({
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Sales Today</p>
-                                <p class="text-xl font-bold text-gray-700"> stats.todaySales </p>
+                                <p class="text-xl font-bold text-gray-700">{{ stats.todaySales }}</p>
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Revenue Today</p>
-                                <p class="text-xl font-bold text-gray-700">$ Number(stats.todayRevenue).toFixed(2) </p>
+                                <p class="text-xl font-bold text-gray-700">{{ formatPrice(stats.todayRevenue) }}</p>
                             </div>
                         </div>
                     </div>
@@ -133,11 +145,11 @@ defineProps({
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Total Paid</p>
-                                <p class="text-xl font-bold text-green-600">$ Number(stats.paidAmount).toFixed(2) </p>
+                                <p class="text-xl font-bold text-green-600">{{ formatPrice(stats.paidAmount) }}</p>
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Total Due</p>
-                                <p class="text-xl font-bold text-red-600">$ Number(stats.dueAmount).toFixed(2) </p>
+                                <p class="text-xl font-bold text-red-600">{{ formatPrice(stats.dueAmount) }}</p>
                             </div>
                         </div>
                     </div>
@@ -165,8 +177,17 @@ defineProps({
                                     <TableDataCell class="py-3">{{ sale.invoice_number }}</TableDataCell>
                                     <TableDataCell class="py-3">{{ sale.customer_name }}</TableDataCell>
                                     <TableDataCell class="py-3">{{ new Date(sale.created_at).toLocaleDateString() }}</TableDataCell>
-                                    <TableDataCell class="py-3">{{ sale.amount }}</TableDataCell>
-                                    <TableDataCell class="py-3">{{ sale.status }}</TableDataCell>
+                                    <TableDataCell class="py-3">{{ formatPrice(sale.amount) }}</TableDataCell>
+                                    <TableDataCell class="py-3">
+                                        <span :class="{
+                                            'px-2 py-1 text-xs font-medium rounded-full': true,
+                                            'bg-green-100 text-green-800': sale.status === 'paid',
+                                            'bg-yellow-100 text-yellow-800': sale.status === 'pending',
+                                            'bg-red-100 text-red-800': sale.status === 'cancelled'
+                                        }">
+                                            {{ sale.status }}
+                                        </span>
+                                    </TableDataCell>
                                 </TableRow>
                             </template>
                         </Table>
@@ -177,23 +198,22 @@ defineProps({
                 <div class="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-3">
                     <div class="col-span-1 p-6 bg-white rounded-lg shadow-md sm:col-span-1">
                         <h3 class="mb-4 text-lg font-semibold text-gray-700">Categories</h3>
-                        <p class="text-2xl font-bold text-gray-700"> stats.totalCategories </p>
+                        <p class="text-2xl font-bold text-gray-700">{{ stats.totalCategories }}</p>
                         <a href="/categories" class="mt-2 text-sm font-medium text-indigo-600 hover:text-indigo-500">Manage Categories</a>
                     </div>
 
                     <div class="col-span-1 p-6 bg-white rounded-lg shadow-md sm:col-span-1">
                         <h3 class="mb-4 text-lg font-semibold text-gray-700">Suppliers</h3>
-                        <p class="text-2xl font-bold text-gray-700"> stats.totalSuppliers </p>
+                        <p class="text-2xl font-bold text-gray-700">{{ stats.totalSuppliers }}</p>
                         <a href="/suppliers" class="mt-2 text-sm font-medium text-indigo-600 hover:text-indigo-500">Manage Suppliers</a>
                     </div>
 
-                    <div class="col-span-1 p-6 bg-white rounded-lg shadow-md sm:col-span-1">
+                    <div class="col-span-1 p-6 bg-white rounded-lg shadow-md sm:col-span-2">
                         <h3 class="mb-4 text-lg font-semibold text-gray-700">Quick Links</h3>
-                        <ul class="space-y-2">
-                            <li><a href="/products/create" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Add New Product</a></li>
-                            <li><a href="/sales/create" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Create New Sale</a></li>
-                            <li><a href="/stock-movements/create" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Record Stock Movement</a></li>
-                        </ul>
+                        <div class="grid grid-cols-2 gap-4">
+                            <a href="/products/create" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Add New Product</a>
+                            <a href="/sales/create" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700">Create New Sale</a>
+                        </div>
                     </div>
                 </div>
             </div>

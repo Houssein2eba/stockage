@@ -15,6 +15,7 @@ class ProductsController extends Controller
 {
     public function index(Request $request)
     {
+        
         $products = Product::query()
             ->with('categories')
             ->when($request->search, function ($query) use ($request) {
@@ -32,6 +33,9 @@ class ProductsController extends Controller
                 $query->orderBy($request->sort, $request->direction);
             }, function ($query) {
                 $query->latest();
+            })
+            ->when($request->filter, function ($query) {
+                $query->whereRaw('quantity <= min_quantity');
             })
             ->paginate(PAGINATION)
             ->withQueryString();
