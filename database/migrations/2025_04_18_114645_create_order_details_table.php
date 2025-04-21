@@ -15,10 +15,9 @@ return new class extends Migration
          
             $table->uuid('id')->primary();
             $table->integer('quantity');
-            $table->decimal('unit_price', 10, 2); // snapshot of price at order time
-            $table->decimal('total_price', 10, 2); // could be unit_price * quantity (for convenience)
+            $table->decimal('total_amount', 10, 2);
+            $table->foreignUuid('order_id')->constrained('orders')->cascadeOnDelete();
             $table->foreignUuid('product_id')->constrained('products')->cascadeOnDelete();
-            $table->foreignUuid('sale_register_id')->constrained('sale_registers')->cascadeOnDelete();
             $table->timestamps();
         });
     }

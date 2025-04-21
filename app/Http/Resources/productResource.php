@@ -23,7 +23,7 @@ class productResource extends JsonResource
             'quantity'=>$this->quantity,
             'min_quantity'=>$this->min_quantity,
             'image'=>$this->image,
-            'categories'=>CategoryResource::collection($this->categories),
+            'categories'=>$this->whenLoaded('categories', fn () => $this->categories),
             'created_at'=>$this->created_at,
         ];
     }

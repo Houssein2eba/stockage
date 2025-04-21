@@ -10,5 +10,9 @@ class Client extends Model
     use HasUuids;
     protected $guarded = ['id'];
 
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
     
 }

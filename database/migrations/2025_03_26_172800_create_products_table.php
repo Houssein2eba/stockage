@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('quantity');
             $table->string('image')->nullable();
             $table->integer('min_quantity');
+            $table->timestamps();
 
         });
 

@@ -1,7 +1,7 @@
 <template>
     <AuthLayout>
       <Head title="Create Sale" />
-      
+
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Header -->
         <div class="flex items-center justify-between mb-8">
@@ -10,19 +10,19 @@
             <p class="text-gray-600 mt-1">Record a new sales transaction</p>
           </div>
         </div>
-  
+
         <!-- Sales Form -->
         <div class="bg-white rounded-lg shadow overflow-hidden">
           <div class="p-6 border-b border-gray-200 bg-gray-50">
             <h2 class="text-lg font-medium text-gray-900">Sale Information</h2>
           </div>
-          
+
           <form @submit.prevent="submitForm" class="p-6 space-y-6">
             <!-- Client Selection (Optional) -->
             <div>
               <div class="flex items-center justify-between mb-2">
                 <InputLabel for="client" value="Client (Optional)" />
-                <button 
+                <button
                   type="button"
                   @click="showClientModal = true"
                   class="text-sm text-blue-600 hover:text-blue-800"
@@ -48,7 +48,7 @@
               </VueMultiselect>
               <InputError class="mt-1" :message="form.errors.client" />
             </div>
-  
+
             <!-- Sale Date -->
             <div>
               <InputLabel for="date" value="Sale Date" />
@@ -62,13 +62,13 @@
               />
               <InputError class="mt-1" :message="form.errors.date" />
             </div>
-  
+
             <!-- Products Selection -->
             <div>
               <InputLabel value="Products" />
               <div class="space-y-4">
-                <div 
-                  v-for="(item, index) in form.items" 
+                <div
+                  v-for="(item, index) in form.items"
                   :key="index"
                   class="p-4 border border-gray-200 rounded-lg"
                 >
@@ -87,8 +87,8 @@
                       >
                         <template #option="{ option }">
                           <div class="flex items-center">
-                            <img 
-                              :src="getImageLink(option.image)" 
+                            <img
+                              :src="getImageLink(option.image)"
                               class="w-8 h-8 rounded-md object-cover mr-2"
                               alt="Product image"
                             >
@@ -101,13 +101,13 @@
                           </div>
                         </template>
                       </VueMultiselect>
-                      <InputError 
-                        class="mt-1" 
-                        :message="form.errors[`items.${index}.product_id`] || 
-                                 form.errors[`items.${index}.product`]" 
+                      <InputError
+                        class="mt-1"
+                        :message="form.errors[`items.${index}.product_id`] ||
+                                 form.errors[`items.${index}.product`]"
                       />
                     </div>
-                    
+
                     <!-- Quantity -->
                     <div class="col-span-2">
                       <TextInput
@@ -121,7 +121,7 @@
                       />
                       <InputError class="mt-1" :message="form.errors[`items.${index}.quantity`]" />
                     </div>
-                    
+
                     <!-- Price -->
                     <div class="col-span-2 flex items-center">
                       <span class="text-gray-700 font-medium">
@@ -129,7 +129,7 @@
                       </span>
                     </div>
                   </div>
-                  
+
                   <!-- Remove button -->
                   <div class="mt-3 flex justify-end">
                     <button
@@ -145,7 +145,7 @@
                     </button>
                   </div>
                 </div>
-                
+
                 <!-- Add Product button -->
                 <button
                   type="button"
@@ -159,11 +159,11 @@
                 </button>
               </div>
             </div>
-  
+
             <!-- Payment Information -->
             <div class="pt-4 border-t border-gray-200">
               <h3 class="text-lg font-medium text-gray-900 mb-4">Payment Information</h3>
-              
+
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Payment Method -->
                 <div>
@@ -181,7 +181,7 @@
                   </select>
                   <InputError class="mt-1" :message="form.errors.payment_method" />
                 </div>
-                
+
                 <!-- Payment Status -->
                 <div>
                   <InputLabel for="payment_status" value="Payment Status" />
@@ -198,7 +198,7 @@
                   <InputError class="mt-1" :message="form.errors.payment_status" />
                 </div>
               </div>
-              
+
               <!-- Amount Paid -->
               <div class="mt-4">
                 <InputLabel for="amount_paid" :value="`Amount Paid (${form.payment_status === 'partially_paid' ? 'Partial' : 'Full'})`" />
@@ -220,7 +220,7 @@
                 <InputError class="mt-1" :message="form.errors.amount_paid" />
               </div>
             </div>
-  
+
             <!-- Summary -->
             <div class="bg-gray-50 p-4 rounded-lg">
               <div class="flex justify-between items-center mb-2">
@@ -236,7 +236,7 @@
                 <span class="text-lg font-bold text-blue-600">{{ formatPrice(total) }}</span>
               </div>
             </div>
-  
+
             <!-- Notes -->
             <div>
               <InputLabel for="notes" value="Notes (Optional)" />
@@ -248,11 +248,11 @@
                 placeholder="Any additional notes about this sale..."
               ></textarea>
             </div>
-  
+
             <!-- Form Actions -->
             <div class="flex justify-end space-x-3 pt-4">
-              <Link 
-                :href="route('sales.index')" 
+              <Link
+                :href="route('sales.index')"
                 class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Cancel
@@ -276,7 +276,7 @@
           </form>
         </div>
       </div>
-  
+
       <!-- Client Modal -->
       <Modal :show="showClientModal" @close="showClientModal = false">
         <div class="p-6">
@@ -298,7 +298,7 @@
       </Modal>
     </AuthLayout>
   </template>
-  
+
   <script setup>
   import { ref, computed } from 'vue';
   import { useForm, Link } from '@inertiajs/vue3';
@@ -309,7 +309,7 @@
   import TextInput from '@/Components/TextInput.vue';
   import Modal from '@/Components/Modal.vue';
   import VueMultiselect from 'vue-multiselect';
-  
+
   const props = defineProps({
     clients: {
       type: Array,
@@ -322,55 +322,55 @@
   });
   
   const showClientModal = ref(false);
-  
+
   const form = useForm({
     client: null,
     date: new Date().toISOString().split('T')[0],
     items: [{ product: null, quantity: 1 }],
     payment_method: 'cash',
     payment_status: 'paid',
-    amount_paid: 0,
+    amount_paid : 0,
     notes: '',
   });
-  
+
   const subtotal = computed(() => {
     return form.items.reduce((sum, item) => {
       return sum + (item.product?.price || 0) * (item.quantity || 0);
     }, 0);
   });
-  
+
   const tax = computed(() => {
     return subtotal.value * 0.1; // 10% tax
   });
-  
+
   const total = computed(() => {
     return subtotal.value + tax.value;
   });
-  
+
   const addItem = () => {
     form.items.push({ product: null, quantity: 1 });
   };
-  
+
   const removeItem = (index) => {
     if (form.items.length > 1) {
       form.items.splice(index, 1);
     }
   };
-  
+
   const updateProductDetails = (index) => {
     if (form.items[index]?.product) {
       form.items[index].quantity = 1;
       validateQuantity(index);
     }
   };
-  
+
   const validateQuantity = (index) => {
     const item = form.items[index];
     if (item?.product && item.quantity > item.product.quantity) {
       form.items[index].quantity = item.product.quantity;
     }
   };
-  
+
   const submitForm = () => {
     const submissionData = {
       client_id: form.client?.id || null,
@@ -385,7 +385,7 @@
         unit_price: item.product?.price || 0
       }))
     };
-  
+
     form.transform(() => submissionData).post(route('sales.store'), {
       onSuccess: () => {
         form.reset();
@@ -396,52 +396,52 @@
       }
     });
   };
-  
+
   const saveClient = () => {
     // Implement client saving logic here
     showClientModal.value = false;
   };
-  
+
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'MRU'
     }).format(price || 0);
   };
-  
+
   const getImageLink = (image) => {
     return image ? '/storage/' + image : '/images/placeholder-product.png';
   };
   </script>
-  
+
   <style src="vue-multiselect/dist/vue-multiselect.css"></style>
-  
+
   <style>
   /* Custom styles for multiselect */
   .multiselect {
     border-radius: 0.375rem;
     border: 1px solid #d1d5db;
   }
-  
+
   .multiselect--active {
     border-color: #3b82f6;
     box-shadow: 0 0 0 1px #3b82f6;
   }
-  
+
   .multiselect__tags {
     border: none;
     padding: 0.5rem 1rem;
   }
-  
+
   .multiselect__option--highlight {
     background: #3b82f6;
   }
-  
+
   .multiselect__option--selected {
     background: #e0e7ff;
     color: #1e40af;
   }
-  
+
   /* Error state */
   .border-red-500 {
     border-color: #ef4444;

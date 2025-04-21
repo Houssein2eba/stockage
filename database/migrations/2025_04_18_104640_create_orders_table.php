@@ -11,14 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sale_registers', function (Blueprint $table) {
+        Schema::create('orders', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('reference')->unique();
-            $table->decimal('total_amount', 10, 2);
-            $table->decimal('total_discount', 10, 2)->default(0);
-            $table->string('status')->default('paid');
-            $table->string('payment_method')->default('cash');
-            $table->foreignUuid('client_id')->constrained('clients')->cascadeOnDelete();
+            $table->foreignUuid('client_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -28,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sale_registers');
+        Schema::dropIfExists('orders');
     }
 };

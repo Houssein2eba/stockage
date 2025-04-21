@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 class Product extends Model
 {
     use HasUuids;
-    public $timestamps = false;
+    
     protected $guarded = ['id','created_at','updated_at'];
 
     public function categories(){
@@ -19,6 +19,15 @@ class Product extends Model
         ->using(CategoryProduct::class)
         ->withTimestamps();
     }
+
+    public function orders()
+    {
+        return $this->belongsToMany(Order::class, 'order_details')
+            ->withPivot(['quantity', 'total_amount'])
+            ->using(OrderDetail::class)
+            ->withTimestamps();
+    }
+
     protected static function boot()
     {
         parent::boot();

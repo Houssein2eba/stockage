@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class CategoryProduct extends Pivot
 {
+    protected $guarded = ['id'];
 
-
+    
     
 }
