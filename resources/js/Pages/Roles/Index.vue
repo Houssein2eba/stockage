@@ -8,7 +8,7 @@ import Table from "@/Components/Table.vue";
 import TableRow from "@/Components/TableRow.vue";
 import TableHeaderCell from "@/Components/TableHeaderCell.vue";
 import TableDataCell from "@/Components/TableDataCell.vue";
-
+import { useAdmin } from '@/composables/admins';
 const props = defineProps({
     roles: {
         type: Object,
@@ -19,7 +19,7 @@ const props = defineProps({
         default: () => ({})
     }
 });
-
+const { isAdmin } = useAdmin();
 const toast = useToast();
 const search = ref(props.filters?.search || '');
 const sort = ref({ field: props.filters?.sort || 'created_at', direction: props.filters?.direction || 'desc' });
@@ -89,7 +89,7 @@ const deleteRole = () => {
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">Roles & Permissions</h1>
                     <p class="text-gray-600 mt-1">Manage roles and their permissions mr 
-                        {{$page.props.auth.roles.name === 'admin'}}</p>
+                        {{isAdmin}}</p>
                 </div>
                 <Link
                     :href="route('roles.create')"
