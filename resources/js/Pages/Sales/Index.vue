@@ -114,94 +114,92 @@
             </div>
 
             <!-- Sales Table -->
-            <div class="bg-white rounded-lg shadow">
-                <Table class="min-w-full divide-y divide-gray-200">
-                    <template #header>
-                        <TableRow>
-                            <TableHeaderCell>Reference</TableHeaderCell>
-                            <TableHeaderCell>Client</TableHeaderCell>
-                            <TableHeaderCell>Items</TableHeaderCell>
-                            <TableHeaderCell>Total</TableHeaderCell>
-                            <TableHeaderCell>Status</TableHeaderCell>
-                            <TableHeaderCell>Date</TableHeaderCell>
-                            <TableHeaderCell :colspan="3" class="text-right">Actions</TableHeaderCell>
-                        </TableRow>
-                    </template>
-                    <template #default>
-                        <TableRow v-for="sale in sales.data" :key="sale.id" class="hover:bg-gray-50">
-                            <TableDataCell :colspan="2">
-                                <div>
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="overflow-x-auto">
+                    <Table class="min-w-full divide-y divide-gray-200">
+                        <template #header>
+                            <TableRow>
+                                <TableHeaderCell class="whitespace-nowrap">Reference</TableHeaderCell>
+                                <TableHeaderCell class="whitespace-nowrap">Client</TableHeaderCell>
+                                <TableHeaderCell class="whitespace-nowrap">Items</TableHeaderCell>
+                                <TableHeaderCell class="whitespace-nowrap">Total</TableHeaderCell>
+                                <TableHeaderCell class="whitespace-nowrap">Status</TableHeaderCell>
+                                <TableHeaderCell class="whitespace-nowrap">Date</TableHeaderCell>
+                                <TableHeaderCell :colspan="3" class="text-right whitespace-nowrap">Actions</TableHeaderCell>
+                            </TableRow>
+                        </template>
+                        <template #default>
+                            <TableRow v-for="sale in sales.data" :key="sale.id" class="hover:bg-gray-50">
+                                <TableDataCell class="max-w-[120px] truncate">
                                     <div class="font-medium text-gray-900">#{{ sale.reference }}</div>
-                                  
-                                </div>
-                            </TableDataCell>
-                            <TableDataCell>
-                                <div class="text-sm text-gray-500">{{ sale.client?.name || 'No Client' }}</div>
-                                <div class="text-xs text-gray-400">{{ sale.client?.number || '-' }}</div>
-                            </TableDataCell>
-                            <TableDataCell>
-                                <div class="text-sm">{{ sale.items_count }} items</div>
-                            </TableDataCell>
-                            <TableDataCell>
-                                <div class="font-medium">{{ formatPrice(sale.total_amount) }}</div>
-                            </TableDataCell>
-                            <TableDataCell>
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize"
-                                    :class="{
-                                        'bg-green-100 text-green-800': sale.status === 'paid',
-                                        'bg-yellow-100 text-yellow-800': sale.status === 'pending',
-                                        'bg-red-100 text-red-800': sale.status === 'cancelled'
-                                    }"
-                                >
-                                    {{ sale.status }}
-                                </span>
-                            </TableDataCell>
-                            <TableDataCell>
-                                <div class="text-sm text-gray-500">
-                                    {{ formatDate(sale.created_at) }}
-                                </div>
-                            </TableDataCell>
-                            <TableDataCell>
-                                <button
-                                    @click="markAsPaid(sale)"
-                                    class="text-green-600 hover:text-green-900 text-sm font-medium"
-                                    v-if="sale.status !== 'paid'"
-                                >
-                                    Mark as Paid
-                                </button>
-                            </TableDataCell>
-                            <TableDataCell>
-                                <button
-                                    @click="confirmDelete(sale)"
-                                    class="text-red-600 hover:text-red-900 text-sm font-medium"
-                                >
-                                    Delete
-                                </button>
-                            </TableDataCell>
-                            <TableDataCell class="text-right">
-                               
-                                    <Link
-                                        :href="route('sales.edit', sale.id)"
-                                        class="text-blue-600 hover:text-blue-900 text-sm font-medium"
+                                </TableDataCell>
+                                <TableDataCell class="max-w-[150px]">
+                                    <div class="truncate">
+                                        <div class="text-sm font-medium text-gray-900">{{ sale.client?.name || 'No Client' }}</div>
+                                        <div class="text-xs text-gray-400">{{ sale.client?.number || '-' }}</div>
+                                    </div>
+                                </TableDataCell>
+                                <TableDataCell>
+                                    <div class="text-sm">{{ sale.items_count }} items</div>
+                                </TableDataCell>
+                                <TableDataCell>
+                                    <div class="font-medium whitespace-nowrap">{{ formatPrice(sale.total_amount) }}</div>
+                                </TableDataCell>
+                                <TableDataCell>
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize whitespace-nowrap"
+                                        :class="{
+                                            'bg-green-100 text-green-800': sale.status === 'paid',
+                                            'bg-yellow-100 text-yellow-800': sale.status === 'pending',
+                                            'bg-red-100 text-red-800': sale.status === 'cancelled'
+                                        }"
                                     >
-                                        View Details
-                                    </Link>
-                            </TableDataCell>
-                        </TableRow>
-                        <TableRow v-if="sales.data.length === 0">
-                            <TableDataCell colspan="7" class="px-6 py-12 text-center">
-                                <div class="flex flex-col items-center">
-                                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                                    </svg>
-                                    <p class="mt-4 text-lg font-medium text-gray-900">No sales found</p>
-                                    <p class="mt-1 text-sm text-gray-500">Get started by creating a new sale.</p>
-                                </div>
-                            </TableDataCell>
-                        </TableRow>
-                    </template>
-                </Table>
+                                        {{ sale.status }}
+                                    </span>
+                                </TableDataCell>
+                                <TableDataCell class="whitespace-nowrap">
+                                    <div class="text-sm text-gray-500">
+                                        {{ formatDate(sale.created_at) }}
+                                    </div>
+                                </TableDataCell>
+                                <TableDataCell class="whitespace-nowrap">
+                                    <div class="flex items-center justify-end gap-3">
+                                        <button
+                                            v-if="sale.status !== 'paid'"
+                                            @click="markAsPaid(sale)"
+                                            class="text-green-600 hover:text-green-900 text-sm font-medium"
+                                        >
+                                            Mark as Paid
+                                        </button>
+                                        <Link
+                                            :href="route('sales.edit', sale.id)"
+                                            class="text-blue-600 hover:text-blue-900 text-sm font-medium"
+                                        >
+                                            View Details
+                                        </Link>
+                                        <button
+                                            @click="confirmDelete(sale)"
+                                            class="text-red-600 hover:text-red-900 text-sm font-medium"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </TableDataCell>
+                            </TableRow>
+                            <TableRow v-if="sales.data.length === 0">
+                                <TableDataCell colspan="7" class="px-6 py-12 text-center">
+                                    <div class="flex flex-col items-center">
+                                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                        </svg>
+                                        <p class="mt-4 text-lg font-medium text-gray-900">No sales found</p>
+                                        <p class="mt-1 text-sm text-gray-500">Get started by creating a new sale.</p>
+                                    </div>
+                                </TableDataCell>
+                            </TableRow>
+                        </template>
+                    </Table>
+                </div>
             </div>
 
             <!-- Pagination -->
