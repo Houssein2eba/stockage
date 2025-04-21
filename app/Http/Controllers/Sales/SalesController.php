@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Sales;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ClientResource;
+use App\Http\Resources\OrderResource;
 use App\Http\Resources\PaymentResource;
 use App\Http\Resources\ProductResource;
 use App\Models\Client;
 use App\Models\Order;
+use App\Models\OrderDetail;
 use App\Models\Payment;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -21,17 +23,19 @@ class SalesController extends Controller
         $orders = Order::with(['client', 'products', 'payment'])
             ->latest()
             ->paginate(PAGINATION);
+
+            
         
         // Calculate statistics
         $stats = [
-            'totalRevenue' => Order::sum('total_amount'),
+            'totalRevenue' => OrderDetail::sum('total_amount'),
             'totalSales' => Order::count(),
             'todaySales' => Order::whereDate('created_at', today())->count(),
             'pendingPayments' => Order::whereNull('payment_id')->count()
         ];
 
         return inertia('Sales/Index', [
-            'sales' => $orders,
+            'sales' => OrderResource::collection($orders),
             'stats' => $stats,
             'filters' => request()->only(['search', 'status', 'date'])
         ]);

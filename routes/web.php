@@ -10,6 +10,7 @@ use App\Http\Controllers\RolesController;
 use App\Http\Controllers\Sales\SalesController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Users\UsersController;
+use App\Models\Order;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -113,6 +114,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::post('/', [PaymentMethodController::class, 'store'])->name('store');
         Route::delete('/{payment}', [PaymentMethodController::class, 'destroy'])->name('destroy');
     });
+
+    Route::post('/status/{id}',function (Request $request, $id) {
+        $order = Order ::findOrFail($id);
+        $order->update(['status' => $request->status]);
+        return redirect()->back()->with('success', 'Order status updated successfully.');
+    })->name('orders.status');
+
 });
 
 require __DIR__.'/auth.php';

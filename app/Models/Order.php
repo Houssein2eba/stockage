@@ -17,17 +17,15 @@ class Order extends Model
         'reference',
         'client_id',
         'payment_id',
-        'total_amount',
+        'status'
     ];
 
-    protected $casts = [
-        'total_amount' => 'decimal:2'
-    ];
+    protected $appends = ['total_amount'];
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['reference', 'client_id', 'payment_id', 'total_amount', 'status'])
+            ->logOnly(['reference', 'client_id', 'payment_id', 'status'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
     }
@@ -39,7 +37,7 @@ class Order extends Model
 
     public function products()
     {
-        return $this->belongsToMany(Product::class,'order_details')
+        return $this->belongsToMany(Product::class, 'order_details')
             ->using(OrderDetail::class)
             ->withPivot(['quantity','total_amount'])
             ->withTimestamps();
@@ -50,8 +48,8 @@ class Order extends Model
         return $this->belongsTo(Payment::class);
     }
 
-    public function calculateTotalAmount()
+    public function getTotalAmountAttribute()
     {
-        return $this->products()->sum('total_amount');
+        return $this->products()->sum('order_details.total_amount');
     }
 }

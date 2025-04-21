@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('reference')->unique();
-            $table->decimal('total_amount', 10, 2)->after('payment_id')->default(0);
             $table->foreignUuid('client_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignUuid('payment_id')->nullable()->constrained()->nullOnDelete();
+            $table->enum('status', ['pending', 'paid', 'cancelled'])->default('pending');
             $table->timestamps();
         });
     }

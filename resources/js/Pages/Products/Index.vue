@@ -11,8 +11,9 @@ import TableRow from "@/Components/TableRow.vue";
 import TableHeaderCell from "@/Components/TableHeaderCell.vue";
 import TableDataCell from "@/Components/TableDataCell.vue";
 import VueMultiselect from 'vue-multiselect';
-import { ref } from 'vue';
-
+import { ref, watch } from 'vue';
+import { debounce } from 'lodash';
+import { router } from '@inertiajs/vue3';
 const form = useForm({
     name: "",
     description: "",
@@ -78,6 +79,18 @@ const cancelDelete = () => {
   showDeleteModal.value = false;
   productToDelete.value = null;
 };
+// filters logic
+const search = ref("");
+const selectedCategory = ref(null);
+
+watch(search, debounce((value) => {
+  router.get(route('products.index'), { search: value, category: selectedCategory.value }, {
+    preserveState: true,
+    preserveScroll: true,
+  });
+}, 500));
+
+
 
 </script>
 
@@ -118,6 +131,7 @@ const cancelDelete = () => {
                 </div>
                 <input
                   type="text"
+                  v-model="search"
                   class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   placeholder="Search products..."
                 />
@@ -126,17 +140,7 @@ const cancelDelete = () => {
 
             <!-- Order By Dropdown -->
             <div class="flex flex-row gap-4">
-              <select class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
-                <option value="" selected disabled>Order by</option>
-                <option value="name_asc">Name (A-Z)</option>
-                <option value="name_desc">Name (Z-A)</option>
-                <option value="price_asc">Price (Low to High)</option>
-                <option value="price_desc">Price (High to Low)</option>
-                <option value="quantity_asc">Stock (Low to High)</option>
-                <option value="quantity_desc">Stock (High to Low)</option>
-                <option value="created_at_desc">Newest First</option>
-                <option value="created_at_asc">Oldest First</option>
-              </select>
+
 
               <!-- Category Filter -->
               <select class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
