@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 
 class SalesController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $orders = Order::with(['client', 'products', 'payment'])
             ->latest()

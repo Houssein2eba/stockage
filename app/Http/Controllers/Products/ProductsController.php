@@ -12,14 +12,23 @@ use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 class ProductsController extends Controller
 {
-    public function index(){
-        $products = Product::with('categories')->paginate(PAGINATION);
+    public function index(Request $request){
 
+        $products = Product::query()
+            ->when($request->search, function ($query) use ($request) {
+                $query->where('name', 'like', "%{$request->search}%")
+                    ->orWhere('description', 'like', "%{$request->search}%");
+            })
+            ->with('categories')
+            ->latest()
+            ->paginate(PAGINATION)
+            ->withQueryString();
 
 
         return inertia('Products/Index',[
             'categories'=>CategoryResource::collection(Category::all()),
              'products'=>$products,
+            'filters'=>$request->only(['search']),
 
         ]);
     }

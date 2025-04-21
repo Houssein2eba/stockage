@@ -18,7 +18,6 @@ class Order extends Model
         'client_id',
         'payment_id',
         'total_amount',
-        'status'
     ];
 
     protected $casts = [
