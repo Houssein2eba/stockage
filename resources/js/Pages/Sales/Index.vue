@@ -132,9 +132,12 @@
                             <TableDataCell :colspan="2">
                                 <div>
                                     <div class="font-medium text-gray-900">#{{ sale.reference }}</div>
-                                    <div class="text-sm text-gray-500">{{ sale.client?.name || 'No Client' }}</div>
-                                    <div class="text-xs text-gray-400">{{ sale.client?.number || '-' }}</div>
+                                  
                                 </div>
+                            </TableDataCell>
+                            <TableDataCell>
+                                <div class="text-sm text-gray-500">{{ sale.client?.name || 'No Client' }}</div>
+                                <div class="text-xs text-gray-400">{{ sale.client?.number || '-' }}</div>
                             </TableDataCell>
                             <TableDataCell>
                                 <div class="text-sm">{{ sale.items_count }} items</div>

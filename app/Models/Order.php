@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Order extends Model
 {
-    use HasUuids;
+    use HasUuids, LogsActivity;
     
     protected $guarded = ['id','created_at','updated_at'];
 
@@ -22,6 +24,14 @@ class Order extends Model
     protected $casts = [
         'total_amount' => 'decimal:2'
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['reference', 'client_id', 'payment_id', 'total_amount', 'status'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
 
     public function client()
     {
