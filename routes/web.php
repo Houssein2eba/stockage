@@ -101,7 +101,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
     // Products Routes
     Route::prefix('products')->name('products.')->group(function () {
+
         Route::get('/', [ProductsController::class, 'index'])->name('index');
+        Route::get('/create', [ProductsController::class, 'create'])->name('create');
         Route::post('/', [ProductsController::class, 'store'])->name('store');
         Route::get('/{id}', [ProductsController::class, 'edit'])->name('edit');
         Route::put('/{id}', [ProductsController::class, 'update'])->name('update');
