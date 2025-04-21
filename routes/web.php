@@ -94,6 +94,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     // Categories Routes
     Route::prefix('categories')->name('categories.')->group(function () {
         Route::get('/', [CategoriesController::class, 'index'])->name('index');
+        Route::get('/create', [CategoriesController::class, 'create'])->name('create');
         Route::post('/', [CategoriesController::class, 'store'])->name('store');
         Route::put('/{id}', [CategoriesController::class, 'update'])->name('update');
         Route::delete('/{id}', [CategoriesController::class, 'destroy'])->name('destroy');

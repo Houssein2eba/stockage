@@ -22,7 +22,10 @@ const props = defineProps({
   users: {
     type: Array,
     default: () => [],
-
+  },
+  filters: {
+    type: Object,
+    default: () => ({})
   }
 });
 const showConfirmDeleteUserModal = ref(false);
@@ -45,13 +48,45 @@ const deleteUser=(user)=> {
 )
 
 }
-const search = ref('');
-watch(search, debounce((value) => {
-  router.get(`/users`, { search: value }, {
+const sort = ref({ field: props.filters?.sort || 'created_at', direction: props.filters?.direction || 'desc' });
+const search = ref(props.filters?.search || '');
+
+// Watch for search and sort changes
+watch([search, sort], debounce(() => {
+  router.get('/users', {
+    search: search.value,
+    sort: sort.value.field,
+    direction: sort.value.direction
+  }, {
     preserveState: true,
-    preserveScroll: true,
+    preserveScroll: true
   });
-}, 500));
+}, 300), { deep: true });
+
+// Table headers configuration
+const tableHeaders = computed(() => [
+  { label: 'Name', field: 'name', sortable: true },
+  { label: 'Role', field: 'roles.name', sortable: true },
+  { label: 'Phone', field: 'number', sortable: true },
+  { label: 'Email', field: 'email', sortable: true },
+  { label: 'Actions', field: null, sortable: false, colspan: 2 }
+]);
+
+const handleSort = (field) => {
+  if (!field || !tableHeaders.value.find(header => header.field === field)?.sortable) return;
+
+  if (sort.value.field === field) {
+    sort.value.direction = sort.value.direction === 'asc' ? 'desc' : 'asc';
+  } else {
+    sort.value.field = field;
+    sort.value.direction = 'asc';
+  }
+};
+
+const getSortIcon = (field) => {
+  if (!field || sort.value.field !== field) return 'none';
+  return sort.value.direction === 'asc' ? 'asc' : 'desc';
+};
 </script>
 
 
@@ -84,12 +119,40 @@ watch(search, debounce((value) => {
         <Table>
           <template #header>
             <TableRow>
-
-              <TableHeaderCell>Name</TableHeaderCell>
-              <TableHeaderCell>Role</TableHeaderCell>
-              <TableHeaderCell>Phone</TableHeaderCell>
-              <TableHeaderCell>Email</TableHeaderCell>
-              <TableHeaderCell :colspan=2 >Action</TableHeaderCell>
+              <TableHeaderCell
+                v-for="header in tableHeaders"
+                :key="header.field || header.label"
+                :class="[
+                  header.sortable ? 'cursor-pointer hover:bg-gray-100' : '',
+                  'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
+                ]"
+                :colspan="header.colspan"
+                @click="handleSort(header.field)"
+              >
+                <div class="flex items-center space-x-1">
+                  <span>{{ header.label }}</span>
+                  <span v-if="header.sortable" class="flex flex-col">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-3 w-3"
+                      :class="{'text-blue-600': getSortIcon(header.field) === 'asc'}"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-3 w-3"
+                      :class="{'text-blue-600': getSortIcon(header.field) === 'desc'}"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </TableHeaderCell>
             </TableRow>
           </template>
           <template #default>

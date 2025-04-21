@@ -18,6 +18,11 @@ class ClientsController extends Controller
                 $query->where('name', 'like', "%{$request->search}%")
                     ->orWhere('email', 'like', "%{$request->search}%");
             })
+            ->when($request->sort && $request->direction, function ($query) use ($request) {
+                $query->orderBy($request->sort, $request->direction);
+            }, function ($query) {
+                $query->latest();
+            })
             ->paginate(PAGINATION)
             ->withQueryString();
         return inertia('Clients/Index', [
@@ -28,8 +33,8 @@ class ClientsController extends Controller
 
     public function create()
     {
-        
-        
+
+
     }
     public function store(Request $request)
     {

@@ -6,18 +6,44 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Products\CategoriesRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
+use App\Traits\Sortable;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class CategoriesController extends Controller
 {
-    public function index(){
-        $category=CategoryResource::collection(Category::all());
+    use Sortable;
+
+    public function index(Request $request)
+    {
+        $categories = Category::query()
+            ->withCount('products')
+            ->when($request->search, function ($query) use ($request) {
+                $query->where('name', 'like', "%{$request->search}%")
+                    ->orWhere('description', 'like', "%{$request->search}%");
+            })
+            ->when($request->sort && $request->direction, function ($query) use ($request) {
+                if ($request->sort === 'products_count') {
+                    $query->orderBy('products_count', $request->direction);
+                } else {
+                    $query->orderBy($request->sort, $request->direction);
+                }
+            }, function ($query) {
+                $query->latest();
+            })
+            ->get();
 
         return inertia('Categories/Index', [
-            'categories' => $category,
+            'categories' => CategoryResource::collection($categories),
+            'filters' => $request->only(['search', 'sort', 'direction'])
         ]);
     }
+
+    public function create()
+    {
+        return Inertia::render('Categories/Create');
+    }
+
     public function store(CategoriesRequest $request){
 
         Category::create([

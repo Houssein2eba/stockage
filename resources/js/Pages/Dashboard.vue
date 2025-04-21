@@ -1,6 +1,10 @@
 <script setup>
 import AuthenticatedLayout from '@/layouts/AuthLayout.vue';
 import { Head } from '@inertiajs/vue3';
+import Table from "@/Components/Table.vue";
+import TableRow from "@/Components/TableRow.vue";
+import TableHeaderCell from "@/Components/TableHeaderCell.vue";
+import TableDataCell from "@/Components/TableDataCell.vue";
 
 defineProps({
     stats:{
@@ -146,38 +150,26 @@ defineProps({
                         <a href="/sales" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">View All</a>
                     </div>
                     <div class="p-6">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="text-left text-gray-500">
-                                    <th class="pb-3 font-medium">Invoice</th>
-                                    <th class="pb-3 font-medium">Customer</th>
-                                    <th class="pb-3 font-medium">Date</th>
-                                    <th class="pb-3 font-medium">Amount</th>
-                                    <th class="pb-3 font-medium">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="sale in recentSales" :key="sale.id" class="border-t">
-                                    <td class="py-3"> sale.invoice_number </td>
-                                    <td class="py-3"> sale.customer_name </td>
-                                    <td class="py-3"> new Date(sale.created_at).toLocaleDateString() </td>
-                                    <td class="py-3">$ Number(sale.total).toFixed(2) </td>
-                                    <td class="py-3">
-                                        <span :class="{
-                                            'px-2 py-1 text-xs font-medium rounded-full': true,
-                                            'bg-green-100 text-green-800': sale.payment_status === 'paid',
-                                            'bg-yellow-100 text-yellow-800': sale.payment_status === 'partial',
-                                            'bg-red-100 text-red-800': sale.payment_status === 'pending'
-                                        }">
-                                             sale.payment_status.charAt(0).toUpperCase() + sale.payment_status.slice(1) 
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr v-if="recentSales.length === 0">
-                                    <td colspan="5" class="py-4 text-center text-gray-500">No recent sales</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <Table class="w-full">
+                            <template #header>
+                                <TableRow>
+                                    <TableHeaderCell>Invoice</TableHeaderCell>
+                                    <TableHeaderCell>Customer</TableHeaderCell>
+                                    <TableHeaderCell>Date</TableHeaderCell>
+                                    <TableHeaderCell>Amount</TableHeaderCell>
+                                    <TableHeaderCell>Status</TableHeaderCell>
+                                </TableRow>
+                            </template>
+                            <template #default>
+                                <TableRow v-for="sale in recentSales" :key="sale.id">
+                                    <TableDataCell class="py-3">{{ sale.invoice_number }}</TableDataCell>
+                                    <TableDataCell class="py-3">{{ sale.customer_name }}</TableDataCell>
+                                    <TableDataCell class="py-3">{{ new Date(sale.created_at).toLocaleDateString() }}</TableDataCell>
+                                    <TableDataCell class="py-3">{{ sale.amount }}</TableDataCell>
+                                    <TableDataCell class="py-3">{{ sale.status }}</TableDataCell>
+                                </TableRow>
+                            </template>
+                        </Table>
                     </div>
                 </div>
 

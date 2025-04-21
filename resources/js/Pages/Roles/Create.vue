@@ -1,104 +1,115 @@
 <script setup>
+import AuthLayout from '@/layouts/AuthLayout.vue'
+import { ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
-import AuthLayout from '@/layouts/AuthLayout.vue';
-import {useToast} from "vue-toastification";
-import InputError from "@/Components/InputError.vue";
-import VueMultiselect from 'vue-multiselect';
-defineOptions({
-    layout:AuthLayout
-})
+import { useToast } from "vue-toastification"
+import InputError from '@/Components/InputError.vue'
+import InputLabel from '@/Components/InputLabel.vue'
+import PrimaryButton from '@/Components/PrimaryButton.vue'
+import TextInput from '@/Components/TextInput.vue'
 
 const props = defineProps({
-  permissions: Array
-})
-
+    permissions: {
+        type: Array,
+        required: true
+    }
+});
 
 const toast = useToast();
 const form = useForm({
-  name: '',
-  permissions: []
-})
-console.log(props.permissions)
-const saveRole = () => {
-  form.post(route('roles.store'), {
-    preserveScroll: true,
-    onSuccess: () => {
-      toast.success('Role created successfully');
-      form.reset();
-    }
-  })
-}
+    name: '',
+    permissions: []
+});
+
+const submit = () => {
+    form.post(route('roles.store'), {
+        onSuccess: () => {
+            toast.success('Role created successfully');
+            form.reset();
+        },
+        onError: () => {
+            toast.error('Failed to create role');
+        }
+    });
+};
 </script>
 
 <template>
-  <div class="fixed inset-0  bg-opacity-50 flex items-center justify-center p-4 ">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
-      <div class="p-6">
-        <h2 class="text-xl font-bold mb-4">Create Role</h2>
-        
-        <form @submit.prevent="saveRole">
-          <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="role-name">
-              Role Name
-            </label>
-            <input
-              id="role-name"
-              v-model="form.name"
-              type="text"
-              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              :class="{ 'border-red-500': form.errors.name }"
-            >
-            <InputError :message="form.errors.name" class="mt-2" />
-          </div>
+    <AuthLayout>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Create Role</h1>
+                    <p class="text-gray-600 mt-1">Create a new role with permissions</p>
+                </div>
+            </div>
 
-          <div class="mb-6">
-            <h3 class="block text-gray-700 text-sm font-bold mb-2">Permissions</h3>
-            <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-2"> -->
-              <!-- <div v-for="permission in permissions" :key="permission.id" class="flex items-center">
-                <input
-                  :id="`permission-${permission.id}`"
-                  v-model="form.permissions"
-                  type="checkbox"
-                  :value="permission.name"
-                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                >
-                <label :for="`permission-${permission.id}`" class="ml-2 block text-sm text-gray-700">
-                  {{ permission.name }}
-                </label>
-                <inputError :message="form.errors.permissions" class="mt-2" />
-              </div> -->
-              <div class="mb-4">
-                <InputLabel for="permissions"  value="Permissions"/>
-                <VueMultiselect
-  v-model="form.permissions"
-  :options="permissions"
-  :multiple="true"
-  :close-on-select="true"
-  placeholder="Pick some"
-  label="name"
-  track-by="id"
-  class="w-full"
-/>
-                <InputError :message="form.errors.permissions" class="mt-2" />
-              </div>
-            <!-- </div> -->
-          </div>
+            <div class="bg-white rounded-lg shadow-sm">
+                <form @submit.prevent="submit" class="p-6 space-y-6">
+                    <div>
+                        <InputLabel for="name" value="Role Name" />
+                        <TextInput
+                            id="name"
+                            v-model="form.name"
+                            type="text"
+                            class="mt-1 block w-full"
+                            required
+                            autofocus
+                        />
+                        <InputError :message="form.errors.name" class="mt-2" />
+                    </div>
 
-          <div class="flex justify-end">
-            
-            <button
-              type="submit"
-              :disabled="form.processing"
-              class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
-            >
-              <span v-if="form.processing">Saving...</span>
-              <span v-else>Save</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+                    <div>
+                        <InputLabel value="Permissions" />
+                        <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            <div
+                                v-for="permission in permissions"
+                                :key="permission.id"
+                                class="flex items-start"
+                            >
+                                <div class="flex items-center h-5">
+                                    <input
+                                        :id="'permission-' + permission.id"
+                                        type="checkbox"
+                                        :value="permission.id"
+                                        v-model="form.permissions"
+                                        class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div class="ml-3 text-sm">
+                                    <label :for="'permission-' + permission.id" class="font-medium text-gray-700">
+                                        {{ permission.name }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <InputError :message="form.errors.permissions" class="mt-2" />
+                    </div>
+
+                    <div class="flex justify-end">
+                        <PrimaryButton
+                            type="submit"
+                            :class="{ 'opacity-25': form.processing }"
+                            :disabled="form.processing"
+                        >
+                            <span v-if="!form.processing" class="flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                Create Role
+                            </span>
+                            <span v-else class="flex items-center gap-2">
+                                <svg class="animate-spin -ml-1 mr-1 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Processing...
+                            </span>
+                        </PrimaryButton>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </AuthLayout>
 </template>
-<style src="vue-multiselect/dist/vue-multiselect.css"></style>
 
