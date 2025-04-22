@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ClientResource;
-use App\Http\Resources\productResource;
+use App\Http\Requests\ClientRequest;
 use App\Models\Client;
-use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -15,16 +14,15 @@ class ClientsController extends Controller
     {
         $clients = Client::query()
             ->when($request->search, function ($query) use ($request) {
-                $query->where('name', 'like', "%{$request->search}%")
-                    ->orWhere('email', 'like', "%{$request->search}%");
+                $query->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('number', 'like', '%' . $request->search . '%');
             })
-            ->when($request->sort && $request->direction, function ($query) use ($request) {
-                $query->orderBy($request->sort, $request->direction);
-            }, function ($query) {
-                $query->latest();
-            })
+            ->with('orders')
+            ->latest()
             ->paginate(PAGINATION)
             ->withQueryString();
+
+
         return inertia('Clients/Index', [
              'clients' => ClientResource::collection($clients),
             'filters' => $request->only(['search']),
@@ -36,13 +34,8 @@ class ClientsController extends Controller
 
 
     }
-    public function store(Request $request)
+    public function store(ClientRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'number' => 'required|string|regex:/^[2-4][0-9]{7}/',
-        ]);
-
         DB::transaction(function () use ($request) {
             Client::create([
                 'name' => $request->name,
@@ -52,6 +45,31 @@ class ClientsController extends Controller
                 ->performedOn(new Client)
                 ->causedBy(auth()->user())
                 ->log('Client Created');
+        });
+
+        return back();
+    }
+
+    public function edit($id)
+    {
+        $client = Client::findOrFail($id);
+        return inertia('Clients/Edit', [
+            'client' => new ClientResource($client)
+        ]);
+    }
+
+    public function update(ClientRequest $request, $id)
+    {
+        DB::transaction(function () use ($request, $id) {
+            $client = Client::findOrFail($id);
+            $client->update([
+                'name' => $request->name,
+                'number' => $request->number,
+            ]);
+            activity()
+                ->performedOn(new Client)
+                ->causedBy(auth()->user())
+                ->log('Client Updated');
         });
 
         return back();

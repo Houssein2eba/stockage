@@ -17,7 +17,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 define('PAGINATION', 10);
-
+define('MAX_QUANTITY', 10000);
+define('MIN_QUANTITY', 1);
 // Public Routes
 Route::get('/', function () {
     return Inertia::render('Welcome', [

@@ -7,6 +7,7 @@ use App\Http\Resources\ClientResource;
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\PaymentResource;
 use App\Http\Resources\ProductResource;
+use App\Http\Requests\OrderRequest;
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderDetail;
@@ -24,8 +25,8 @@ class SalesController extends Controller
             ->latest()
             ->paginate(PAGINATION);
 
-            
-        
+
+
         // Calculate statistics
         $stats = [
             'totalRevenue' => OrderDetail::sum('total_amount'),
@@ -53,39 +54,28 @@ class SalesController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(OrderRequest $request)
     {
-        $request->validate([
-            'client_id' => 'nullable|exists:clients,id',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'payment_id' => 'nullable|exists:payments,id',
-            'notes' => 'nullable|string'
-        ]);
-
         DB::transaction(function () use ($request) {
-            $totalAmount = 0;
-            
-            // Calculate total amount first
-            foreach ($request->items as $item) {
+            $totalAmount = collect($request->items)->sum(function ($item) {
                 $product = Product::find($item['product_id']);
-                $totalAmount += $product->price * $item['quantity'];
-            }
+                return $product->price * $item['quantity'];
+            });
 
-            // Create the order
+            // Create the order with sequential reference
             $order = Order::create([
-                'reference' => 'ORD-' . Str::random(10),
-                'client_id' => $request->client_id,
-                'payment_id' => $request->payment_id,
+                'reference' => Order::generateReference(),
+                'client_id' => $request->client ? $request->client['id'] : null,
+                'payment_id' => $request->payment ? $request->payment['id'] : null,
                 'total_amount' => $totalAmount,
-                'status' => $request->payment_id ? 'paid' : 'pending'
+                'status' => $request->payment && $request->payment['id'] ? 'paid' : 'pending'
             ]);
 
             // Add order details
             foreach ($request->items as $item) {
-                $product = Product::find($item['product_id']);
                 
+                $product = Product::find($item['product_id']);
+
                 if ($product->quantity < $item['quantity']) {
                     throw new \Exception("Insufficient stock for product: {$product->name}");
                 }
@@ -122,20 +112,12 @@ class SalesController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(OrderRequest $request, $id)
     {
-        $request->validate([
-            'client.id' => 'nullable|exists:clients,id',
-            'payment.id' => 'nullable|exists:payments,id',
-            'items' => 'required|array|min:1',
-            'items.*.product.id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
-        ]);
-
         DB::transaction(function () use ($request, $id) {
             $order = Order::findOrFail($id);
             $order->load('products');
-            
+
             // Calculate total amount
             $totalAmount = collect($request->items)->sum(function ($item) {
                 $product = Product::find($item['product']['id']);
@@ -144,7 +126,7 @@ class SalesController extends Controller
 
             // Get current products to restore quantities
             $currentProducts = $order->products;
-            
+
             // Restore previous quantities
             foreach ($currentProducts as $product) {
                 $product->increment('quantity', $product->pivot->quantity);
@@ -155,7 +137,7 @@ class SalesController extends Controller
                 'client_id' => $request->client ? $request->client['id'] : null,
                 'payment_id' => $request->payment ? $request->payment['id'] : null,
                 'total_amount' => $totalAmount,
-                'status' => $request->payment && $request->payment['id'] ? 'paid' : 'pending'
+                'status' => $request->status ?? ($request->payment && $request->payment['id'] ? 'paid' : 'pending')
             ]);
 
             // Sync new products with order details

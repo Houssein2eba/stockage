@@ -1,15 +1,12 @@
 <script setup>
 import AuthLayout from "@/layouts/AuthLayout.vue";
-import InputError from "@/Components/InputError.vue";
-import InputLabel from "@/Components/InputLabel.vue";
-import PrimaryButton from "@/Components/PrimaryButton.vue";
-import TextInput from "@/Components/TextInput.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import { useToast } from "vue-toastification";
 import Table from "@/Components/Table.vue";
 import TableRow from "@/Components/TableRow.vue";
 import TableHeaderCell from "@/Components/TableHeaderCell.vue";
 import TableDataCell from "@/Components/TableDataCell.vue";
+import PrimaryButton from "@/Components/PrimaryButton.vue";
 import { ref, watch, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { debounce } from 'lodash';
@@ -22,15 +19,18 @@ const props = defineProps({
     }
 });
 
-const form = useForm({
-    id: null,
-    name: "",
-    number: "",
-});
-
+const form = useForm({});
 const toast = useToast();
 const search = ref(props.filters?.search || '');
 const sort = ref({ field: props.filters?.sort || 'created_at', direction: props.filters?.direction || 'desc' });
+
+// Table headers configuration
+const tableHeaders = computed(() => [
+    { label: 'Name', field: 'name', sortable: true },
+    { label: 'Number', field: 'number', sortable: true },
+    { label: 'Orders', field: 'orders_count', sortable: true },
+    { label: 'Actions', field: null, sortable: false }
+]);
 
 // Watch for search and sort changes
 watch([search, sort], debounce(() => {
@@ -42,14 +42,7 @@ watch([search, sort], debounce(() => {
         preserveState: true,
         preserveScroll: true
     });
-}, 300), { deep: true });
-
-// Table headers configuration
-const tableHeaders = computed(() => [
-    { label: 'Name', field: 'name', sortable: true },
-    { label: 'Number', field: 'number', sortable: true },
-    { label: 'Actions', field: null, sortable: false }
-]);
+}, 300));
 
 const handleSort = (field) => {
     if (!field || !tableHeaders.value.find(header => header.field === field)?.sortable) return;
@@ -67,7 +60,7 @@ const getSortIcon = (field) => {
     return sort.value.direction === 'asc' ? 'asc' : 'desc';
 };
 
-// delete Client logic
+// Delete client logic
 const showDeleteModal = ref(false);
 const clientToDelete = ref(null);
 
@@ -84,16 +77,11 @@ const deleteClient = () => {
             clientToDelete.value = null;
         },
         onError: () => {
-            toast.error('Failed to delete Client');
+            toast.error('Failed to delete client');
             showDeleteModal.value = false;
             clientToDelete.value = null;
         },
     });
-};
-
-const cancelDelete = () => {
-  showDeleteModal.value = false;
-  clientToDelete.value = null;
 };
 </script>
 
@@ -114,9 +102,18 @@ const cancelDelete = () => {
                             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                         </svg>
                         <span class="text-sm font-medium text-blue-800">
-                            Total Clients: <span class="font-semibold">{{ props.clients.data.length }}</span>
+                            Total Clients: <span class="font-semibold">{{ props.clients.length }}</span>
                         </span>
                     </div>
+                    <Link
+                        :href="route('clients.create')"
+                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Add New Client
+                    </Link>
                 </div>
             </div>
 
@@ -143,169 +140,95 @@ const cancelDelete = () => {
                 </div>
             </div>
 
-            <!-- Two-column layout -->
-            <div class="flex flex-col lg:flex-row gap-6">
-                <!-- Main content area (table) -->
-                <div class="flex-1 overflow-hidden">
-                    <div class="bg-white rounded-lg border border-gray-200 shadow-xs overflow-hidden">
-                        <div class="min-w-full overflow-x-auto">
-                            <Table class="w-full whitespace-nowrap">
-                                <thead class="bg-gray-50">
-                                    <TableRow>
-                                        <TableHeaderCell
-                                            v-for="header in tableHeaders"
-                                            :key="header.field || header.label"
-                                            :class="[
-                                                header.sortable ? 'cursor-pointer hover:bg-gray-100' : '',
-                                                'px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
-                                            ]"
-                                            @click="handleSort(header.field)"
-                                        >
-                                            <div class="flex items-center space-x-1">
-                                                <span>{{ header.label }}</span>
-                                                <span v-if="header.sortable" class="flex flex-col">
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        class="h-3 w-3"
-                                                        :class="{'text-blue-600': getSortIcon(header.field) === 'asc'}"
-                                                        viewBox="0 0 20 20"
-                                                        fill="currentColor"
-                                                    >
-                                                        <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
-                                                    </svg>
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        class="h-3 w-3"
-                                                        :class="{'text-blue-600': getSortIcon(header.field) === 'desc'}"
-                                                        viewBox="0 0 20 20"
-                                                        fill="currentColor"
-                                                    >
-                                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                                    </svg>
-                                                </span>
-                                            </div>
-                                        </TableHeaderCell>
-                                    </TableRow>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200">
-                                    <TableRow v-for="client in props.clients.data" :key="client.id" class="hover:bg-gray-50/50 transition-colors">
-                                        <TableDataCell class="px-4 sm:px-6 py-4">
-                                            <span class="font-medium text-gray-900">{{ client.name }}</span>
-                                        </TableDataCell>
-                                        <TableDataCell class="px-4 sm:px-6 py-4">
-                                            <div class="text-gray-600">{{ client.number }}</div>
-                                        </TableDataCell>
-                                        <TableDataCell class="px-4 sm:px-6 py-4">
-                                            <div class="flex items-center justify-end gap-2 sm:gap-3">
-                                                <Link
-                                                    :href="route('clients.edit', client.id)"
-                                                    class="text-blue-600 hover:text-blue-900 transition-colors flex items-center gap-1 whitespace-nowrap"
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                    </svg>
-                                                    <span class="hidden sm:inline">Edit</span>
-                                                </Link>
-                                                <button
-                                                    @click="confirmDelete(client.id)"
-                                                    class="text-red-600 hover:text-red-900 transition-colors flex items-center gap-1 whitespace-nowrap"
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                    <span class="hidden sm:inline">Delete</span>
-                                                </button>
-                                            </div>
-                                        </TableDataCell>
-                                    </TableRow>
-                                    <TableRow v-if="props.clients.data.length === 0">
-                                        <TableDataCell colspan="3" class="px-4 sm:px-6 py-12">
-                                            <div class="flex flex-col items-center justify-center">
-                                                <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                                                </svg>
-                                                <p class="mt-2">No clients found</p>
-                                                <p class="text-sm text-gray-400">Add your first client using the form</p>
-                                            </div>
-                                        </TableDataCell>
-                                    </TableRow>
-                                </tbody>
-                            </Table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sidebar form -->
-                <div class="lg:w-96">
-                    <div class="bg-white rounded-lg border border-gray-200 shadow-xs sticky top-6">
-                        <div class="p-5 border-b border-gray-200 bg-gray-50/50">
-                            <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                                </svg>
-                                Add New Client
-                            </h2>
-                        </div>
-                        <form @submit.prevent="form.post(route('clients.store'), {
-                            onSuccess: () => {
-                                toast.success('Client created successfully');
-                                form.reset();
-                            },
-                            onError: () => {
-                                toast.error('Failed to create Client');
-                            },
-                        })" class="p-5 space-y-5">
-                            <div>
-                                <InputLabel for="name" value="Client Name" class="mb-1.5" />
-                                <TextInput
-                                    id="name"
-                                    type="text"
-                                    class="w-full"
-                                    v-model="form.name"
-                                    placeholder="Enter client name"
-                                    :class="{ 'border-red-500': form.errors.name }"
-                                />
-                                <InputError class="mt-1.5" :message="form.errors.name" />
-                            </div>
-
-                            <div>
-                                <InputLabel for="number" value="Client Number" class="mb-1.5" />
-                                <TextInput
-                                    id="number"
-                                    type="text"
-                                    class="w-full"
-                                    v-model="form.number"
-                                    placeholder="Enter client number"
-                                    :class="{ 'border-red-500': form.errors.number }"
-                                />
-                                <InputError class="mt-1.5" :message="form.errors.number" />
-                            </div>
-
-                            <div class="pt-2">
-                                <PrimaryButton
-                                    class="w-full justify-center py-2.5"
-                                    :class="{ 'opacity-25': form.processing }"
-                                    :disabled="form.processing"
+            <!-- Clients Table -->
+                <div class="w-full overflow-x-auto" style="max-height: 70vh; overflow-y: auto;">
+                    <Table class="min-w-full table-fixed divide-y divide-gray-200">
+                        <template #header >
+                            <TableRow>
+                                <TableHeaderCell
+                                    v-for="header in tableHeaders"
+                                    :key="header.field || header.label"
+                                    :class="[
+                                        header.sortable ? 'cursor-pointer hover:bg-gray-100' : '',
+                                        'px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
+                                    ]"
+                                    @click="handleSort(header.field)"
                                 >
-                                    <span v-if="!form.processing" class="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    <div class="flex items-center space-x-1">
+                                        <span>{{ header.label }}</span>
+                                        <span v-if="header.sortable" class="flex flex-col">
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                class="h-3 w-3"
+                                                :class="{'text-blue-600': getSortIcon(header.field) === 'asc'}"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
+                                            >
+                                                <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                                            </svg>
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                class="h-3 w-3"
+                                                :class="{'text-blue-600': getSortIcon(header.field) === 'desc'}"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
+                                            >
+                                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                            </svg>
+                                        </span>
+                                    </div>
+                                </TableHeaderCell>
+                            </TableRow>
+                        </template>
+                        <template #default>
+                            <TableRow v-for="client in props.clients.data" :key="client.id" class="hover:bg-gray-50/50 transition-colors">
+                                <TableDataCell class="px-4 sm:px-6 py-4">
+                                    <span class="font-medium text-gray-900">{{ client.name }}</span>
+                                </TableDataCell>
+                                <TableDataCell class="px-4 sm:px-6 py-4">
+                                    <div class="text-gray-600">{{ client.number }}</div>
+                                </TableDataCell>
+                                <TableDataCell>
+                                    {{ client.orders_count }} orders
+                                </TableDataCell>
+                                <TableDataCell class="px-4 sm:px-6 py-4">
+                                    <div class="flex items-center justify-end gap-2 sm:gap-3">
+                                        <Link
+                                            :href="route('clients.edit', client.id)"
+                                            class="text-blue-600 hover:text-blue-900 transition-colors flex items-center gap-1 whitespace-nowrap"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                            <span class="hidden sm:inline">Edit</span>
+                                        </Link>
+                                        <button
+                                            @click="confirmDelete(client.id)"
+                                            class="text-red-600 hover:text-red-900 transition-colors flex items-center gap-1 whitespace-nowrap"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                            <span class="hidden sm:inline">Delete</span>
+                                        </button>
+                                    </div>
+                                </TableDataCell>
+                            </TableRow>
+                            <TableRow v-if="props.clients.length === 0">
+                                <TableDataCell colspan="3" class="px-4 sm:px-6 py-12">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                                         </svg>
-                                        Add Client
-                                    </span>
-                                    <span v-else class="flex items-center gap-2">
-                                        <svg class="animate-spin -ml-1 mr-1 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Processing...
-                                    </span>
-                                </PrimaryButton>
-                            </div>
-                        </form>
-                    </div>
+                                        <p class="mt-2">No clients found</p>
+                                        <p class="text-sm text-gray-400">Add your first client using the form</p>
+                                    </div>
+                                </TableDataCell>
+                            </TableRow>
+                        </template>
+                    </Table>
                 </div>
-            </div>
+
 
             <!-- Delete confirmation modal -->
             <Transition name="fade">
@@ -339,7 +262,7 @@ const cancelDelete = () => {
                                 >
                                     <span v-if="!form.processing">Delete</span>
                                     <span v-else class="flex items-center">
-                                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>

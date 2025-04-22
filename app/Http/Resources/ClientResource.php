@@ -17,7 +17,14 @@ class ClientResource extends JsonResource
         return [
             "id"=> $this->id,
             "name"=>$this->name,
-            "number"=>$this->number
+            "number"=>$this->number,
+            "created_at"=>$this->created_at->format('Y-m-d H:i:s'),
+            'orders'=> $this->whenLoaded('orders', function () {
+                return OrderResource::collection($this->orders);
+            }),
+            'orders_count'=> $this->whenLoaded('orders', function () {
+                return $this->orders->count();
+            }),
         ];
     }
 }

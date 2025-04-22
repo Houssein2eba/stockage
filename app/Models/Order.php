@@ -52,4 +52,25 @@ class Order extends Model
     {
         return $this->products()->sum('order_details.total_amount');
     }
+
+    public static function generateReference(): string
+    {
+        $latest = self::latest()->first();
+        
+        if (!$latest) {
+            return 'ORD-000001';
+        }
+
+        // Extract the numeric part and increment
+        $number = (int) substr($latest->reference, 4);
+        $next = $number + 1;
+
+        // Ensure the number doesn't exceed 999999
+        if ($next > 999999) {
+            $next = 1;
+        }
+
+        // Format with leading zeros
+        return 'ORD-' . str_pad($next, 6, '0', STR_PAD_LEFT);
+    }
 }
