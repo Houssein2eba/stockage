@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facture #{{ $order->reference }}</title>
+    <title>Invoice #{{ $order->reference }}</title>
     <style>
         body {
             font-family: 'DejaVu Sans', Arial, sans-serif;
@@ -120,18 +120,18 @@
         <!-- Header -->
         <div class="header">
             <div class="company-info">
-                <div class="company-name">FACTURE</div>
+                <div class="company-name">INVOICE</div>
                 <div>Stock Management System</div>
-                <div>123 Rue Principale, Ville</div>
-                <div>Tél: +222 00 00 00 00</div>
+                <div>123 Main Street, City</div>
+                <div>Phone: +1 800 123 4567</div>
                 <div>Email: contact@stockmanagement.com</div>
             </div>
             <div class="invoice-info">
                 <div class="invoice-number">#{{ $order->reference }}</div>
                 <div>Date: {{ $order->created_at->format('d/m/Y') }}</div>
-                <div>Mode de paiement: {{ $order->payment?->name ?? 'Cash' }}</div>
+                <div>Payment Method: {{ $order->payment?->name ?? 'Cash' }}</div>
                 <div class="status-container">
-                    <span>Statut:
+                    <span>Status:
                         {{ ucfirst($order->status) }}
                     </span>
                 </div>
@@ -141,12 +141,12 @@
 
         <!-- Client Info -->
         <div class="client-info">
-            <div class="client-title">Informations Client</div>
+            <div class="client-title">Client Information</div>
             @if($order->client)
                 <div>{{ $order->client->name }}</div>
                 <div>{{ $order->client->number }}</div>
             @else
-                <div>Client Non Spécifié</div>
+                <div>Client Not Specified</div>
             @endif
         </div>
 
@@ -154,9 +154,9 @@
         <table>
             <thead>
                 <tr>
-                    <th>Produit</th>
-                    <th class="text-right">Prix Unitaire</th>
-                    <th class="text-right">Quantité</th>
+                    <th>Product</th>
+                    <th class="text-right">Unit Price</th>
+                    <th class="text-right">Quantity</th>
                     <th class="text-right">Total</th>
                 </tr>
             </thead>
@@ -164,14 +164,14 @@
                 @foreach($order->products as $product)
                     <tr>
                         <td>{{ $product->name }}</td>
-                        <td class="text-right">{{ number_format($product->price, 2, ',', ' ') }} MRU</td>
+                        <td class="text-right">{{ number_format($product->price, 2, ',', ' ') }} USD</td>
                         <td class="text-right">{{ $product->pivot->quantity }}</td>
-                        <td class="text-right">{{ number_format($product->pivot->total_amount, 2, ',', ' ') }} MRU</td>
+                        <td class="text-right">{{ number_format($product->pivot->total_amount, 2, ',', ' ') }} USD</td>
                     </tr>
                 @endforeach
                 <tr class="total-row">
                     <td colspan="3" class="text-right">Total</td>
-                    <td class="text-right">{{ number_format($order->total_amount, 2, ',', ' ') }} MRU</td>
+                    <td class="text-right">{{ number_format($order->total_amount, 2, ',', ' ') }} USD</td>
                 </tr>
             </tbody>
         </table>
@@ -179,22 +179,22 @@
         <!-- Payment Info -->
         <div class="payment-info">
             <div style="width: 48%; float: left;">
-                <strong>Conditions de paiement:</strong>
+                <strong>Payment Terms:</strong>
                 <ul style="padding-left: 20px; margin-top: 10px;">
-                    <li>Paiement dû dans les 30 jours</li>
-                    <li>Veuillez inclure le numéro de facture dans votre paiement</li>
+                    <li>Payment is due within 30 days</li>
+                    <li>Please include the invoice number in your payment</li>
                 </ul>
             </div>
             <div style="width: 48%; float: right;">
                 <strong>Notes:</strong>
-                <p style="margin-top: 10px;">{{ $order->notes ?? 'Aucune note' }}</p>
+                <p style="margin-top: 10px;">{{ $order->notes ?? 'No notes' }}</p>
             </div>
             <div class="clear"></div>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            <p>Merci pour votre confiance!</p>
+            <p>Thank you for your business!</p>
         </div>
     </div>
 </body>
