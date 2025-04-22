@@ -45,19 +45,18 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            <tr v-for="(product, index) in sale.products" :key="index">
+                            <tr v-for="product in sale.products" :key="product.id">
                                 <td class="px-4 py-4 text-sm text-gray-900">{{ product.name }}</td>
                                 <td class="px-4 py-4 text-sm text-gray-900 text-right">{{ formatPrice(product.price) }}</td>
+                                
+                                   
+                                
                                 <td class="px-4 py-4 text-sm text-gray-900 text-right">{{ product.pivot.quantity}}</td>
-                                <td class="px-4 py-4 text-sm text-gray-900 text-right">{{ formatPrice(product.price * product.quantity) }}</td>
+                                <td class="px-4 py-4 text-sm text-gray-900 text-right">{{ formatPrice(product.pivot.total_amount) }}</td>
                             </tr>
                         </tbody>
                         <tfoot class="bg-gray-50">
-                            <tr>
-                                <td colspan="2" class="px-4 py-4"></td>
-                                <td class="px-4 py-4 text-sm font-medium text-gray-900 text-right">Sous-total</td>
-                                <td class="px-4 py-4 text-sm font-medium text-gray-900 text-right">{{ formatPrice(totalAmount) }}</td>
-                            </tr>
+                            
 
                             <tr class="bg-gray-100">
                                 <td colspan="2" class="px-4 py-4"></td>
@@ -119,6 +118,7 @@ const formatPrice = (price) => {
 const printInvoice = () => {
     window.print()
 }
+
 </script>
 
 <style>
