@@ -18,11 +18,11 @@ class OrderResource extends JsonResource
             'id' => $this->id,
             'reference' => $this->reference,
             'status' => $this->status,
-            'total_amount' => $this->total_amount,
+            'total_amount' => $this->totalAmount(),
             'client' => new ClientResource($this->whenLoaded('client')),
             'payment' => new PaymentResource($this->whenLoaded('payment')),
             'products' => ProductResource::collection($this->whenLoaded('products')),
-            'items'=>$this->products->count(),
+            'items' => $this->products->count(),
             'created_at' => $this->created_at->toDateTimeString(),
             'updated_at' => $this->updated_at->toDateTimeString(),
         ];

@@ -172,13 +172,13 @@
                                             Mark as Paid
                                         </button>
                                         <Link
-                                            :href="route('sales.edit', sale.id)"
+                                            :href="route('sales.show', sale.id)"
                                             class="text-blue-600 hover:text-blue-900 text-sm font-medium"
                                         >
                                             View Details
                                         </Link>
                                         <button
-                                            @click="confirmDelete(sale)"
+                                            @click="confirmDelete(sale.id)"
                                             class="text-red-600 hover:text-red-900 text-sm font-medium"
                                         >
                                             Delete
@@ -186,7 +186,7 @@
                                     </div>
                                 </TableDataCell>
                             </TableRow>
-                            <TableRow v-if="sales.data.length === 0">
+                            <TableRow v-if="sales.length === 0">
                                 <TableDataCell colspan="7" class="px-6 py-12 text-center">
                                     <div class="flex flex-col items-center">
                                         <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -219,16 +219,17 @@
                     <button
                         @click="closeDeleteModal"
                         class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
+                        :disabled="processing"
                     >
                         Cancel
                     </button>
                     <button
                         @click="deleteSale"
                         class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700"
-                        :class="{ 'opacity-25': processing }"
-                        :disabled="processing"
+                        
                     >
-                        Delete Sale
+                        <span >Delete Sale</span>
+                        
                     </button>
                 </div>
             </div>
@@ -250,13 +251,13 @@ import TextInput from '@/Components/TextInput.vue'
 import Modal from '@/Components/Modal.vue'
 import Pagination from '@/Components/Pagination.vue'
 import DatePicker from 'primevue/datepicker'
-
+import {router} from '@inertiajs/vue3'
 const props = defineProps({
     sales: Object,
     stats: Object,
     filters: Object
 })
-console.log(props)
+
 const toast = useToast()
 const showDeleteModal = ref(false)
 const saleToDelete = ref(null)
@@ -299,29 +300,29 @@ const formatDate = (date) => {
 
 const confirmDelete = (sale) => {
     saleToDelete.value = sale
+    console.log(saleToDelete.value)
     showDeleteModal.value = true
 }
 
 const closeDeleteModal = () => {
     showDeleteModal.value = false
     saleToDelete.value = null
+    processing.value = false
 }
 
 const deleteSale = () => {
-    if (!saleToDelete.value) return
-
-    processing.value = true
-    router.delete(route('sales.destroy', saleToDelete.value.id), {
+    router.delete(route('sales.destroy', saleToDelete.value), {
         onSuccess: () => {
             toast.success('Sale deleted successfully')
-            closeDeleteModal()
+            showDeleteModal.value = false
+            saleToDelete.value = null
         },
         onError: () => {
             toast.error('Failed to delete sale')
+            showDeleteModal.value = false
+            saleToDelete.value = null
         },
-        onFinish: () => {
-            processing.value = false
-        }
+        preserveScroll: true
     })
 }
 

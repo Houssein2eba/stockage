@@ -20,7 +20,9 @@
                                     :displayValue="(id) => clients.find(client => client.id === id)?.name || ''"
                                     @change="searchClients"
                                     placeholder="Select or search client..." />
-                                <ComboboxOptions class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                    <InputError class="mt-1.5" :message="form.errors.client_id" />
+
+                                 <ComboboxOptions class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                                     <ComboboxOption
                                         v-for="client in clients"
                                         :key="client.id"
@@ -34,6 +36,7 @@
                                         </div>
                                     </ComboboxOption>
                                 </ComboboxOptions>
+
                             </div>
                         </Combobox>
                     </div>
@@ -44,7 +47,7 @@
                         <div class="space-y-4">
                             <div v-for="(item, index) in form.items" :key="index" class="flex items-start gap-4 p-4 border rounded-lg">
                                 <!-- Product Selection -->
-                                <div class="flex-1">
+                                 <div class="flex-1">
                                     <Combobox v-model="item.product_id">
                                         <div class="relative">
                                             <ComboboxInput 
@@ -70,6 +73,7 @@
                                             </ComboboxOptions>
                                         </div>
                                     </Combobox>
+                                    
                                 </div>
 
                                 <!-- Quantity -->
@@ -125,6 +129,7 @@
                                 {{ payment.name }}
                             </option>
                         </select>
+                        <InputError class="mt-1.5" :message="form.errors.payment_id" />
                     </div>
 
                     <!-- Notes -->
@@ -158,9 +163,9 @@
                             type="submit"
                             class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700"
                             :disabled="form.processing"
-                            :class="{ 'opacity-75 cursor-not-allowed': processing }"
+                            :class="{ 'opacity-75 cursor-not-allowed': form.processing }"
                         >
-                            <span v-if="processing">Saving...</span>
+                            <span v-if="form.processing">Saving...</span>   
                             <span v-else>Save Sale</span>
                         </button>
                     </div>
@@ -171,15 +176,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { Link, router } from '@inertiajs/vue3'
+
+import { Link, router, useForm } from '@inertiajs/vue3'
 import { useToast } from 'vue-toastification'
 import AuthLayout from '@/layouts/AuthLayout.vue'
 import TextInput from '@/Components/TextInput.vue'
 import { Combobox, ComboboxInput, ComboboxOptions, ComboboxOption } from '@headlessui/vue'
-
+import InputError from '@/Components/InputError.vue'
 const toast = useToast()
-const processing = ref(false)
 
 const props = defineProps({
     clients: {
@@ -195,8 +199,8 @@ const props = defineProps({
         default: () => []
     }
 })
-
-const form = ref({
+console.log(props.errors)
+const form = useForm({
     client_id: null,
     items: [{ product_id: null, quantity: 1 }],
     payment_id: null,
@@ -204,11 +208,11 @@ const form = ref({
 })
 
 const addItem = () => {
-    form.value.items.push({ product_id: null, quantity: 1 })
+    form.items.push({ product_id: null, quantity: 1 })
 }
 
 const removeItem = (index) => {
-    form.value.items.splice(index, 1)
+    form.items.splice(index, 1)
 }
 
 const calculateItemTotal = (item) => {
@@ -218,7 +222,7 @@ const calculateItemTotal = (item) => {
 }
 
 const calculateTotal = () => {
-    return form.value.items.reduce((total, item) => total + calculateItemTotal(item), 0)
+    return form.items.reduce((total, item) => total + calculateItemTotal(item), 0)
 }
 
 const formatPrice = (price) => {
@@ -237,20 +241,18 @@ const searchProducts = (query) => {
 }
 
 const submitForm = () => {
-    if (form.value.items.some(item => !item.product_id)) {
+    if (form.items.some(item => !item.product_id)) {
         toast.error('Please select products for all items')
         return
     }
 
-    processing.value = true
-    router.post(route('sales.store'), form.value, {
+    form.post(route('sales.store'), {
         onSuccess: () => {
-            toast.success('Sale created successfully')
-            router.visit(route('sales.index'))
+            toast.success('Sale created successfully');
+            form.reset();
         },
-        onError: (errors) => {
+        onError: () => {
             toast.error('Failed to create sale')
-            processing.value = false
         }
     })
 }

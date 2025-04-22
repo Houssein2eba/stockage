@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -72,5 +73,13 @@ class Order extends Model
 
         // Format with leading zeros
         return 'ORD-' . str_pad($next, 6, '0', STR_PAD_LEFT);
+    }
+
+    public function totalAmount()
+    {
+        
+        $totalAmount = DB::table('order_details')->where('order_id', $this->id)->get('total_amount');
+       ;
+        return $totalAmount;
     }
 }

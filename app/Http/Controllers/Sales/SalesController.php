@@ -23,7 +23,9 @@ class SalesController extends Controller
     {
         $orders = Order::with(['client', 'products', 'payment'])
             ->latest()
-            ->paginate(PAGINATION);
+            ->paginate(PAGINATION)
+            ->withQueryString()
+            ;
 
 
 
@@ -39,6 +41,15 @@ class SalesController extends Controller
             'sales' => OrderResource::collection($orders),
             'stats' => $stats,
             'filters' => request()->only(['search', 'status', 'date'])
+        ]);
+    }
+
+    public function show($id){
+        $order = Order::with(['client', 'products', 'payment'])->findOrFail($id);
+
+        
+        return inertia('Sales/Show', [
+            'sale' => new OrderResource($order)
         ]);
     }
 
@@ -62,18 +73,18 @@ class SalesController extends Controller
                 return $product->price * $item['quantity'];
             });
 
-            // Create the order with sequential reference
+            
+
+            // Create the order
             $order = Order::create([
                 'reference' => Order::generateReference(),
-                'client_id' => $request->client ? $request->client['id'] : null,
-                'payment_id' => $request->payment ? $request->payment['id'] : null,
-                'total_amount' => $totalAmount,
-                'status' => $request->payment && $request->payment['id'] ? 'paid' : 'pending'
+                'client_id' => $request->client_id,
+                'payment_id' => $request->payment_id,
+                'status' => $request->payment_id ? 'paid' : 'pending'
             ]);
 
             // Add order details
             foreach ($request->items as $item) {
-                
                 $product = Product::find($item['product_id']);
 
                 if ($product->quantity < $item['quantity']) {
@@ -92,7 +103,7 @@ class SalesController extends Controller
             }
         });
 
-        return back()->with('success', 'Sale recorded successfully');
+        return redirect()->route('sales.index')->with('success', 'Sale created successfully');
     }
 
     public function edit($id)
@@ -105,7 +116,7 @@ class SalesController extends Controller
         $payments = Payment::all();
 
         return inertia('Sales/Edit', [
-            'sale' => $order,
+            'sale' => new OrderResource($order),
             'clients' => ClientResource::collection($clients),
             'products' => ProductResource::collection($products),
             'payments' => PaymentResource::collection($payments)
@@ -163,6 +174,18 @@ class SalesController extends Controller
             }
         });
 
-        return back()->with('success', 'Sale updated successfully');
+        return back();
+    }
+
+    public function destroy($id)
+    {
+        DB::transaction(function () use ($id) {
+            $order = Order::findOrFail($id);
+
+            
+            $order->delete();
+        });
+
+        return redirect()->back();
     }
 }

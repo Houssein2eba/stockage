@@ -17,8 +17,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 define('PAGINATION', 10);
-define('MAX_QUANTITY', 10000);
-define('MIN_QUANTITY', 1);
+
 // Public Routes
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -50,7 +49,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
     //sells Routes
     Route::prefix('sales')->name('sales.')->group(function () {
+        
         Route::get('/', [SalesController::class, 'index'])->name('index');
+        Route::get('/sale/{id}', [SalesController::class, 'show'])->name('show');
         Route::get('/create', [SalesController::class, 'create'])->name('create');
         Route::post('/', [SalesController::class, 'store'])->name('store');
         Route::get('/{id}', [SalesController::class, 'edit'])->name('edit');
@@ -58,9 +59,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/{id}', [SalesController::class, 'destroy'])->name('destroy');
     });
 
-    // Settings Routes
-    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
-    Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+ 
 });
 
 // Admin Routes

@@ -23,13 +23,12 @@ class OrderRequest extends FormRequest
      */
     public function rules(): array
     {
-        $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
 
+        $isClient = $this->client_id===null ? false : true;
+        
         return [
-            'client' => ['nullable', 'array'],
-            'client.id' => ['nullable', 'exists:clients,id'],
-            'payment' => ['nullable', 'array'],
-            'payment.id' => ['nullable', 'exists:payments,id'],
+            'client_id' => ['nullable', 'exists:clients,id'],
+            'payment_id' => $isClient ? ['nullable', 'exists:payments,id'] : ['required', 'exists:payments,id'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'exists:products,id'],
             'items.*.quantity' => [
@@ -52,15 +51,20 @@ class OrderRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'items.required' => 'At least one item is required for the sale',
-            'items.min' => 'At least one item is required for the sale',
-            'items.*.product.required' => 'Please select a product for each item',
+            'items.required' => 'At least one item is required for the order',
+            'items.array' => 'Items must be provided as a list',
+            'items.min' => 'At least one item is required for the order',
+            'items.*.product_id.required' => 'Please select a product for each item',
+            'items.*.product_id.exists' => 'One or more selected products do not exist',
             'items.*.quantity.required' => 'Please specify quantity for each item',
+            'items.*.quantity.integer' => 'Quantity must be a whole number',
             'items.*.quantity.min' => 'Quantity must be at least 1',
-            'items.*.quantity.max' => 'Quantity cannot exceed 10000 units',
-            'client.id.exists' => 'The selected client is invalid',
-            'payment.id.exists' => 'The selected payment method is invalid',
-            'status.in' => 'Invalid order status'
+            'items.*.quantity.max' => 'Quantity cannot exceed 1000 units',
+            'client_id.exists' => 'The selected client does not exist',
+            'payment_id.required' => 'Payment method is required for non-client orders',
+            'payment_id.exists' => 'The selected payment method is invalid',
+            'notes.string' => 'Notes must be text',
+            'notes.max' => 'Notes cannot exceed 1000 characters'
         ];
     }
 }
