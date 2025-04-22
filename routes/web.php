@@ -4,6 +4,7 @@ use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\ClientsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\Pdf\FactureController;
 use App\Http\Controllers\Products\CategoriesController;
 use App\Http\Controllers\Products\ProductsController;
 use App\Http\Controllers\ProfileController;
@@ -16,7 +17,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-define('PAGINATION', 10);
+define('PAGINATION', 2);
 
 // Public Routes
 Route::get('/', function () {
@@ -57,6 +58,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{id}', [SalesController::class, 'edit'])->name('edit');
         Route::put('/{id}', [SalesController::class, 'update'])->name('update');
         Route::delete('/{id}', [SalesController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}/invoice', [FactureController::class, 'generatePdf'])->name('invoice');
     });
 
  

@@ -75,11 +75,9 @@ class Order extends Model
         return 'ORD-' . str_pad($next, 6, '0', STR_PAD_LEFT);
     }
 
-    public function totalAmount()
+    public function totalAmount():float
     {
-        
-        $totalAmount = DB::table('order_details')->where('order_id', $this->id)->get('total_amount');
-       ;
-        return $totalAmount;
+        $totalAmount = DB::table('order_details')->where('order_id', $this->id)->sum('total_amount');
+        return (float) $totalAmount;
     }
 }

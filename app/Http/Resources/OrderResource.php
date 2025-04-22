@@ -18,7 +18,7 @@ class OrderResource extends JsonResource
             'id' => $this->id,
             'reference' => $this->reference,
             'status' => $this->status,
-            'total_amount' => $this->totalAmount(),
+            'total_amount' => $this->products->sum('pivot.total_amount'),
             'client' => new ClientResource($this->whenLoaded('client')),
             'payment' => new PaymentResource($this->whenLoaded('payment')),
             'products' => ProductResource::collection($this->whenLoaded('products')),

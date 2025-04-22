@@ -46,7 +46,6 @@ class SalesController extends Controller
 
     public function show($id){
         $order = Order::with(['client', 'products', 'payment'])->findOrFail($id);
-
         
         return inertia('Sales/Show', [
             'sale' => new OrderResource($order)
@@ -68,12 +67,6 @@ class SalesController extends Controller
     public function store(OrderRequest $request)
     {
         DB::transaction(function () use ($request) {
-            $totalAmount = collect($request->items)->sum(function ($item) {
-                $product = Product::find($item['product_id']);
-                return $product->price * $item['quantity'];
-            });
-
-            
 
             // Create the order
             $order = Order::create([
@@ -85,25 +78,25 @@ class SalesController extends Controller
 
             // Add order details
             foreach ($request->items as $item) {
+               $productData[$item['product_id']]=[
+                'quantity'=>$item['quantity'],
+                'total_amount'=>$item['quantity']*Product::find($item['product_id'])->price
+               ];
+            }
+            $order->products()->attach($productData);
+            // dd($request->items);
+            // $order->sync(collect($request->items));
+            // Update product quantities
+            foreach ($request->items as $item) {
                 $product = Product::find($item['product_id']);
-
                 if ($product->quantity < $item['quantity']) {
                     throw new \Exception("Insufficient stock for product: {$product->name}");
                 }
-
-                // Create order detail
-                $order->products()->attach($product->id, [
-                    'id' => Str::uuid(),
-                    'quantity' => $item['quantity'],
-                    'total_amount' => $product->price * $item['quantity']
-                ]);
-
-                // Update product quantity
                 $product->decrement('quantity', $item['quantity']);
             }
         });
 
-        return redirect()->route('sales.index')->with('success', 'Sale created successfully');
+        return back();
     }
 
     public function edit($id)

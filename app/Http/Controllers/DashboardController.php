@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Payment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -20,13 +21,17 @@ class DashboardController extends Controller
             'lowStockCount' => Product::whereRaw('quantity <= min_quantity')->count(),
             'totalSales' => Order::count(),
             'totalCategories' => Category::count(),
-            'totalRevenue' => Order::sum('total_amount'),
+            'totalRevenue' => OrderDetail::sum('total_amount'),
             'totalProfit' => Order::sum('total_amount') * 0.2, // Assuming 20% profit margin
-            'todaySales' => Order::whereDate('created_at', Carbon::today())->count(),
-            'todayRevenue' => Order::whereDate('created_at', Carbon::today())->sum('total_amount'),
-            'paidAmount' => Payment::where('status', 'paid')->sum('amount'),
-            'dueAmount' => Order::sum('total_amount') - Payment::where('status', 'paid')->sum('amount'),
+            'todaySales' => OrderDetail::whereDate('created_at', Carbon::today())->count(),
+            'todayRevenue' => OrderDetail::whereDate('created_at', Carbon::today())->sum('total_amount'),
+            'paidAmount' =>DB::table('orders')
+                ->where('status', 'paid')
+                ->join('order_details', 'orders.id', '=', 'order_details.order_id')
+                ->sum('order_details.total_amount'),
+            
         ];
+        $stats['dueAmount']=$stats['totalRevenue']-$stats['paidAmount'];
 
         $recentSales = Order::with('client')
             ->latest()
@@ -39,7 +44,7 @@ class DashboardController extends Controller
                     'customer_name' => $sale->client ? $sale->client->name : 'No Client',
                     'created_at' => $sale->created_at,
                     'amount' => $sale->total_amount,
-                    'status' => $sale->payment_status
+                    'status' => $sale->status
                 ];
             });
 

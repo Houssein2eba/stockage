@@ -159,7 +159,7 @@ onMounted(() => {
   <div class="relative">
     <button
       @click="toggleClientsDropdown"
-      class="w-full flex items-center justify-between p-2.5 rounded-lg hover:bg-blue-50 transition-colors group"
+      class="w-full flex items-center justify-between p-2.5 rounded-lg hover:bg-blue-50 transition-colors group shadow-sm hover:shadow-md"
     >
       <div class="flex items-center gap-2">
         <svg class="w-5 h-5 text-blue-600 group-hover:text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -201,7 +201,7 @@ onMounted(() => {
   <div class="relative">
     <button
       @click="togglePostsDropdown"
-      class="w-full flex items-center justify-between p-2.5 rounded-lg hover:bg-blue-50 transition-colors group"
+      class="w-full shadow-sm hover:shadow-md flex items-center justify-between p-2.5 rounded-lg hover:bg-blue-50 transition-colors group"
     >
       <div class="flex items-center gap-2">
         <svg class="w-5 h-5 text-blue-600 group-hover:text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -243,7 +243,7 @@ onMounted(() => {
   <div class="relative">
     <button
       @click="toggleProductsDropdown"
-      class="w-full flex items-center justify-between p-2.5 rounded-lg hover:bg-blue-50 transition-colors group"
+      class="w-full shadow-sm hover:shadow-md flex items-center justify-between p-2.5 rounded-lg hover:bg-blue-50 transition-colors group"
     >
       <div class="flex items-center gap-2">
         <svg class="w-5 h-5 text-blue-600 group-hover:text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
