@@ -46,11 +46,6 @@ class SalesController extends Controller
 
     public function show($id){
         $order = Order::with(['client', 'products', 'payment'])->findOrFail($id);
-
-        // $o=new OrderResource($order);
-        // foreach ($o->products as $product) {
-        //     echo "Product: {$product->name}, Quantity: {$product->pivot->quantity}<br>";
-        // }
         
         return inertia('Sales/Show', [
             'sale' => new OrderResource($order)
@@ -72,12 +67,6 @@ class SalesController extends Controller
     public function store(OrderRequest $request)
     {
         DB::transaction(function () use ($request) {
-            $totalAmount = collect($request->items)->sum(function ($item) {
-                $product = Product::find($item['product_id']);
-                return $product->price * $item['quantity'];
-            });
-
-            
 
             // Create the order
             $order = Order::create([
@@ -95,6 +84,8 @@ class SalesController extends Controller
                ];
             }
             $order->products()->attach($productData);
+            // dd($request->items);
+            // $order->sync(collect($request->items));
             // Update product quantities
             foreach ($request->items as $item) {
                 $product = Product::find($item['product_id']);

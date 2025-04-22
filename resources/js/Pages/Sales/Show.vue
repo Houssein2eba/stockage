@@ -18,9 +18,10 @@
                     <div>
                         <h2 class="text-lg font-semibold text-gray-800">Client</h2>
                         <div class="mt-2 text-gray-600">
-                            <p class="font-medium">{{ sale.client.name }}</p>
-                            <p>{{ sale.client.address || 'Adresse non renseignée' }}</p>
-                            <p>{{ sale.client.phone || 'Téléphone non renseigné' }}</p>
+                            <p class="font-medium">{{ sale.client.name  }}</p>
+                            <p class="font-medium">{{ sale.client.number  }}</p>
+                            
+                           
                         </div>
                     </div>
                     <div class="text-right">
