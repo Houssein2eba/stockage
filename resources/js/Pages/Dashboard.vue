@@ -8,7 +8,7 @@ import TableDataCell from "@/Components/TableDataCell.vue";
 import {Link} from '@inertiajs/vue3';
 import { useToast } from 'vue-toastification';
 import { ref } from 'vue';
-defineProps({
+const props = defineProps({
     stats: {
         type: Object,
         required: true
@@ -172,12 +172,17 @@ const formatPrice = (value) => {
                                     <TableHeaderCell>Status</TableHeaderCell>
                                 </TableRow>
                             </template>
-                            <template #default>
-                                <TableRow v-for="sale in recentSales" :key="sale.id">
-                                    <TableDataCell class="py-3">{{ sale.invoice_number }}</TableDataCell>
-                                    <TableDataCell class="py-3">{{ sale.customer_name }}</TableDataCell>
+                            <template #body>
+                                <TableRow v-for="sale in props.recentSales" :key="sale.id">
+                                    <TableDataCell class="py-3">{{ sale.reference }}</TableDataCell>
+                                    <TableDataCell class="py-3">
+                                        <div class="truncate">
+                                        <div class="text-sm font-medium text-gray-900">{{ sale.client.name || 'No Client' }}</div>
+                                        <div class="text-xs text-gray-400">{{ sale.client.number || '--' }}</div>
+                                    </div>
+                                    </TableDataCell>
                                     <TableDataCell class="py-3">{{ new Date(sale.created_at).toLocaleDateString() }}</TableDataCell>
-                                    <TableDataCell class="py-3">{{ formatPrice(sale.amount) }}</TableDataCell>
+                                    <TableDataCell class="py-3">{{ formatPrice(sale.total_amount) }}</TableDataCell>
                                     <TableDataCell class="py-3">
                                         <span :class="{
                                             'px-2 py-1 text-xs font-medium rounded-full': true,

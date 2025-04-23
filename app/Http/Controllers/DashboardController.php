@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use App\Http\Resources\OrderResource;
 
 class DashboardController extends Controller
 {
@@ -33,20 +34,10 @@ class DashboardController extends Controller
         ];
         $stats['dueAmount']=$stats['totalRevenue']-$stats['paidAmount'];
 
-        $recentSales = Order::with('client')
+        $recentSales = OrderResource::collection(Order::with('client')
             ->latest()
             ->take(5)
-            ->get()
-            ->map(function($sale) {
-                return [
-                    'id' => $sale->id,
-                    'invoice_number' => $sale->reference,
-                    'customer_name' => $sale->client ? $sale->client->name : 'No Client',
-                    'created_at' => $sale->created_at,
-                    'amount' => $sale->total_amount,
-                    'status' => $sale->status
-                ];
-            });
+            ->get());
 
         // Monthly sales data for chart using SQLite date functions
         $chartData = OrderDetail::selectRaw("strftime('%Y-%m', created_at) as month, COUNT(*) as count, SUM(total_amount) as total")

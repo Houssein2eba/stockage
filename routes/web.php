@@ -39,15 +39,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/', [ProfileController::class, 'destroy'])->name('profile.destroy');
     });
-    //Clients Routes
-    Route::prefix('clients')->name('clients.')->group(function () {
-        Route::get('/', [ClientsController::class, 'index'])->name('index');
-        Route::get('/create', [ClientsController::class, 'create'])->name('create');
-        Route::post('/', [ClientsController::class, 'store'])->name('store');
-        Route::get('/{id}', [ClientsController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [ClientsController::class, 'update'])->name('update');
-        Route::delete('/{id}', [ClientsController::class, 'destroy'])->name('destroy');
-    });
+    // Clients Routes (resourceful)
+    Route::resource('clients', ClientsController::class)->except(['show']);
     //sells Routes
     Route::prefix('sales')->name('sales.')->group(function () {
         
