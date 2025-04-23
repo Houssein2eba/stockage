@@ -37,13 +37,16 @@ class ClientsController extends Controller
     public function store(ClientRequest $request)
     {
         DB::transaction(function () use ($request) {
-            Client::create([
+            $client = Client::create([
                 'name' => $request->name,
                 'number' => $request->number,
             ]);
+            $attributes = $client->toArray();
+            unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
             activity()
-                ->performedOn(new Client)
+                ->performedOn($client)
                 ->causedBy(auth()->user())
+                ->withProperties(['attributes' => $attributes])
                 ->log('Client Created');
         });
 
@@ -62,13 +65,18 @@ class ClientsController extends Controller
     {
         DB::transaction(function () use ($request, $id) {
             $client = Client::findOrFail($id);
+            $old = $client->toArray();
             $client->update([
                 'name' => $request->name,
                 'number' => $request->number,
             ]);
+            $attributes = $client->toArray();
+            unset($old['id'], $old['created_at'], $old['updated_at']);
+            unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
             activity()
-                ->performedOn(new Client)
+                ->performedOn($client)
                 ->causedBy(auth()->user())
+                ->withProperties(['old' => $old, 'attributes' => $attributes])
                 ->log('Client Updated');
         });
 
@@ -79,10 +87,13 @@ class ClientsController extends Controller
     {
         $client = Client::findOrFail($id);
         DB::transaction(function () use ($client) {
+            $old = $client->toArray();
             $client->delete();
+            unset($old['id'], $old['created_at'], $old['updated_at']);
             activity()
-                ->performedOn(new Client)
+                ->performedOn($client)
                 ->causedBy(auth()->user())
+                ->withProperties(['old' => $old])
                 ->log('Client Deleted');
         });
 

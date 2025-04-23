@@ -43,12 +43,14 @@ class RolesController extends Controller
             $permissions = collect($request->permissions)->pluck('name');
             $role->syncPermissions($permissions);
 
+            $attributes = $role->toArray();
+           
+            unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
             activity()
                 ->causedBy(auth()->user())
                 ->performedOn($role)
                 ->withProperties([
-                    'new' => $request->validated(),
-                    'old' => [],
+                    'attributes' => $attributes,
                 ])
                 ->log('Created role');
         });
@@ -88,12 +90,17 @@ class RolesController extends Controller
             $permissions = collect($request->permissions)->pluck('name');
             $role->syncPermissions($permissions);
 
+            $old = $role->getOriginal();
+            $role->refresh();
+            $attributes = $role->toArray();
+            unset($old['id'], $old['created_at'], $old['updated_at']);
+            unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
             activity()
                 ->causedBy(auth()->user())
                 ->performedOn($role)
                 ->withProperties([
-                    'new' => $request->all(),
-                    'old' => []
+                    'old' => $old,
+                    'attributes' => $attributes
                 ])
                 ->log('Updated role');
         });
@@ -104,15 +111,14 @@ class RolesController extends Controller
     public function destroy($id)
     {
         $role = Role::findOrFail($id);
-        $roleName = $role->name;
+        $old = $role->toArray();
         $role->delete();
-
+        unset($old['id'], $old['created_at'], $old['updated_at']);
         activity()
             ->causedBy(auth()->user())
-            ->performedOn(new Role)
+            ->performedOn($role)
             ->withProperties([
-                'new' => [],
-                'old' => ['role_name' => $roleName],
+                'old' => $old
             ])
             ->log('Deleted role');
 

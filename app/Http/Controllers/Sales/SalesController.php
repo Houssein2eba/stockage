@@ -67,7 +67,6 @@ class SalesController extends Controller
     public function store(OrderRequest $request)
     {
         DB::transaction(function () use ($request) {
-
             // Create the order
             $order = Order::create([
                 'reference' => Order::generateReference(),
@@ -84,8 +83,6 @@ class SalesController extends Controller
                ];
             }
             $order->products()->attach($productData);
-            // dd($request->items);
-            // $order->sync(collect($request->items));
             // Update product quantities
             foreach ($request->items as $item) {
                 $product = Product::find($item['product_id']);
@@ -94,6 +91,13 @@ class SalesController extends Controller
                 }
                 $product->decrement('quantity', $item['quantity']);
             }
+            $attributes = $order->toArray();
+            unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($order)
+                ->withProperties(['attributes' => $attributes])
+                ->log('Order Created');
         });
 
         return back();
@@ -120,6 +124,7 @@ class SalesController extends Controller
     {
         DB::transaction(function () use ($request, $id) {
             $order = Order::findOrFail($id);
+            $old = $order->toArray();
             $order->load('products');
 
             // Calculate total amount
@@ -165,6 +170,15 @@ class SalesController extends Controller
                 }
                 $product->decrement('quantity', $item['quantity']);
             }
+            $order->refresh();
+            $attributes = $order->toArray();
+            unset($old['id'], $old['created_at'], $old['updated_at']);
+            unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($order)
+                ->withProperties(['old' => $old, 'attributes' => $attributes])
+                ->log('Order Updated');
         });
 
         return back();
@@ -174,9 +188,14 @@ class SalesController extends Controller
     {
         DB::transaction(function () use ($id) {
             $order = Order::findOrFail($id);
-
-            
+            $old = $order->toArray();
             $order->delete();
+            unset($old['id'], $old['created_at'], $old['updated_at']);
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($order)
+                ->withProperties(['old' => $old])
+                ->log('Order Deleted');
         });
 
         return redirect()->back();

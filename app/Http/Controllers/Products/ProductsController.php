@@ -70,6 +70,13 @@ class ProductsController extends Controller
                 'min_quantity' => $request->min_quantity,
             ]);
             $product->categories()->attach(collect($request->category)->pluck('id'));
+            $attributes = $product->toArray();
+            unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($product)
+                ->withProperties(['attributes' => $attributes])
+                ->log('Product Created');
         });
 
         return back();
@@ -89,6 +96,7 @@ class ProductsController extends Controller
         $request->validated();
         $product = Product::findOrFail($id);
         DB::transaction(function () use ($request, $product) {
+            $old = $product->toArray();
             if ($request->hasFile('image')) {
                 $url = $request->file('image')->store('products', 'public');
                 $product->update([
@@ -109,6 +117,15 @@ class ProductsController extends Controller
                 ]);
             }
             $product->categories()->sync(collect($request->category)->pluck('id'));
+            $product->refresh();
+            $attributes = $product->toArray();
+            unset($old['id'], $old['created_at'], $old['updated_at']);
+            unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($product)
+                ->withProperties(['old' => $old, 'attributes' => $attributes])
+                ->log('Product Updated');
         });
 
         return to_route('products.index');
@@ -117,8 +134,15 @@ class ProductsController extends Controller
     public function destroy($id)
     {
         $product = Product::findOrFail($id);
+        $old = $product->toArray();
         $product->categories()->detach();
         $product->delete();
+        unset($old['id'], $old['created_at'], $old['updated_at']);
+        activity()
+            ->causedBy(auth()->user())
+            ->performedOn($product)
+            ->withProperties(['old' => $old])
+            ->log('Product Deleted');
         return back();
     }
 }

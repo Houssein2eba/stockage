@@ -20,12 +20,6 @@ const formatValue = (value) => {
 
 const before = computed(() => props.activity.properties?.old || {});
 const after = computed(() => props.activity.properties?.attributes || {});
-
-const formatDate = (date) => {
-  if (!date) return '';
-  const d = new Date(date);
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
-};
 </script>
 
 <template>
@@ -36,7 +30,7 @@ const formatDate = (date) => {
           <div>
             <h3 class="text-lg font-medium text-gray-900">{{ activity.description }}</h3>
             <p class="text-sm text-gray-500">
-              {{ formatDate(activity.created_at) }}
+              {{ new Date(activity.created_at).toLocaleString() }}
             </p>
           </div>
         </div>
