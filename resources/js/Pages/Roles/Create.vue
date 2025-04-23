@@ -7,13 +7,14 @@ import InputError from '@/Components/InputError.vue'
 import InputLabel from '@/Components/InputLabel.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import TextInput from '@/Components/TextInput.vue'
-
+import VueMultiselect from 'vue-multiselect'
 const props = defineProps({
     permissions: {
         type: Array,
         required: true
     }
 });
+
 
 const toast = useToast();
 const form = useForm({
@@ -27,8 +28,9 @@ const submit = () => {
             toast.success('Role created successfully');
             form.reset();
         },
-        onError: () => {
+        onError: (errors) => {
             toast.error('Failed to create role');
+            console.error(errors);
         }
     });
 };
@@ -61,28 +63,19 @@ const submit = () => {
 
                     <div>
                         <InputLabel value="Permissions" />
-                        <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            <div
-                                v-for="permission in permissions"
-                                :key="permission.id"
-                                class="flex items-start"
-                            >
-                                <div class="flex items-center h-5">
-                                    <input
-                                        :id="'permission-' + permission.id"
-                                        type="checkbox"
-                                        :value="permission.id"
-                                        v-model="form.permissions"
-                                        class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                    />
-                                </div>
-                                <div class="ml-3 text-sm">
-                                    <label :for="'permission-' + permission.id" class="font-medium text-gray-700">
-                                        {{ permission.name }}
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
+                        <VueMultiselect
+                            v-model="form.permissions"
+                            :options="permissions"
+                            :multiple="true"
+                            :close-on-select="false"
+                            :clear-on-select="false"
+                            :searchable="true"
+                            track-by="id"
+                            label="name"
+                            :placeholder="permissions.length > 0 ? 'Select Permissions' : 'No permissions available'"
+                            
+                        />
+                         
                         <InputError :message="form.errors.permissions" class="mt-2" />
                     </div>
 
@@ -112,4 +105,4 @@ const submit = () => {
         </div>
     </AuthLayout>
 </template>
-
+<style src="vue-multiselect/dist/vue-multiselect.css"></style>

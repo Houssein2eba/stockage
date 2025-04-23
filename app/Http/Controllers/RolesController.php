@@ -15,9 +15,29 @@ use Spatie\Permission\Models\Role;
 
 class RolesController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $roles = Role::with(['permissions', 'users'])->paginate(PAGINATION);
+        $request->validate([
+            'search' => 'nullable|string',
+            'sort' => 'nullable|string|in:name,users_count',
+            'direction' => 'nullable|string|in:asc,desc',
+            'page' => 'nullable|integer|min:1',
+        ]);
+        $roles = Role::with(['permissions', 'users'])
+            ->when($request->has('search'), function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request->input('search') . '%');
+                
+            })
+            ->when($request->has('sort'), function ($query) use ($request) {
+                if($request->input('sort') === 'users_count'){
+                    $query->orderBy('users_count', $request->input('direction', 'asc'));
+                }else{
+                    $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
+                }
+            })
+            ->where('name', '!=', 'admin')
+            ->paginate(PAGINATION)
+            ->withQueryString();
 
         return Inertia::render('Roles/Index', [
             'roles' => RolesResource::collection($roles),

@@ -16,7 +16,7 @@
                             <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
                         </svg>
                         <span class="text-sm font-medium text-blue-800">
-                            Total Methods: <span class="font-semibold">{{ props.paymentMethods.length }}</span>
+                            Total Methods: <span class="font-semibold">{{ props.payment_count }}</span>
                         </span>
                     </div>
                 </div>
@@ -96,7 +96,7 @@
                                     </TableRow>
                                 </template>
                                 <template #body>
-                                    <TableRow v-for="payment in paymentMethods" :key="payment.id" class="hover:bg-gray-50/50 transition-colors">
+                                    <TableRow v-for="payment in props.paymentMethods.data" :key="payment.id" class="hover:bg-gray-50/50 transition-colors">
                                         <TableDataCell class="px-6 py-4 whitespace-nowrap">
                                             <img :src="`/storage/${payment.logo}`" :alt="payment.name" class="h-8 w-8 object-contain" />
                                         </TableDataCell>
@@ -115,7 +115,7 @@
                                             </button>
                                         </TableDataCell>
                                     </TableRow>
-                                    <TableRow v-if="paymentMethods.length === 0">
+                                    <TableRow v-if="props.payment_count === 0">
                                         <TableDataCell colspan="3" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
                                             <div class="flex flex-col items-center justify-center py-6">
                                                 <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,6 +128,18 @@
                                     </TableRow>
                                 </template>
                             </Table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div class="px-6 py-4 border-t border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <div class="text-sm text-gray-700" v-if="props.paymentMethods.meta && props.paymentMethods.meta.total > 0">
+                                    Showing <span class="font-medium">{{ props.paymentMethods.meta.from }}</span> to 
+                                    <span class="font-medium">{{ props.paymentMethods.meta.to }}</span> of 
+                                    <span class="font-medium">{{ props.paymentMethods.meta.total }}</span> results
+                                </div>
+                                <Pagination :links="props.paymentMethods.meta.links" @change="handlePageChange" />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -218,6 +230,7 @@ import Table from "@/Components/Table.vue";
 import TableRow from "@/Components/TableRow.vue";
 import TableHeaderCell from "@/Components/TableHeaderCell.vue";
 import TableDataCell from "@/Components/TableDataCell.vue";
+import Pagination from "@/Components/Pagination.vue";
 import { ref, watch, computed } from 'vue';
 import { useToast } from 'vue-toastification';
 import { debounce } from 'lodash';
@@ -226,12 +239,16 @@ const toast = useToast();
 
 const props = defineProps({
     paymentMethods: {
-        type: Array,
-        default: () => []
+        type: Object,
+        default: () => ({})
     },
     filters: {
         type: Object,
         default: () => ({})
+    },
+    payment_count: {
+        type: Number,
+        default: 0
     }
 });
 
@@ -243,18 +260,20 @@ const form = useForm({
 const logoPreview = ref(null);
 const search = ref(props.filters?.search || '');
 const sort = ref({ field: props.filters?.sort || 'created_at', direction: props.filters?.direction || 'desc' });
+const page = ref(props.paymentMethods?.meta?.current_page || 1);
 
-// Watch for search and sort changes
-watch([search, sort], debounce(() => {
+// Watch for search changes only, not page or sort as they have direct handlers
+watch([search], debounce(() => {
     router.get(route('payment.index'), {
         search: search.value,
         sort: sort.value.field,
-        direction: sort.value.direction
+        direction: sort.value.direction,
+        page: 1 // Reset to page 1 when searching
     }, {
         preserveState: true,
         preserveScroll: true
     });
-}, 300), { deep: true });
+}, 300));
 
 // Table headers configuration
 const tableHeaders = computed(() => [
@@ -271,6 +290,40 @@ const handleSort = (field) => {
     } else {
         sort.value.field = field;
         sort.value.direction = 'asc';
+    }
+    
+    // Keep the current page when sorting
+    router.get(route('payment.index'), {
+        search: search.value,
+        sort: sort.value.field,
+        direction: sort.value.direction,
+        page: page.value
+    }, {
+        preserveState: true,
+        preserveScroll: true
+    });
+};
+
+// Handle pagination link clicks
+const handlePageChange = (url) => {
+    if (!url) return;
+    
+    // Extract page number from URL
+    const urlObj = new URL(url);
+    const pageParam = urlObj.searchParams.get('page');
+    
+    if (pageParam) {
+        page.value = parseInt(pageParam);
+        
+        router.get(route('payment.index'), {
+            search: search.value,
+            sort: sort.value.field,
+            direction: sort.value.direction,
+            page: page.value
+        }, {
+            preserveState: true,
+            preserveScroll: true
+        });
     }
 };
 

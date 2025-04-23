@@ -16,10 +16,7 @@ import { debounce } from 'lodash';
 import Pagination from "@/Components/Pagination.vue";
 
 
-const form = useForm({
-    name: "",
-    description: "",
-});
+
 
 const props = defineProps({
     categories: {
@@ -31,6 +28,7 @@ const props = defineProps({
         type: Object,
         default: () => ({})
     },
+    
     categories_count: {
         type: Number,
         default: 0
@@ -39,18 +37,20 @@ const props = defineProps({
 
 const search = ref('');
 const sort = ref({ field: props.filters?.sort || 'created_at', direction: props.filters?.direction || 'desc' });
+const page = ref(props.categories?.meta?.current_page || 1);
 
-// Watch for search and sort changes
-watch([search, sort], debounce(() => {
+// Watch for search changes only, not page or sort as they have direct handlers
+watch([search], debounce(() => {
     router.get(route('categories.index'), {
         search: search.value,
         sort: sort.value.field,
-        direction: sort.value.direction
+        direction: sort.value.direction,
+        page: 1 // Reset to page 1 when searching
     }, {
         preserveState: true,
         preserveScroll: true
     });
-}, 300), { deep: true });
+}, 300));
 
 // Computed property for table headers with sorting
 const tableHeaders = computed(() => [
@@ -69,6 +69,17 @@ const handleSort = (field) => {
         sort.value.field = field;
         sort.value.direction = 'asc';
     }
+    
+    // Keep the current page when sorting
+    router.get(route('categories.index'), {
+        search: search.value,
+        sort: sort.value.field,
+        direction: sort.value.direction,
+        page: page.value
+    }, {
+        preserveState: true,
+        preserveScroll: true
+    });
 };
 
 const getSortIcon = (field) => {
@@ -123,6 +134,29 @@ const updateCategory = () => {
             toast.error("Failed to update category");
         },
     });
+};
+
+// Handle pagination link clicks
+const handlePageChange = (url) => {
+    if (!url) return;
+    
+    // Extract page number from URL
+    const urlObj = new URL(url);
+    const pageParam = urlObj.searchParams.get('page');
+    
+    if (pageParam) {
+        page.value = parseInt(pageParam);
+        
+        router.get(route('categories.index'), {
+            search: search.value,
+            sort: sort.value.field,
+            direction: sort.value.direction,
+            page: page.value
+        }, {
+            preserveState: true,
+            preserveScroll: true
+        });
+    }
 };
 </script>
 
@@ -282,7 +316,7 @@ const updateCategory = () => {
                 <span class="font-medium">{{ categories.meta.to }}</span> of 
                 <span class="font-medium">{{ categories.meta.total }}</span> results
               </div>
-                <Pagination :links="categories.meta.links" />
+                <Pagination :links="categories.meta.links" @change="handlePageChange" />
                </div>
             </div>
 

@@ -15,6 +15,13 @@ class ProductsController extends Controller
 {
     public function index(Request $request)
     {
+        $request->validate([
+            'search' => 'nullable|string',
+            'category' => 'nullable|exists:categories,id',
+            'sort' => 'nullable|string|in:name,price,quantity,created_at,updated_at',
+            'direction' => 'nullable|string|in:asc,desc',
+            'page' => 'nullable|integer|min:1',
+        ]);
         
         $products = Product::query()
             ->with('categories')
@@ -31,18 +38,18 @@ class ProductsController extends Controller
             })
             ->when($request->sort && $request->direction, function ($query) use ($request) {
                 $query->orderBy($request->sort, $request->direction);
-            }, function ($query) {
-                $query->latest();
             })
             ->when($request->filter, function ($query) {
                 $query->whereRaw('quantity <= min_quantity');
             })
+            ->latest()
             ->paginate(PAGINATION)
             ->withQueryString();
 
         return inertia('Products/Index', [
             'categories' => CategoryResource::collection(Category::all()),
-            'products' => $products,
+            'products' => ProductResource::collection($products),
+            'products_count' => DB::table('products')->count(),
             'filters' => $request->only(['search', 'category', 'sort', 'direction'])
         ]);
     }

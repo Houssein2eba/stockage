@@ -12,10 +12,19 @@ class ClientsController extends Controller
 {
     public function index(Request $request)
     {
+        $request->validate([
+            'search' => 'nullable|string',
+            'sort' => 'nullable|string|in:name,number,orders_count',
+            'direction' => 'nullable|string|in:asc,desc',
+            'page' => 'nullable|integer|min:1',
+        ]);
         $clients = Client::query()
             ->when($request->search, function ($query) use ($request) {
                 $query->where('name', 'like', '%' . $request->search . '%')
                     ->orWhere('number', 'like', '%' . $request->search . '%');
+            })
+            ->when($request->sort && $request->direction, function ($query) use ($request) {
+                $query->orderBy($request->sort, $request->direction);
             })
             ->with('orders')
             ->latest()
@@ -25,7 +34,8 @@ class ClientsController extends Controller
 
         return inertia('Clients/Index', [
              'clients' => ClientResource::collection($clients),
-            'filters' => $request->only(['search']),
+            'filters' => $request->only(['search', 'sort', 'direction', 'page']),
+            'clients_count' => DB::table('clients')->count(),
         ]);
     }
 

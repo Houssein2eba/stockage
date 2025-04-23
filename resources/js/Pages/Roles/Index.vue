@@ -8,7 +8,9 @@ import Table from "@/Components/Table.vue";
 import TableRow from "@/Components/TableRow.vue";
 import TableHeaderCell from "@/Components/TableHeaderCell.vue";
 import TableDataCell from "@/Components/TableDataCell.vue";
+import Pagination from "@/Components/Pagination.vue";
 import { useAdmin } from '@/composables/admins';
+
 const props = defineProps({
     roles: {
         type: Object,
@@ -19,27 +21,30 @@ const props = defineProps({
         default: () => ({})
     }
 });
+
 const { isAdmin } = useAdmin();
 const toast = useToast();
 const search = ref(props.filters?.search || '');
 const sort = ref({ field: props.filters?.sort || 'created_at', direction: props.filters?.direction || 'desc' });
+const page = ref(props.roles?.meta?.current_page || 1);
 
-// Watch for search and sort changes
-watch([search, sort], debounce(() => {
+// Watch for search changes only
+watch([search], debounce(() => {
     router.get(route('roles.index'), {
         search: search.value,
         sort: sort.value.field,
-        direction: sort.value.direction
+        direction: sort.value.direction,
+        page: 1 // Reset to page 1 when searching
     }, {
         preserveState: true,
         preserveScroll: true
     });
-}, 300), { deep: true });
+}, 300));
 
 // Table headers configuration
 const tableHeaders = computed(() => [
     { label: 'Role Name', field: 'name', sortable: true },
-    { label: 'Permissions', field: 'permissions_count', sortable: true },
+    { label: 'Permissions', field: null, sortable: false },
     { label: 'Employees', field: 'users_count', sortable: true },
     { label: 'Actions', field: null, sortable: false, colspan: 2 }
 ]);
@@ -52,6 +57,40 @@ const handleSort = (field) => {
     } else {
         sort.value.field = field;
         sort.value.direction = 'asc';
+    }
+    
+    // Keep the current page when sorting
+    router.get(route('roles.index'), {
+        search: search.value,
+        sort: sort.value.field,
+        direction: sort.value.direction,
+        page: page.value
+    }, {
+        preserveState: true,
+        preserveScroll: true
+    });
+};
+
+// Handle pagination link clicks
+const handlePageChange = (url) => {
+    if (!url) return;
+    
+    // Extract page number from URL
+    const urlObj = new URL(url);
+    const pageParam = urlObj.searchParams.get('page');
+    
+    if (pageParam) {
+        page.value = parseInt(pageParam);
+        
+        router.get(route('roles.index'), {
+            search: search.value,
+            sort: sort.value.field,
+            direction: sort.value.direction,
+            page: page.value
+        }, {
+            preserveState: true,
+            preserveScroll: true
+        });
     }
 };
 
@@ -89,7 +128,7 @@ const deleteRole = () => {
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">Roles & Permissions</h1>
                     <p class="text-gray-600 mt-1">Manage roles and their permissions mr 
-                        {{isAdmin}}</p>
+                        </p>
                 </div>
                 <Link
                     :href="route('roles.create')"
@@ -169,7 +208,7 @@ const deleteRole = () => {
                         </template>
                         <template #body>
                             <TableRow v-for="role in props.roles.data" :key="role.id">
-                                <template v-if="role.name !== 'admin'">
+                                
                                     <TableDataCell class="px-6 py-4">{{ role.name }}</TableDataCell>
                                     <TableDataCell class="px-6 py-4">
                                         <div class="flex flex-wrap gap-1">
@@ -193,52 +232,78 @@ const deleteRole = () => {
                                             Edit
                                         </Link>
                                     </TableDataCell>
-                                </template>
+                                
                             </TableRow>
-                            <TableRow v-if="props.roles.data.length === 0">
+                            <TableRow v-if="props.roles_count === 0">
                                 <TableDataCell colspan="5" class="px-6 py-4 text-center text-gray-500">
                                     <div class="flex flex-col items-center justify-center py-6">
                                         <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                                         </svg>
-                                        <p class="mt-2">No roles found</p>
-                                        <p class="text-sm text-gray-400">Add your first role using the form above</p>
+                                        <p class="mt-2 text-base font-medium">No roles found</p>
+                                        <p class="text-sm text-gray-500">Add a new role using the form.</p>
                                     </div>
                                 </TableDataCell>
                             </TableRow>
                         </template>
                     </Table>
                 </div>
-            </div>
-        </div>
-
-        <!-- Delete Confirmation Modal -->
-        <div v-if="showDeleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-lg font-bold text-gray-900">Confirm Deletion</h3>
-                    <button @click="showDeleteModal = false" class="text-gray-400 hover:text-gray-500">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+                
+                <!-- Pagination -->
+                <div class="px-6 py-4 border-t border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-700" v-if="props.roles.meta && props.roles.meta.total > 0">
+                            Showing <span class="font-medium">{{ props.roles.meta.from }}</span> to 
+                            <span class="font-medium">{{ props.roles.meta.to }}</span> of 
+                            <span class="font-medium">{{ props.roles.meta.total }}</span> results
+                        </div>
+                        <Pagination v-if="props.roles.meta && props.roles.meta.links" :links="props.roles.meta.links" @change="handlePageChange" />
+                    </div>
                 </div>
-                <p class="mb-6 text-gray-600">
-                    Are you sure you want to delete this role? This action cannot be undone.
-                </p>
-                <div class="flex justify-end space-x-3">
-                    <button
-                        @click="showDeleteModal = false"
-                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        @click="deleteRole"
-                        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                    >
-                        Delete
-                    </button>
+            </div>
+
+            <!-- Delete Role Modal -->
+            <div v-if="showDeleteModal" class="fixed inset-0 z-10 overflow-y-auto">
+                <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity">
+                        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                    </div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen"></span>
+                    <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+                        <div>
+                            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                                <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <div class="mt-3 text-center sm:mt-5">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                                    Delete Role
+                                </h3>
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-500">
+                                        Are you sure you want to delete this role? All users with this role will lose their permissions. This action cannot be undone.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
+                            <button
+                                type="button"
+                                @click="deleteRole"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:col-start-2 sm:text-sm"
+                            >
+                                Delete
+                            </button>
+                            <button
+                                type="button"
+                                @click="showDeleteModal = false"
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:col-start-1 sm:text-sm"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

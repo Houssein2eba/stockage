@@ -1,35 +1,31 @@
 <script setup>
 import AuthLayout from "@/layouts/AuthLayout.vue";
-import InputError from "@/Components/InputError.vue";
-import InputLabel from "@/Components/InputLabel.vue";
+
+
 import PrimaryButton from "@/Components/PrimaryButton.vue";
-import TextInput from "@/Components/TextInput.vue";
+
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import { useToast } from "vue-toastification";
 import Table from "@/Components/Table.vue";
 import TableRow from "@/Components/TableRow.vue";
 import TableHeaderCell from "@/Components/TableHeaderCell.vue";
 import TableDataCell from "@/Components/TableDataCell.vue";
-import VueMultiselect from 'vue-multiselect';
+
 import { ref, watch, computed } from 'vue';
 import { debounce } from 'lodash';
 import { router } from '@inertiajs/vue3';
+import Pagination from "@/Components/Pagination.vue";
 
-const form = useForm({
-    name: "",
-    description: "",
-    price: "",
-    quantity: "",
-    min_quantity: "",
-    category: null,
-    image: null
-});
+
 
 const props = defineProps({
     categories: Array,
-    products: Object,
-    filters: Object
+    products: Array,
+    filters: Object,
+    products_count: Number
 });
+
+console.log(props.products);
 
 const toast = useToast();
 const previewImage = ref(null);
@@ -38,6 +34,7 @@ const productToDelete = ref(null);
 const sort = ref({ field: props.filters?.sort || 'created_at', direction: props.filters?.direction || 'desc' });
 const search = ref(props.filters?.search || '');
 const selectedCategory = ref(props.filters?.category || '');
+const page = ref(props.products?.meta?.current_page || 1);
 
 // Computed property for table headers with sorting
 const tableHeaders = computed(() => [
@@ -50,18 +47,19 @@ const tableHeaders = computed(() => [
     { label: 'Actions', field: null, sortable: false }
 ]);
 
-// Watch for filter changes
-watch([search, selectedCategory, sort], debounce(() => {
+// Watch for search and category filter changes only
+watch([search, selectedCategory], debounce(() => {
     router.get(route('products.index'), {
         search: search.value,
         category: selectedCategory.value,
         sort: sort.value.field,
-        direction: sort.value.direction
+        direction: sort.value.direction,
+        page: 1 // Reset to page 1 when filtering
     }, {
         preserveState: true,
         preserveScroll: true
     });
-}, 300), { deep: true });
+}, 300));
 
 const handleSort = (field) => {
     if (!field || !tableHeaders.value.find(header => header.field === field)?.sortable) return;
@@ -71,6 +69,42 @@ const handleSort = (field) => {
     } else {
         sort.value.field = field;
         sort.value.direction = 'asc';
+    }
+    
+    // Keep the current page when sorting
+    router.get(route('products.index'), {
+        search: search.value,
+        category: selectedCategory.value,
+        sort: sort.value.field,
+        direction: sort.value.direction,
+        page: page.value
+    }, {
+        preserveState: true,
+        preserveScroll: true
+    });
+};
+
+// Handle pagination link clicks
+const handlePageChange = (url) => {
+    if (!url) return;
+    
+    // Extract page number from URL
+    const urlObj = new URL(url);
+    const pageParam = urlObj.searchParams.get('page');
+    
+    if (pageParam) {
+        page.value = parseInt(pageParam);
+        
+        router.get(route('products.index'), {
+            search: search.value,
+            category: selectedCategory.value,
+            sort: sort.value.field,
+            direction: sort.value.direction,
+            page: page.value
+        }, {
+            preserveState: true,
+            preserveScroll: true
+        });
     }
 };
 
@@ -143,7 +177,7 @@ const cancelDelete = () => {
               <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
             </svg>
             <span class="text-sm font-medium text-blue-800">
-              Total Products: <span class="font-semibold">{{ props.products.data.length }}</span>
+              Total Products: <span class="font-semibold">{{ props.products_count }}</span>
             </span>
           </div>
           <Link
@@ -186,18 +220,6 @@ const cancelDelete = () => {
                 class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
               >
                 <option value="">All Categories</option>
-                <option v-for="category in categories" :key="category.id" :value="category.id">
-                  {{ category.name }}
-                </option>
-              </select>
-            </div>
-            <!-- low stock filter -->
-            <div class="w-full sm:w-64">
-              <select
-                v-model="selectedCategory"
-                class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-              >
-                <option value="">All Stocks</option>
                 <option v-for="category in categories" :key="category.id" :value="category.id">
                   {{ category.name }}
                 </option>
@@ -323,7 +345,7 @@ const cancelDelete = () => {
                   </div>
                 </TableDataCell>
               </TableRow>
-              <TableRow v-if=" props.products.data.length === 0">
+              <TableRow v-if="props.products.data.length === 0">
                 <TableDataCell colspan="7" class="text-center py-12 text-gray-500">
                   <div class="flex flex-col items-center justify-center">
                     <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -336,6 +358,18 @@ const cancelDelete = () => {
               </TableRow>
             </template>
           </Table>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="px-6 py-4 border-t border-gray-200">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-700" v-if="props.products_count > 0">
+              Showing <span class="font-medium">{{ props.products.meta.from }}</span> to 
+              <span class="font-medium">{{ props.products.meta.to }}</span> of 
+              <span class="font-medium">{{ props.products.meta.total }}</span> results
+            </div>
+            <Pagination v-if="props.products.meta && props.products.meta.links" :links="props.products.meta.links" @change="handlePageChange" />
+          </div>
         </div>
       </div>
     </div>
@@ -405,5 +439,3 @@ const cancelDelete = () => {
   opacity: 0;
 }
 </style>
-
-<style src="vue-multiselect/dist/vue-multiselect.css"></style>

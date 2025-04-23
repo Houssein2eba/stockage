@@ -10,34 +10,41 @@ import PrimaryButton from "@/Components/PrimaryButton.vue";
 import { ref, watch, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { debounce } from 'lodash';
-
+import Pagination from "@/Components/Pagination.vue";
 const props = defineProps({
     clients: Object,
     filters: {
         type: Object,
         default: () => ({})
+    },
+    clients_count: {
+        type: Number,
+        default: 0
     }
 });
+
 
 const form = useForm({});
 const toast = useToast();
 const search = ref(props.filters?.search || '');
 const sort = ref({ field: props.filters?.sort || 'created_at', direction: props.filters?.direction || 'desc' });
-
+const page = ref(props.clients?.meta?.current_page || 1);
 // Table headers configuration
 const tableHeaders = computed(() => [
     { label: 'Name', field: 'name', sortable: true },
     { label: 'Number', field: 'number', sortable: true },
     { label: 'Orders', field: 'orders_count', sortable: true },
-    { label: 'Actions', field: null, sortable: false }
+    { label: 'Edit', field: null, sortable: false },
+    { label: 'Delete', field: null, sortable: false }
 ]);
 
-// Watch for search and sort changes
-watch([search, sort], debounce(() => {
+// Watch for search changes only, not page or sort as they have direct handlers
+watch([search], debounce(() => {
     router.get(route('clients.index'), {
         search: search.value,
         sort: sort.value.field,
-        direction: sort.value.direction
+        direction: sort.value.direction,
+        page: 1 // Reset to page 1 when searching
     }, {
         preserveState: true,
         preserveScroll: true
@@ -53,6 +60,17 @@ const handleSort = (field) => {
         sort.value.field = field;
         sort.value.direction = 'asc';
     }
+
+    // Keep the current page when sorting
+    router.get(route('clients.index'), {
+        search: search.value,
+        sort: sort.value.field,
+        direction: sort.value.direction,
+        page: page.value
+    }, {
+        preserveState: true,
+        preserveScroll: true
+    });
 };
 
 const getSortIcon = (field) => {
@@ -83,6 +101,29 @@ const deleteClient = () => {
         },
     });
 };
+
+// Handle pagination link clicks
+const handlePageChange = (url) => {
+    if (!url) return;
+    
+    // Extract page number from URL
+    const urlObj = new URL(url);
+    const pageParam = urlObj.searchParams.get('page');
+    
+    if (pageParam) {
+        page.value = parseInt(pageParam);
+        
+        router.get(route('clients.index'), {
+            search: search.value,
+            sort: sort.value.field,
+            direction: sort.value.direction,
+            page: page.value
+        }, {
+            preserveState: true,
+            preserveScroll: true
+        });
+    }
+};
 </script>
 
 <template>
@@ -102,7 +143,7 @@ const deleteClient = () => {
                             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                         </svg>
                         <span class="text-sm font-medium text-blue-800">
-                            Total Clients: <span class="font-semibold">{{ props.clients.length }}</span>
+                            Total Clients: <span class="font-semibold">{{ props.clients_count }}</span>
                         </span>
                     </div>
                     <Link
@@ -192,7 +233,7 @@ const deleteClient = () => {
                                     {{ client.orders_count }} orders
                                 </TableDataCell>
                                 <TableDataCell class="px-4 sm:px-6 py-4">
-                                    <div class="flex items-center justify-end gap-2 sm:gap-3">
+                                    
                                         <Link
                                             :href="route('clients.edit', client.id)"
                                             class="text-blue-600 hover:text-blue-900 transition-colors flex items-center gap-1 whitespace-nowrap"
@@ -202,7 +243,10 @@ const deleteClient = () => {
                                             </svg>
                                             <span class="hidden sm:inline">Edit</span>
                                         </Link>
-                                        <button
+                                   
+                                </TableDataCell>
+                                <TableDataCell class="px-4 sm:px-6 py-4">
+                                    <button
                                             @click="confirmDelete(client.id)"
                                             class="text-red-600 hover:text-red-900 transition-colors flex items-center gap-1 whitespace-nowrap"
                                         >
@@ -211,11 +255,10 @@ const deleteClient = () => {
                                             </svg>
                                             <span class="hidden sm:inline">Delete</span>
                                         </button>
-                                    </div>
                                 </TableDataCell>
                             </TableRow>
                             <TableRow v-if="props.clients.length === 0">
-                                <TableDataCell colspan="3" class="px-4 sm:px-6 py-12">
+                                <TableDataCell colspan="5" class="px-4 sm:px-6 py-12">
                                     <div class="flex flex-col items-center justify-center">
                                         <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
@@ -227,7 +270,17 @@ const deleteClient = () => {
                             </TableRow>
                         </template>
                     </Table>
+                    <!-- Pagination  -->
+                 
                 </div>
+                <div class="flex items-center justify-between mt-4">
+              <div class="text-sm text-gray-700" v-if="props.clients_count > 0">
+                Showing <span class="font-medium">{{ props.clients.meta.from }}</span> to 
+                <span class="font-medium">{{ props.clients.meta.to }}</span> of 
+                <span class="font-medium">{{ props.clients.meta.total }}</span> results
+              </div>
+                <Pagination :links="props.clients.meta.links" @change="handlePageChange" />
+               </div>
 
 
             <!-- Delete confirmation modal -->

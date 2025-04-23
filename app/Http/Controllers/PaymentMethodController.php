@@ -7,13 +7,36 @@ use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
-
+use Illuminate\Support\Facades\DB;
 class PaymentMethodController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+         // Number of items per page
+        $request->validate([
+            'search' => 'nullable|string',
+            'sort' => 'nullable|string|in:name,created_at,updated_at',
+            'direction' => 'nullable|string|in:asc,desc',
+            'page' => 'nullable|integer|min:1',
+        ]);
+        
+        
+        
+        $paymentMethods = Payment::query()
+            ->when($request->search, function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request->search . '%');
+            })
+            ->when($request->sort && $request->direction, function ($query) use ($request) {
+                $query->orderBy($request->sort, $request->direction);
+            })
+            ->latest()
+            ->paginate(PAGINATION)
+            ->withQueryString();
+        
         return Inertia::render('Payment/Index', [
-            'paymentMethods' => PaymentResource::collection(Payment::all())
+            'paymentMethods' => PaymentResource::collection($paymentMethods),
+            'filters' => $request->only(['search', 'sort', 'direction']),
+            'payment_count' => DB::table('payments')->count(),
         ]);
     }
 

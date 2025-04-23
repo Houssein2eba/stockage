@@ -87,26 +87,28 @@
                     <div class="flex flex-wrap items-center gap-4">
                         <div class="flex-1 min-w-[200px]">
                             <TextInput
-                                v-model="filters.search"
+                                v-model="search"
                                 type="search"
                                 placeholder="Search sales..."
                                 class="w-full"
                             />
                         </div>
                         <div class="flex items-center gap-4">
-                            <select
-                                v-model="filters.status"
-                                class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            >
-                                <option value="">All Status</option>
-                                <option value="paid">Paid</option>
-                                <option value="pending">Pending</option>
-                                <option value="cancelled">Cancelled</option>
-                            </select>
+                            <div class="w-48">
+                                <FilterMultiselect
+                                    v-model="statusFilter"
+                                    :options="statusOptions"
+                                    label="Status"
+                                    placeholder="Select status"
+                                    track-by="value"
+                                    @update:modelValue="handleStatusChange"
+                                />
+                            </div>
                             <DatePicker
-                                v-model="filters.date"
+                                v-model="dateFilter"
                                 placeholder="Select date"
                                 class="w-[200px]"
+                                @update:modelValue="handleDateChange"
                             />
                         </div>
                     </div>
@@ -119,13 +121,43 @@
                     <Table >
                         <template #header>
                             <TableRow>
-                                <TableHeaderCell class="whitespace-nowrap">Reference</TableHeaderCell>
-                                <TableHeaderCell class="whitespace-nowrap">Client</TableHeaderCell>
-                                <TableHeaderCell class="whitespace-nowrap">Items</TableHeaderCell>
-                                <TableHeaderCell class="whitespace-nowrap">Total</TableHeaderCell>
-                                <TableHeaderCell class="whitespace-nowrap">Status</TableHeaderCell>
-                                <TableHeaderCell class="whitespace-nowrap">Date</TableHeaderCell>
-                                <TableHeaderCell :colspan="3" class="text-right whitespace-nowrap">Actions</TableHeaderCell>
+                                <SortableTableHeader 
+                                    label="Reference" 
+                                    field="reference" 
+                                    :sortable="true"
+                                    :sortDirection="getSortIcon('reference')"
+                                    @sort="handleSort"
+                                />
+                                <SortableTableHeader 
+                                    label="Client" 
+                                    field="client_id" 
+                                    :sortable="true"
+                                    :sortDirection="getSortIcon('client_id')"
+                                    @sort="handleSort"
+                                />
+                                <SortableTableHeader label="Items" />
+                                <SortableTableHeader 
+                                    label="Total" 
+                                    field="total_amount" 
+                                    :sortable="true"
+                                    :sortDirection="getSortIcon('total_amount')"
+                                    @sort="handleSort"
+                                />
+                                <SortableTableHeader 
+                                    label="Status" 
+                                    field="status" 
+                                    :sortable="true"
+                                    :sortDirection="getSortIcon('status')"
+                                    @sort="handleSort"
+                                />
+                                <SortableTableHeader 
+                                    label="Date" 
+                                    field="created_at" 
+                                    :sortable="true"
+                                    :sortDirection="getSortIcon('created_at')"
+                                    @sort="handleSort"
+                                />
+                                <SortableTableHeader label="Actions" align="right" :colspan="3" />
                             </TableRow>
                         </template>
                         <template #body>
@@ -186,7 +218,7 @@
                                     </div>
                                 </TableDataCell>
                             </TableRow>
-                            <TableRow v-if="sales.length === 0">
+                            <TableRow v-if="sales.data && sales.data.length === 0">
                                 <TableDataCell colspan="7" class="px-6 py-12 text-center">
                                     <div class="flex flex-col items-center">
                                         <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -203,9 +235,10 @@
             </div>
 
             <!-- Pagination -->
-            <div class="mt-6">
-                <Pagination :links="sales.links" />
-            </div>
+            <TablePagination 
+                :meta="sales.meta" 
+                @change="handlePageChange" 
+            />
         </div>
 
         <!-- Delete Confirmation Modal -->
@@ -238,8 +271,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
-import { Link } from '@inertiajs/vue3'
+import { Head, Link } from '@inertiajs/vue3'
 import { useToast } from 'vue-toastification'
 import { format } from 'date-fns'
 import AuthLayout from '@/layouts/AuthLayout.vue'
@@ -249,9 +281,14 @@ import TableHeaderCell from '@/Components/TableHeaderCell.vue'
 import TableDataCell from '@/Components/TableDataCell.vue'
 import TextInput from '@/Components/TextInput.vue'
 import Modal from '@/Components/Modal.vue'
-import Pagination from '@/Components/Pagination.vue'
 import DatePicker from 'primevue/datepicker'
-import {router} from '@inertiajs/vue3'
+import { ref, computed, watch } from 'vue'
+import { usePagination } from '@/composables/usePagination';
+import TablePagination from '@/Components/TablePagination.vue';
+import SortableTableHeader from '@/Components/SortableTableHeader.vue';
+import FilterMultiselect from '@/Components/FilterMultiselect.vue';
+import { router } from '@inertiajs/vue3';
+
 const props = defineProps({
     sales: Object,
     stats: Object,
@@ -263,11 +300,22 @@ const showDeleteModal = ref(false)
 const saleToDelete = ref(null)
 const processing = ref(false)
 
-const filters = ref({
-    search: props.filters?.search || '',
-    status: props.filters?.status || '',
-    date: props.filters?.date ? new Date(props.filters.date) : null
-})
+// Status options for multiselect
+const statusOptions = [
+    { label: 'All Status', value: '' },
+    { label: 'Paid', value: 'paid' },
+    { label: 'Pending', value: 'pending' },
+    { label: 'Cancelled', value: 'cancelled' }
+];
+
+// Initialize status filter from props
+const statusFilter = ref(
+    props.filters?.status 
+        ? statusOptions.find(option => option.value === props.filters.status) 
+        : statusOptions[0]
+);
+
+const dateFilter = ref(props.filters?.date ? new Date(props.filters.date) : null);
 
 const stats = computed(() => ({
     totalRevenue: props.stats?.totalRevenue || 0,
@@ -276,16 +324,36 @@ const stats = computed(() => ({
     pendingPayments: props.stats?.pendingPayments || 0
 }))
 
-// Watch for filter changes
-watch(filters.value, (newFilters) => {
-    router.get(route('sales.index'), {
-        ...newFilters,
-        date: newFilters.date ? format(newFilters.date, 'yyyy-MM-dd') : null
-    }, {
-        preserveState: true,
-        preserveScroll: true
-    })
-}, { deep: true })
+// Initialize pagination with usePagination composable
+const {
+    search,
+    sort,
+    page,
+    handleSort,
+    handlePageChange,
+    getSortIcon,
+    updateRoute,
+    updateFilters
+} = usePagination({
+    routeName: 'sales.index',
+    initialFilters: props.filters,
+    initialMeta: props.sales?.meta,
+    watchDependencies: [search],
+    additionalParams: {}, 
+    debounceTime: 300
+});
+
+// Handle status filter change
+const handleStatusChange = (value) => {
+    updateFilters({ status: value?.value || '' });
+};
+
+// Handle date filter change
+const handleDateChange = (date) => {
+    updateFilters({ 
+        date: date ? format(date, 'yyyy-MM-dd') : null 
+    });
+};
 
 const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
@@ -300,7 +368,6 @@ const formatDate = (date) => {
 
 const confirmDelete = (sale) => {
     saleToDelete.value = sale
-    console.log(saleToDelete.value)
     showDeleteModal.value = true
 }
 
@@ -339,3 +406,5 @@ const markAsPaid = (sale) => {
     })
 }
 </script>
+
+<style src="vue-multiselect/dist/vue-multiselect.css"></style>

@@ -16,6 +16,12 @@ class CategoriesController extends Controller
 
     public function index(Request $request)
     {
+        $request->validate([
+            'search' => 'nullable|string',
+            'sort' => 'nullable|string|in:name,description,products_count',
+            'direction' => 'nullable|string|in:asc,desc',
+            'page' => 'nullable|integer|min:1',
+        ]);
         $categories = Category::query()
             ->withCount('products')
             ->when($request->search, function ($query) use ($request) {
