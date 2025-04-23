@@ -31,11 +31,13 @@ class CategoriesController extends Controller
             }, function ($query) {
                 $query->latest();
             })
-            ->get();
+            ->paginate(PAGINATION)
+            ->withQueryString();
 
         return inertia('Categories/Index', [
             'categories' => CategoryResource::collection($categories),
-            'filters' => $request->only(['search', 'sort', 'direction'])
+            'filters' => $request->only(['search', 'sort', 'direction']),
+            'categories_count' => Category::count(),
         ]);
     }
 

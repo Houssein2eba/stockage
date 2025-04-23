@@ -13,6 +13,7 @@ import TableDataCell from "@/Components/TableDataCell.vue";
 import { ref, watch, computed } from "vue";
 import { router } from "@inertiajs/vue3";
 import { debounce } from 'lodash';
+import Pagination from "@/Components/Pagination.vue";
 
 
 const form = useForm({
@@ -22,15 +23,20 @@ const form = useForm({
 
 const props = defineProps({
     categories: {
-        type: Array,
+        type: Object,
         required: true,
-        default: () => []
+        default: () => ({})
     },
     filters: {
         type: Object,
         default: () => ({})
+    },
+    categories_count: {
+        type: Number,
+        default: 0
     }
 });
+
 const search = ref('');
 const sort = ref({ field: props.filters?.sort || 'created_at', direction: props.filters?.direction || 'desc' });
 
@@ -137,7 +143,7 @@ const updateCategory = () => {
                             <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
                         </svg>
                         <span class="text-sm font-medium text-blue-800">
-                            Total Categories: <span class="font-semibold">{{ categories.length }}</span>
+                            Total Categories: <span class="font-semibold">{{ categories_count }}</span>
                         </span>
                     </div>
                     <Link
@@ -217,7 +223,7 @@ const updateCategory = () => {
                             </TableRow>
                         </template>
                         <template #body>
-                            <TableRow v-for="category in categories" :key="category.id" class="hover:bg-gray-50/50 transition-colors">
+                            <TableRow v-for="category in categories.data" :key="category.id" class="hover:bg-gray-50/50 transition-colors">
                                 <TableDataCell class="px-4 sm:px-6 py-4">
                                     <span class="font-medium text-gray-900">{{ category.name }}</span>
                                 </TableDataCell>
@@ -254,7 +260,7 @@ const updateCategory = () => {
                                     </div>
                                 </TableDataCell>
                             </TableRow>
-                            <TableRow v-if="categories.length === 0">
+                            <TableRow v-if="categories.data.length === 0">
                                 <TableDataCell colspan="4" class="px-4 sm:px-6 py-12">
                                     <div class="flex flex-col items-center justify-center">
                                         <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -267,7 +273,17 @@ const updateCategory = () => {
                             </TableRow>
                         </template>
                     </Table>
+                     
                 </div>
+                 <!-- Pagination  -->
+                 <div class="flex items-center justify-between mt-4">
+              <div class="text-sm text-gray-700" v-if="categories_count > 0">
+                Showing <span class="font-medium">{{ categories.meta.from }}</span> to 
+                <span class="font-medium">{{ categories.meta.to }}</span> of 
+                <span class="font-medium">{{ categories.meta.total }}</span> results
+              </div>
+                <Pagination :links="categories.meta.links" />
+               </div>
             </div>
 
             <!-- Delete confirmation modal -->
