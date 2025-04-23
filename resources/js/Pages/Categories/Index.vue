@@ -176,10 +176,10 @@ const updateCategory = () => {
             </div>
 
             <!-- Categories Table -->
-            <div class="bg-white rounded-lg border border-gray-200 shadow-xs sm:overflow-scroll md:overflow-scroll   lg:w-fit lg:m-auto">
-                <div class="min-w-full overflow-x-auto">
-                    <Table class="w-full whitespace-nowrap">
-                        <thead class="bg-gray-50">
+            <div class="bg-white rounded-lg border border-gray-200 shadow-xs m-auto">
+                <div class="w-full overflow-x-auto">
+                    <Table >
+                        <template #header>
                             <TableRow>
                                 <TableHeaderCell
                                     v-for="header in tableHeaders"
@@ -215,8 +215,8 @@ const updateCategory = () => {
                                     </div>
                                 </TableHeaderCell>
                             </TableRow>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
+                        </template>
+                        <template #body>
                             <TableRow v-for="category in categories" :key="category.id" class="hover:bg-gray-50/50 transition-colors">
                                 <TableDataCell class="px-4 sm:px-6 py-4">
                                     <span class="font-medium text-gray-900">{{ category.name }}</span>
@@ -265,7 +265,7 @@ const updateCategory = () => {
                                     </div>
                                 </TableDataCell>
                             </TableRow>
-                        </tbody>
+                        </template>
                     </Table>
                 </div>
             </div>

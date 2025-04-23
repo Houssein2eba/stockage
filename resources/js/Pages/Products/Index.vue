@@ -208,10 +208,10 @@ const cancelDelete = () => {
       </div>
 
       <!-- Products Table -->
-      <div class="bg-white rounded-lg border border-gray-200 shadow-xs min-h-[400px] flex flex-col">
-        <div class="overflow-x-auto flex-1">
-          <Table class="w-full divide-y h-full">
-            <thead class="bg-gray-50">
+      <div class="bg-white rounded-lg border border-gray-200 shadow-xs  flex flex-col">
+        <div class="overflow-x-auto flex-1 ">
+          <Table>
+             <template #header >
               <TableRow>
                 <TableHeaderCell
                   v-for="header in tableHeaders"
@@ -232,7 +232,7 @@ const cancelDelete = () => {
                         viewBox="0 0 20 20"
                         fill="currentColor"
                       >
-                        <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                        <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path>
                       </svg>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -241,14 +241,14 @@ const cancelDelete = () => {
                         viewBox="0 0 20 20"
                         fill="currentColor"
                       >
-                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                       </svg>
                     </span>
                   </div>
                 </TableHeaderCell>
               </TableRow>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
+            </template>
+            <template #body>
               <TableRow v-for="product in props.products.data" :key="product.id" class="hover:bg-gray-50/50 transition-colors">
                 <TableDataCell class="py-4 pl-6">
                   <div class="font-medium text-gray-900">{{ product.name }}</div>
@@ -334,7 +334,7 @@ const cancelDelete = () => {
                   </div>
                 </TableDataCell>
               </TableRow>
-            </tbody>
+            </template>
           </Table>
         </div>
       </div>

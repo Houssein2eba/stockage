@@ -116,7 +116,7 @@
             <!-- Sales Table -->
             <div class="bg-white rounded-lg shadow overflow-hidden">
                 <div class="overflow-x-auto">
-                    <Table class="min-w-full divide-y divide-gray-200">
+                    <Table >
                         <template #header>
                             <TableRow>
                                 <TableHeaderCell class="whitespace-nowrap">Reference</TableHeaderCell>
@@ -128,7 +128,7 @@
                                 <TableHeaderCell :colspan="3" class="text-right whitespace-nowrap">Actions</TableHeaderCell>
                             </TableRow>
                         </template>
-                        <template #default>
+                        <template #body>
                             <TableRow v-for="sale in sales.data" :key="sale.id" class="hover:bg-gray-50">
                                 <TableDataCell class="max-w-[120px] truncate">
                                     <div class="font-medium text-gray-900">#{{ sale.reference }}</div>

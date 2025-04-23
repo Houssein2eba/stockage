@@ -55,7 +55,7 @@
                         </div>
 
                         <div class="w-full overflow-x-auto">
-                            <Table class="min-w-full table-fixed divide-y divide-gray-200">
+                            <Table >
                                 <template #header>
                                     <TableRow>
                                         <TableHeaderCell
@@ -95,7 +95,7 @@
                                         </TableHeaderCell>
                                     </TableRow>
                                 </template>
-                                <template #default>
+                                <template #body>
                                     <TableRow v-for="payment in paymentMethods" :key="payment.id" class="hover:bg-gray-50/50 transition-colors">
                                         <TableDataCell class="px-6 py-4 whitespace-nowrap">
                                             <img :src="`/storage/${payment.logo}`" :alt="payment.name" class="h-8 w-8 object-contain" />

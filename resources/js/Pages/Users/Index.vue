@@ -155,7 +155,7 @@ const getSortIcon = (field) => {
               </TableHeaderCell>
             </TableRow>
           </template>
-          <template #default>
+          <template #body>
             <TableRow v-for="user in props.users.data" :key="user.id" class="border-b">
               <template v-if="user.roles.name !=='admin'">
               <TableDataCell>{{ user.name }}</TableDataCell>

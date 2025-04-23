@@ -128,7 +128,7 @@ const deleteRole = () => {
             <!-- Roles Table -->
             <div class="bg-white shadow rounded-lg overflow-hidden">
                 <div class="overflow-x-auto">
-                    <Table class="min-w-full divide-y divide-gray-200">
+                    <Table >
                         <template #header>
                             <TableRow>
                                 <TableHeaderCell
@@ -167,7 +167,7 @@ const deleteRole = () => {
                                 </TableHeaderCell>
                             </TableRow>
                         </template>
-                        <template #default>
+                        <template #body>
                             <TableRow v-for="role in props.roles.data" :key="role.id">
                                 <template v-if="role.name !== 'admin'">
                                     <TableDataCell class="px-6 py-4">{{ role.name }}</TableDataCell>

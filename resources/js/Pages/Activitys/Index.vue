@@ -59,7 +59,7 @@ const formatModelName = (modelType) => {
         </div>
 
         <Table class="w-full">
-            <thead>
+            <template #header>
                 <tr>
                     <TableHeaderCell>Action</TableHeaderCell>
                     <TableHeaderCell>Performed By</TableHeaderCell>
@@ -67,8 +67,8 @@ const formatModelName = (modelType) => {
                     <TableHeaderCell>Time</TableHeaderCell>
                     <TableHeaderCell>Details</TableHeaderCell>
                 </tr>
-            </thead>
-            <tbody>
+            </template>
+            <template #body>
                 <TableRow v-for="activity in filteredActivities" :key="activity.id">
                     <TableDataCell>
                         <span class="px-2 py-1 text-xs font-semibold rounded"
@@ -93,7 +93,7 @@ const formatModelName = (modelType) => {
                         </Link>
                     </TableDataCell>
                 </TableRow>
-            </tbody>
+            </template>
         </Table>
 
         <div class="flex items-center justify-between mt-4">

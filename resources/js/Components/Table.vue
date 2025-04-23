@@ -1,14 +1,16 @@
 <template>
-  <div class="w-full overflow-x-auto">
+  
     <table class="w-full table-auto border-collapse">
-      <thead>
-        <slot name="header"></slot>
+      <thead class="bg-gray-50">
+        <slot name="header">
+
+        </slot>
       </thead>
       <tbody class="bg-white">
-        <slot></slot>
+        <slot name="body"></slot>
       </tbody>
     </table>
-  </div>
+  
 </template>
 
 <script setup>

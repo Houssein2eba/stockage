@@ -142,7 +142,7 @@ const deleteClient = () => {
 
             <!-- Clients Table -->
                 <div class="w-full overflow-x-auto" style="max-height: 70vh; overflow-y: auto;">
-                    <Table class="min-w-full table-fixed divide-y divide-gray-200">
+                    <Table >
                         <template #header >
                             <TableRow>
                                 <TableHeaderCell
@@ -180,7 +180,7 @@ const deleteClient = () => {
                                 </TableHeaderCell>
                             </TableRow>
                         </template>
-                        <template #default>
+                        <template #body>
                             <TableRow v-for="client in props.clients.data" :key="client.id" class="hover:bg-gray-50/50 transition-colors">
                                 <TableDataCell class="px-4 sm:px-6 py-4">
                                     <span class="font-medium text-gray-900">{{ client.name }}</span>
