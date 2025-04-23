@@ -1,5 +1,9 @@
 import '../css/app.css';
 import './bootstrap';
+import DataTablesLib from 'datatables.net';
+import DataTable from 'datatables.net-vue3';
+
+
 
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
@@ -14,6 +18,8 @@ import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import PrimeVue from "primevue/config";
 import Aura from "@primeuix/themes/aura";
+
+DataTable.use(DataTablesLib);
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const vuetify = createVuetify({
     components,
@@ -54,6 +60,7 @@ createInertiaApp({
                 maxToasts: 5,
                 newestOnTop: true,
             })
+            .component('DataTable', DataTable)
             .mount(el);
     },
     

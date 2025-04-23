@@ -6,14 +6,10 @@ import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import { useToast } from "vue-toastification";
-import Table from "@/Components/Table.vue";
-import TableRow from "@/Components/TableRow.vue";
-import TableHeaderCell from "@/Components/TableHeaderCell.vue";
-import TableDataCell from "@/Components/TableDataCell.vue";
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, onMounted } from "vue";
 import { router } from "@inertiajs/vue3";
 import { debounce } from 'lodash';
-
+import Paginator from "@/Components/Paginator.vue";
 
 const form = useForm({
     name: "",
@@ -22,37 +18,66 @@ const form = useForm({
 
 const props = defineProps({
     categories: {
-        type: Array,
+        type: Object,
         required: true,
-        default: () => []
+        default: () => ({})
     },
     filters: {
         type: Object,
         default: () => ({})
     }
 });
+// console.log(props.categories);
 const search = ref('');
 const sort = ref({ field: props.filters?.sort || 'created_at', direction: props.filters?.direction || 'desc' });
 
-// Watch for search and sort changes
-watch([search, sort], debounce(() => {
-    router.get(route('categories.index'), {
-        search: search.value,
-        sort: sort.value.field,
-        direction: sort.value.direction
-    }, {
-        preserveState: true,
-        preserveScroll: true
-    });
-}, 300), { deep: true });
+// Reference to the table element
+// DataTable options
+const dtOptions = {
+  paging: false,
+  searching: false,
+  info: false,
+  ordering: true,
+  lengthChange: true,
+  pageLength: 10,
+  lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, 'All']],
+  dom: 'lfrtip'
+};
+
+
 
 // Computed property for table headers with sorting
-const tableHeaders = computed(() => [
-    { label: 'Name', field: 'name', sortable: true },
-    { label: 'Description', field: 'description', sortable: true },
-    { label: 'Products', field: 'products_count', sortable: true },
-    { label: 'Actions', field: null, sortable: false }
-]);
+const columns = [
+    { data: 'name', title: 'Name' },
+    { data: 'description', title: 'Description' },
+    { data: 'products_count', title: 'Products' },
+    { data: null, title: 'Actions', orderable: false, render: (data, type, row) => {
+        return `
+            <div class="flex items-center gap-3 justify-end">
+                <button
+                    class="edit-btn inline-flex items-center gap-2 px-3 py-2 border border-blue-600 text-blue-700 bg-blue-50 hover:bg-blue-100 hover:text-blue-900 rounded-md font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    title="Edit"
+                    data-id="${row.id}"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit
+                </button>
+                <button
+                    class="delete-btn inline-flex items-center gap-2 px-3 py-2 border border-red-600 text-red-700 bg-red-50 hover:bg-red-100 hover:text-red-900 rounded-md font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-red-400"
+                    title="Delete"
+                    data-id="${row.id}"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Delete
+                </button>
+            </div>
+        `;
+    } }
+];
 
 const handleSort = (field) => {
     if (!field || !tableHeaders.value.find(header => header.field === field)?.sortable) return;
@@ -118,7 +143,40 @@ const updateCategory = () => {
         },
     });
 };
+
+// search logic is already defined on line 27
+watch(() => search.value, debounce((value) => {
+    router.get('/categories', { search: value }, { preserveState: true, replace: true });
+}, 300));
+
+// Add event listeners after the DataTable is initialized
+onMounted(() => {
+    // Need to wait for the table to be fully initialized
+    setTimeout(() => {
+        // Event delegation for edit buttons
+        document.addEventListener('click', (e) => {
+            const editBtn = e.target.closest('.edit-btn');
+            if (editBtn) {
+                const categoryId = editBtn.getAttribute('data-id');
+                const category = props.categories.data.find(cat => cat.id.toString() === categoryId);
+                if (category) {
+                    openEditModal(category);
+                }
+            }
+            
+            const deleteBtn = e.target.closest('.delete-btn');
+            if (deleteBtn) {
+                const categoryId = deleteBtn.getAttribute('data-id');
+                if (categoryId) {
+                    confirmDelete(categoryId);
+                }
+            }
+        });
+    }, 500); // Small delay to ensure the DataTable is fully rendered
+});
 </script>
+
+
 
 <template>
     <AuthLayout>
@@ -137,7 +195,7 @@ const updateCategory = () => {
                             <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
                         </svg>
                         <span class="text-sm font-medium text-blue-800">
-                            Total Categories: <span class="font-semibold">{{ categories.length }}</span>
+                            Total Categories: <span class="font-semibold">{{ props.categories.meta?.total || props.categories.data?.length || 0 }}</span>
                         </span>
                     </div>
                     <Link
@@ -176,97 +234,53 @@ const updateCategory = () => {
             </div>
 
             <!-- Categories Table -->
-            <div class="bg-white rounded-lg border border-gray-200 shadow-xs sm:overflow-scroll md:overflow-scroll   lg:w-fit lg:m-auto">
-                <div class="min-w-full overflow-x-auto">
-                    <Table class="w-full whitespace-nowrap">
-                        <thead class="bg-gray-50">
-                            <TableRow>
-                                <TableHeaderCell
-                                    v-for="header in tableHeaders"
-                                    :key="header.field || header.label"
-                                    :class="[
-                                        header.sortable ? 'cursor-pointer hover:bg-gray-100' : '',
-                                        'px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
-                                    ]"
-                                    @click="handleSort(header.field)"
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-lg w-full p-6">
+                <!-- Table Header Bar -->
+                
+                
+                <div class="w-full">
+                    <DataTable
+                        :data="props.categories.data"
+                        :columns="columns"
+                        class="display w-full text-lg text-left text-gray-800 border border-gray-300 rounded-lg"
+                        :options="dtOptions"
+                    >
+                        <template #cell-actions="{ row }">
+                            <div class="flex items-center gap-3 justify-end">
+                                <button
+                                    @click="openEditModal(row)"
+                                    class="inline-flex items-center gap-2 px-3 py-2 border border-blue-600 text-blue-700 bg-blue-50 hover:bg-blue-100 hover:text-blue-900 rounded-md font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    title="Edit"
                                 >
-                                    <div class="flex items-center space-x-1">
-                                        <span>{{ header.label }}</span>
-                                        <span v-if="header.sortable" class="flex flex-col">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                class="h-3 w-3"
-                                                :class="{'text-blue-600': getSortIcon(header.field) === 'asc'}"
-                                                viewBox="0 0 20 20"
-                                                fill="currentColor"
-                                            >
-                                                <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
-                                            </svg>
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                class="h-3 w-3"
-                                                :class="{'text-blue-600': getSortIcon(header.field) === 'desc'}"
-                                                viewBox="0 0 20 20"
-                                                fill="currentColor"
-                                            >
-                                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                            </svg>
-                                        </span>
-                                    </div>
-                                </TableHeaderCell>
-                            </TableRow>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            <TableRow v-for="category in categories" :key="category.id" class="hover:bg-gray-50/50 transition-colors">
-                                <TableDataCell class="px-4 sm:px-6 py-4">
-                                    <span class="font-medium text-gray-900">{{ category.name }}</span>
-                                </TableDataCell>
-                                <TableDataCell class="px-4 sm:px-6 py-4">
-                                    <div class="text-gray-600 truncate max-w-xs">
-                                        {{ category.description || "---" }}
-                                    </div>
-                                </TableDataCell>
-                                <TableDataCell class="px-4 sm:px-6 py-4 text-center">
-                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                                        {{ category.products_count }}
-                                    </span>
-                                </TableDataCell>
-                                <TableDataCell class="px-4 sm:px-6 py-4">
-                                    <div class="flex items-center justify-end gap-2 sm:gap-3">
-                                        <button
-                                            @click="openEditModal(category)"
-                                            class="text-blue-600 hover:text-blue-900 transition-colors flex items-center gap-1 whitespace-nowrap"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
-                                            <span class="hidden sm:inline">Edit</span>
-                                        </button>
-                                        <button
-                                            @click="confirmDelete(category.id)"
-                                            class="text-red-600 hover:text-red-900 transition-colors flex items-center gap-1 whitespace-nowrap"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                            <span class="hidden sm:inline">Delete</span>
-                                        </button>
-                                    </div>
-                                </TableDataCell>
-                            </TableRow>
-                            <TableRow v-if="categories.length === 0">
-                                <TableDataCell colspan="4" class="px-4 sm:px-6 py-12">
-                                    <div class="flex flex-col items-center justify-center">
-                                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                                        </svg>
-                                        <p class="mt-2">No Categories found</p>
-                                        <p class="text-sm text-gray-400">Add your first category using the create button above</p>
-                                    </div>
-                                </TableDataCell>
-                            </TableRow>
-                        </tbody>
-                    </Table>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                    Edit
+                                </button>
+                                <button
+                                    @click="confirmDelete(row.id)"
+                                    class="inline-flex items-center gap-2 px-3 py-2 border border-red-600 text-red-700 bg-red-50 hover:bg-red-100 hover:text-red-900 rounded-md font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-red-400"
+                                    title="Delete"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    Delete
+                                </button>
+                            </div>
+                        </template>
+                    </DataTable>
+                    
+                    <!-- Custom Pagination -->
+                    <div class="mt-6">
+                        <Paginator 
+                            :meta="props.categories.meta || props.categories" 
+                            showInfo 
+                            size="md" 
+                            align="center" 
+                            class="w-full" 
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -391,5 +405,16 @@ const updateCategory = () => {
 }
 .fade-enter-from, .fade-leave-to {
     opacity: 0;
+}
+
+/* Smooth table row transitions */
+.TableRow {
+    transition: all 0.2s ease;
+}
+
+/* Better focus styles for accessibility */
+button:focus, input:focus, textarea:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
 }
 </style>

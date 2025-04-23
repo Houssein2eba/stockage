@@ -2,14 +2,15 @@
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import { useToast } from "vue-toastification";
-import Table from "@/Components/Table.vue";
-import TableRow from "@/Components/TableRow.vue";
-import TableHeaderCell from "@/Components/TableHeaderCell.vue";
-import TableDataCell from "@/Components/TableDataCell.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
-import { ref, watch, computed } from 'vue';
+import InputLabel from "@/Components/InputLabel.vue";
+import InputError from "@/Components/InputError.vue";
+import TextInput from "@/Components/TextInput.vue";
+import { ref, watch, computed, onMounted } from 'vue';
+
 import { router } from '@inertiajs/vue3';
 import { debounce } from 'lodash';
+import Paginator from "@/Components/Paginator.vue";
 
 const props = defineProps({
     clients: Object,
@@ -24,7 +25,52 @@ const toast = useToast();
 const search = ref(props.filters?.search || '');
 const sort = ref({ field: props.filters?.sort || 'created_at', direction: props.filters?.direction || 'desc' });
 
-// Table headers configuration
+// DataTable options
+const dtOptions = {
+  paging: false,
+  searching: false,
+  info: false,
+  ordering: true,
+  lengthChange: true,
+  pageLength: 10,
+  lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, 'All']],
+  dom: 'lfrtip'
+};
+
+// Columns configuration for DataTable
+const columns = [
+    { data: 'name', title: 'Name' },
+    { data: 'number', title: 'Number' },
+    { data: 'orders_count', title: 'Orders' },
+    { data: null, title: 'Actions', orderable: false, render: (data, type, row) => {
+        return `
+            <div class="flex items-center gap-3 justify-end">
+                <button
+                    class="edit-btn inline-flex items-center gap-2 px-3 py-2 border border-blue-600 text-blue-700 bg-blue-50 hover:bg-blue-100 hover:text-blue-900 rounded-md font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    title="Edit"
+                    data-id="${row.id}"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit
+                </button>
+                <button
+                    class="delete-btn inline-flex items-center gap-2 px-3 py-2 border border-red-600 text-red-700 bg-red-50 hover:bg-red-100 hover:text-red-900 rounded-md font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-red-400"
+                    title="Delete"
+                    data-id="${row.id}"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Delete
+                </button>
+            </div>
+        `;
+    } }
+];
+
+// Table headers configuration for reference
 const tableHeaders = computed(() => [
     { label: 'Name', field: 'name', sortable: true },
     { label: 'Number', field: 'number', sortable: true },
@@ -33,15 +79,8 @@ const tableHeaders = computed(() => [
 ]);
 
 // Watch for search and sort changes
-watch([search, sort], debounce(() => {
-    router.get(route('clients.index'), {
-        search: search.value,
-        sort: sort.value.field,
-        direction: sort.value.direction
-    }, {
-        preserveState: true,
-        preserveScroll: true
-    });
+watch(() => search.value, debounce((value) => {
+    router.get('/clients', { search: value }, { preserveState: true, replace: true });
 }, 300));
 
 const handleSort = (field) => {
@@ -83,6 +122,61 @@ const deleteClient = () => {
         },
     });
 };
+
+// Edit client logic
+const editForm = useForm({
+    id: null,
+    name: "",
+    number: ""
+});
+
+const showEditModal = ref(false);
+
+const openEditModal = (client) => {
+    editForm.id = client.id;
+    editForm.name = client.name;
+    editForm.number = client.number || "";
+    showEditModal.value = true;
+};
+
+const updateClient = () => {
+    editForm.put(route('clients.update', editForm.id), {
+        onSuccess: () => {
+            toast.success("Client updated successfully");
+            showEditModal.value = false;
+            editForm.reset();
+        },
+        onError: () => {
+            toast.error("Failed to update client");
+        },
+    });
+};
+
+// Add event listeners after the DataTable is initialized
+onMounted(() => {
+    // Need to wait for the table to be fully initialized
+    setTimeout(() => {
+        // Event delegation for edit buttons
+        document.addEventListener('click', (e) => {
+            const editBtn = e.target.closest('.edit-btn');
+            if (editBtn) {
+                const clientId = editBtn.getAttribute('data-id');
+                const client = props.clients.data.find(client => client.id.toString() === clientId);
+                if (client) {
+                    openEditModal(client);
+                }
+            }
+            
+            const deleteBtn = e.target.closest('.delete-btn');
+            if (deleteBtn) {
+                const clientId = deleteBtn.getAttribute('data-id');
+                if (clientId) {
+                    confirmDelete(clientId);
+                }
+            }
+        });
+    }, 500); // Small delay to ensure the DataTable is fully rendered
+});
 </script>
 
 <template>
@@ -102,7 +196,7 @@ const deleteClient = () => {
                             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                         </svg>
                         <span class="text-sm font-medium text-blue-800">
-                            Total Clients: <span class="font-semibold">{{ props.clients.length }}</span>
+                            Total Clients: <span class="font-semibold">{{ props.clients.data.length }}</span>
                         </span>
                     </div>
                     <Link
@@ -141,93 +235,53 @@ const deleteClient = () => {
             </div>
 
             <!-- Clients Table -->
-                <div class="w-full overflow-x-auto" style="max-height: 70vh; overflow-y: auto;">
-                    <Table class="min-w-full table-fixed divide-y divide-gray-200">
-                        <template #header >
-                            <TableRow>
-                                <TableHeaderCell
-                                    v-for="header in tableHeaders"
-                                    :key="header.field || header.label"
-                                    :class="[
-                                        header.sortable ? 'cursor-pointer hover:bg-gray-100' : '',
-                                        'px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
-                                    ]"
-                                    @click="handleSort(header.field)"
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-lg w-full p-6">
+                <div class="w-full">
+                    <DataTable
+                        :data="props.clients.data"
+                        :columns="columns"
+                        class="display w-full text-lg text-left text-gray-800 border border-gray-300 rounded-lg"
+                        :options="dtOptions"
+                    >
+                        <template #cell-actions="{ row }">
+                            <div class="flex items-center gap-3 justify-end">
+                                <button
+                                    @click="openEditModal(row)"
+                                    class="inline-flex items-center gap-2 px-3 py-2 border border-blue-600 text-blue-700 bg-blue-50 hover:bg-blue-100 hover:text-blue-900 rounded-md font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    title="Edit"
                                 >
-                                    <div class="flex items-center space-x-1">
-                                        <span>{{ header.label }}</span>
-                                        <span v-if="header.sortable" class="flex flex-col">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                class="h-3 w-3"
-                                                :class="{'text-blue-600': getSortIcon(header.field) === 'asc'}"
-                                                viewBox="0 0 20 20"
-                                                fill="currentColor"
-                                            >
-                                                <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
-                                            </svg>
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                class="h-3 w-3"
-                                                :class="{'text-blue-600': getSortIcon(header.field) === 'desc'}"
-                                                viewBox="0 0 20 20"
-                                                fill="currentColor"
-                                            >
-                                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                            </svg>
-                                        </span>
-                                    </div>
-                                </TableHeaderCell>
-                            </TableRow>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                    Edit
+                                </button>
+                                <button
+                                    @click="confirmDelete(row.id)"
+                                    class="inline-flex items-center gap-2 px-3 py-2 border border-red-600 text-red-700 bg-red-50 hover:bg-red-100 hover:text-red-900 rounded-md font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-red-400"
+                                    title="Delete"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    Delete
+                                </button>
+                            </div>
                         </template>
-                        <template #default>
-                            <TableRow v-for="client in props.clients.data" :key="client.id" class="hover:bg-gray-50/50 transition-colors">
-                                <TableDataCell class="px-4 sm:px-6 py-4">
-                                    <span class="font-medium text-gray-900">{{ client.name }}</span>
-                                </TableDataCell>
-                                <TableDataCell class="px-4 sm:px-6 py-4">
-                                    <div class="text-gray-600">{{ client.number }}</div>
-                                </TableDataCell>
-                                <TableDataCell>
-                                    {{ client.orders_count }} orders
-                                </TableDataCell>
-                                <TableDataCell class="px-4 sm:px-6 py-4">
-                                    <div class="flex items-center justify-end gap-2 sm:gap-3">
-                                        <Link
-                                            :href="route('clients.edit', client.id)"
-                                            class="text-blue-600 hover:text-blue-900 transition-colors flex items-center gap-1 whitespace-nowrap"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
-                                            <span class="hidden sm:inline">Edit</span>
-                                        </Link>
-                                        <button
-                                            @click="confirmDelete(client.id)"
-                                            class="text-red-600 hover:text-red-900 transition-colors flex items-center gap-1 whitespace-nowrap"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                            <span class="hidden sm:inline">Delete</span>
-                                        </button>
-                                    </div>
-                                </TableDataCell>
-                            </TableRow>
-                            <TableRow v-if="props.clients.length === 0">
-                                <TableDataCell colspan="3" class="px-4 sm:px-6 py-12">
-                                    <div class="flex flex-col items-center justify-center">
-                                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                                        </svg>
-                                        <p class="mt-2">No clients found</p>
-                                        <p class="text-sm text-gray-400">Add your first client using the form</p>
-                                    </div>
-                                </TableDataCell>
-                            </TableRow>
-                        </template>
-                    </Table>
+                    </DataTable>
+                    <!-- Custom Pagination -->
+                    <div class="mt-6">
+                        <Paginator 
+                            :meta="props.clients.meta || props.clients" 
+                            showInfo 
+                            size="md" 
+                            align="center" 
+                            class="w-full" 
+                        />
+                    </div>
                 </div>
+                
+                
+            </div>
 
 
             <!-- Delete confirmation modal -->
@@ -280,6 +334,69 @@ const deleteClient = () => {
                     </div>
                 </div>
             </Transition>
+
+            <!-- Edit Client Modal -->
+            <div v-if="showEditModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
+                <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-lg font-bold text-gray-900">Edit Client</h3>
+                        <button @click="showEditModal = false" class="text-gray-400 hover:text-gray-500">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <form @submit.prevent="updateClient">
+                        <div class="space-y-4">
+                            <div>
+                                <InputLabel for="name" value="Name" />
+                                <TextInput
+                                    id="name"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    v-model="editForm.name"
+                                    required
+                                    autofocus
+                                    autocomplete="name"
+                                />
+                                <InputError class="mt-2" :message="editForm.errors.name" />
+                            </div>
+
+                            <div>
+                                <InputLabel for="number" value="Number" />
+                                <TextInput
+                                    id="number"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    v-model="editForm.number"
+                                    autocomplete="number"
+                                />
+                                <InputError class="mt-2" :message="editForm.errors.number" />
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-end mt-6">
+                            <button 
+                                type="button"
+                                class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ml-3"
+                                @click="showEditModal = false"
+                            >
+                                Cancel
+                            </button>
+                            <PrimaryButton class="ml-3" :class="{ 'opacity-25': editForm.processing }" :disabled="editForm.processing">
+                                <span v-if="!editForm.processing">Update</span>
+                                <span v-else class="flex items-center">
+                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Updating...
+                                </span>
+                            </PrimaryButton>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </AuthLayout>
 </template>

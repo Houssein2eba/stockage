@@ -6,14 +6,14 @@ import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import { useToast } from "vue-toastification";
-import Table from "@/Components/Table.vue";
-import TableRow from "@/Components/TableRow.vue";
-import TableHeaderCell from "@/Components/TableHeaderCell.vue";
-import TableDataCell from "@/Components/TableDataCell.vue";
 import VueMultiselect from 'vue-multiselect';
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, onMounted } from 'vue';
 import { debounce } from 'lodash';
 import { router } from '@inertiajs/vue3';
+import Paginator from "@/Components/Paginator.vue";
+
+
+
 
 const form = useForm({
     name: "",
@@ -39,7 +39,137 @@ const sort = ref({ field: props.filters?.sort || 'created_at', direction: props.
 const search = ref(props.filters?.search || '');
 const selectedCategory = ref(props.filters?.category || '');
 
-// Computed property for table headers with sorting
+// DataTable options
+const dtOptions = {
+  paging: false,
+  searching: false,
+  info: false,
+  ordering: true,
+  lengthChange: true,
+  pageLength: 10,
+  lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, 'All']],
+  dom: 'lfrtip',
+  responsive: true,
+  autoWidth: false,
+  scrollX: true,
+  scrollCollapse: true
+};
+
+// Columns configuration for DataTable
+const columns = [
+    { 
+      data: 'name', 
+      title: 'Product',
+      className: 'min-w-[120px] font-medium',
+      responsivePriority: 1 // Highest priority - always show
+    },
+    { 
+      data: 'description', 
+      title: 'Description', 
+      className: 'min-w-[200px]',
+      responsivePriority: 4, // Lower priority
+      render: (data, type, row) => {
+        if (type === 'display') {
+          return data ? `<div class="line-clamp-2 max-w-xs">${data}</div>` : "<div class=\"text-gray-400\">No description</div>";
+        }
+        return data;
+      }
+    },
+    { 
+      data: null, 
+      title: 'Image', 
+      orderable: false, 
+      className: 'text-center',
+      responsivePriority: 3, // Medium priority
+      render: (data, type, row) => {
+        if (type === 'display') {
+          const imgSrc = row.image ? `/storage/${row.image}` : '/images/placeholder-product.png';
+          return `<img src="${imgSrc}" alt="${row.name}" class="w-12 h-12 object-cover rounded-md mx-auto">`;
+        }
+        return '';
+      }
+    },
+    { 
+      data: 'price', 
+      title: 'Price', 
+      className: 'text-right whitespace-nowrap min-w-[100px]',
+      responsivePriority: 2, // High priority
+      render: (data, type, row) => {
+        if (type === 'display' || type === 'filter') {
+          return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'MRU'
+          }).format(data);
+        }
+        return data;
+      }
+    },
+    { 
+      data: 'quantity', 
+      title: 'Stock', 
+      className: 'text-center min-w-[80px]',
+      responsivePriority: 2, // High priority
+      render: (data, type, row) => {
+        if (type === 'display') {
+          const minQuantity = parseInt(row.min_quantity) || 0;
+          const quantity = parseInt(data) || 0;
+          const colorClass = quantity <= minQuantity ? 'text-red-600 font-medium' : 'text-green-600 font-medium';
+          return `<span class="${colorClass}">${quantity}</span>`;
+        }
+        return data;
+      }
+    },
+    { 
+      data: 'category', 
+      title: 'Category', 
+      className: 'min-w-[120px]',
+      responsivePriority: 3, // Medium priority
+      render: (data, type, row) => {
+        if (type === 'display') {
+          return data ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">${data.name}</span>` : '';
+        }
+        return data ? data.name : '';
+      }
+    },
+    { 
+      data: null, 
+      title: 'Actions', 
+      orderable: false, 
+      className: 'min-w-[150px]',
+      responsivePriority: 1, // Highest priority - always show
+      render: (data, type, row) => {
+        if (type === 'display') {
+          return `
+            <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 justify-end">
+                <a
+                    href="/products/${row.id}/edit"
+                    class="edit-btn inline-flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-2 border border-blue-600 text-blue-700 bg-blue-50 hover:bg-blue-100 hover:text-blue-900 rounded-md font-medium text-sm shadow-sm transition focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    title="Edit"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <span class="hidden sm:inline">Edit</span>
+                </a>
+                <button
+                    class="delete-btn inline-flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-2 border border-red-600 text-red-700 bg-red-50 hover:bg-red-100 hover:text-red-900 rounded-md font-medium text-sm shadow-sm transition focus:outline-none focus:ring-2 focus:ring-red-400"
+                    title="Delete"
+                    data-id="${row.id}"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <span class="hidden sm:inline">Delete</span>
+                </button>
+            </div>
+          `;
+        }
+        return '';
+      }
+    }
+];
+
+// Keep the original tableHeaders for reference
 const tableHeaders = computed(() => [
     { label: 'Product', field: 'name', sortable: true },
     { label: 'Description', field: 'description', sortable: false },
@@ -124,6 +254,23 @@ const cancelDelete = () => {
   productToDelete.value = null;
 };
 
+// Add event listeners after the DataTable is initialized
+onMounted(() => {
+    // Need to wait for the table to be fully initialized
+    setTimeout(() => {
+        // Event delegation for delete buttons
+        document.addEventListener('click', (e) => {
+            const deleteBtn = e.target.closest('.delete-btn');
+            if (deleteBtn) {
+                const productId = deleteBtn.getAttribute('data-id');
+                if (productId) {
+                    confirmDelete(productId);
+                }
+            }
+        });
+    }, 500); // Small delay to ensure the DataTable is fully rendered
+});
+
 </script>
 
 <template>
@@ -186,7 +333,7 @@ const cancelDelete = () => {
                 class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
               >
                 <option value="">All Categories</option>
-                <option v-for="category in categories" :key="category.id" :value="category.id">
+                <option v-for="category in props.categories" :key="category.id" :value="category.id">
                   {{ category.name }}
                 </option>
               </select>
@@ -207,135 +354,51 @@ const cancelDelete = () => {
         </div>
       </div>
 
-      <!-- Products Table -->
-      <div class="bg-white rounded-lg border border-gray-200 shadow-xs min-h-[400px] flex flex-col">
-        <div class="overflow-x-auto flex-1">
-          <Table class="w-full divide-y h-full">
-            <thead class="bg-gray-50">
-              <TableRow>
-                <TableHeaderCell
-                  v-for="header in tableHeaders"
-                  :key="header.field || header.label"
-                  :class="[
-                    header.sortable ? 'cursor-pointer hover:bg-gray-100' : '',
-                    'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
-                  ]"
-                  @click="handleSort(header.field)"
+      <!-- Products Table Container -->      
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-lg w-full p-4 sm:p-6">
+        <div class="w-full overflow-x-auto">
+          <DataTable
+            :data="props.products.data"
+            :columns="columns"
+            class="display w-full text-sm sm:text-base text-left text-gray-800 border border-gray-300 rounded-lg table-responsive"
+            :options="dtOptions"
+          >
+            <template #cell-actions="{ row }">
+              <div class="flex items-center gap-3 justify-end">
+                <a
+                  :href="`/products/${row.id}/edit`"
+                  class="inline-flex items-center gap-2 px-3 py-2 border border-blue-600 text-blue-700 bg-blue-50 hover:bg-blue-100 hover:text-blue-900 rounded-md font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  title="Edit"
                 >
-                  <div class="flex items-center space-x-1">
-                    <span>{{ header.label }}</span>
-                    <span v-if="header.sortable" class="flex flex-col">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-3 w-3"
-                        :class="{'text-blue-600': getSortIcon(header.field) === 'asc'}"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
-                      </svg>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-3 w-3"
-                        :class="{'text-blue-600': getSortIcon(header.field) === 'desc'}"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                      </svg>
-                    </span>
-                  </div>
-                </TableHeaderCell>
-              </TableRow>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-              <TableRow v-for="product in props.products.data" :key="product.id" class="hover:bg-gray-50/50 transition-colors">
-                <TableDataCell class="py-4 pl-6">
-                  <div class="font-medium text-gray-900">{{ product.name }}</div>
-                </TableDataCell>
-                <TableDataCell class="text-gray-600 text-sm">
-                  <div class="line-clamp-2">{{ product.description || "No description" }}</div>
-                </TableDataCell>
-                <TableDataCell class="text-center">
-                  <div class="flex justify-center">
-                    <img
-                      :src="getImageLink(product.image) || 'https://i0.wp.com/georgiaautomation.com/wp-content/uploads/2018/09/image-placeholder.png?ssl=1'"
-                      alt="Product"
-                      class="w-10 h-10 object-cover rounded-md border border-gray-200"
-                    />
-                  </div>
-                </TableDataCell>
-                <TableDataCell class="text-center font-medium text-gray-900">
-                  {{ formatPrice(product.price) }}
-                </TableDataCell>
-                <TableDataCell class="text-center">
-                  <span
-                    :class="{
-                      'bg-green-100 text-green-800': product.quantity > 10,
-                      'bg-yellow-100 text-yellow-800': product.quantity > product.min_quantity && product.quantity <=product.min_quantity+ 10,
-                      'bg-red-100 text-red-800': product.quantity < product.min_quantity,
-                    }"
-                    class="px-2.5 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1"
-                  >
-                    <svg v-if="product.quantity > 10" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                    <svg v-else-if="product.quantity > 0" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" clip-rule="evenodd" />
-                    </svg>
-                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                    </svg>
-                    {{ product.quantity }} in stock
-                  </span>
-                </TableDataCell>
-                <TableDataCell class="text-center text-sm">
-                  <div class="flex flex-wrap gap-1 justify-center">
-                    <span
-                      v-for="category in product.categories"
-                      :key="category.id"
-                      class="px-2.5 py-1 bg-blue-100/80 text-blue-800 rounded-full text-xs"
-                    >
-                      {{ category.name }}
-                    </span>
-                  </div>
-                </TableDataCell>
-                <TableDataCell class="text-right pr-6">
-                  <div class="flex items-center justify-end gap-3">
-                    <Link
-                      :href="route('products.edit', product.id)"
-                      class="text-blue-600 hover:text-blue-900 transition-colors flex items-center gap-1"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                      Edit
-                    </Link>
-                    <button
-                      @click.prevent="confirmDelete(product.id)"
-                      class="text-red-600 hover:text-red-900 transition-colors flex items-center gap-1"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                      Delete
-                    </button>
-                  </div>
-                </TableDataCell>
-              </TableRow>
-              <TableRow v-if=" props.products.data.length === 0">
-                <TableDataCell colspan="7" class="text-center py-12 text-gray-500">
-                  <div class="flex flex-col items-center justify-center">
-                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                    </svg>
-                    <p class="mt-3 text-gray-600 font-medium">No products found</p>
-                    <p class="text-sm text-gray-400 mt-1">Add your first product using the form</p>
-                  </div>
-                </TableDataCell>
-              </TableRow>
-            </tbody>
-          </Table>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Edit
+                </a>
+                <button
+                  class="delete-btn inline-flex items-center gap-2 px-3 py-2 border border-red-600 text-red-700 bg-red-50 hover:bg-red-100 hover:text-red-900 rounded-md font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-red-400"
+                  title="Delete"
+                  :data-id="row.id"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Delete
+                </button>
+              </div>
+            </template>
+          </DataTable>
+
+          <!-- Custom Pagination -->
+          <div class="mt-6">
+            <Paginator 
+              :meta="props.products.meta || props.products" 
+              showInfo 
+              size="md" 
+              align="center" 
+              class="w-full" 
+            />
+          </div>
         </div>
       </div>
     </div>

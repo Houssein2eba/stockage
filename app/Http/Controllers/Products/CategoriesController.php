@@ -31,7 +31,7 @@ class CategoriesController extends Controller
             }, function ($query) {
                 $query->latest();
             })
-            ->get();
+            ->paginate(PAGINATION)->withQueryString();
 
         return inertia('Categories/Index', [
             'categories' => CategoryResource::collection($categories),
