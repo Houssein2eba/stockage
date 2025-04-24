@@ -13,9 +13,14 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
-
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\UserssExport;
 class UsersController extends Controller
 {
+    public function export()
+    {
+        return Excel::download(new UserssExport(), 'users.xlsx');
+    }
     public function index(Request $request): Response
     {
         $users = User::with('roles')

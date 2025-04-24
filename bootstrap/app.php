@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
+            'Excel' => \Maatwebsite\Excel\Middleware\ImportExportMiddleware::class,
 
         ]);
 

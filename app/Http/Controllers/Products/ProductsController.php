@@ -10,6 +10,8 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ProductsExport;
 
 class ProductsController extends Controller
 {
@@ -151,5 +153,14 @@ class ProductsController extends Controller
             ->withProperties(['old' => $old])
             ->log('Product Deleted');
         return back();
+    }
+
+    public function export()
+    {
+        activity()
+            ->causedBy(auth()->user())
+            ->log('Products Exported');
+            
+            return Excel::download(new ProductsExport(), 'products.xlsx');
     }
 }

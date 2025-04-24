@@ -66,6 +66,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     // Users Routes
     Route::prefix('users')->name('users.')->group(function () {
+        Route::get('/export', [UsersController::class, 'export'])->name('export');
         Route::get('/', [UsersController::class, 'index'])->name('index');
         Route::get('/create', [UsersController::class, 'create'])->name('create');
         Route::post('/', [UsersController::class, 'store'])->name('store');
@@ -105,6 +106,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('/', [ProductsController::class, 'index'])->name('index');
         Route::get('/create', [ProductsController::class, 'create'])->name('create');
         Route::post('/', [ProductsController::class, 'store'])->name('store');
+        Route::get('/export', [ProductsController::class, 'export'])->name('export');
         Route::get('/{id}', [ProductsController::class, 'edit'])->name('edit');
         Route::put('/{id}', [ProductsController::class, 'update'])->name('update');
         Route::delete('/{id}', [ProductsController::class, 'destroy'])->name('destroy');
