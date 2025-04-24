@@ -122,7 +122,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         $order->update(['status' => $request->status]);
         return redirect()->back()->with('success', 'Order status updated successfully.');
     })->name('orders.status');
-
+    
+  
 });
+
 
 require __DIR__.'/auth.php';
