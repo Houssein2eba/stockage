@@ -53,7 +53,26 @@ watch([search, statusFilter, dateFilter], () => {
 });
 
 const handleSort = (field) => {
-    // Implement sorting logic here
+    if (!field) return;
+
+    if (sort.value.field === field) {
+        sort.value.direction = sort.value.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        sort.value.field = field;
+        sort.value.direction = 'asc';
+    }
+
+    router.get(route('sales.index'), {
+        search: search.value,
+        status: statusFilter.value,
+        date: dateFilter.value,
+        sort: sort.value.field,
+        direction: sort.value.direction,
+        page: 1
+    }, {
+        preserveState: true,
+        preserveScroll: true
+    });
 };
 
 const handlePageChange = (url) => {
@@ -84,11 +103,10 @@ const closeDeleteModal = () => {
     showDeleteModal.value = false;
     saleToDelete.value = null;
 };
-const getSortIcon = (field) => {
-    // Assuming you have a sort object to track the current sort field and direction
-    const sort = ref({ field: props.filters?.sort || 'created_at', direction: props.filters?.direction || 'desc' });
+const sort = ref({ field: props.filters?.sort || 'created_at', direction: props.filters?.direction || 'desc' });
 
-    if (sort.value.field !== field) return 'none';
+const getSortIcon = (field) => {
+    if (!field || sort.value.field !== field) return 'none';
     return sort.value.direction === 'asc' ? 'asc' : 'desc';
 };
 </script>

@@ -21,12 +21,46 @@ class SalesController extends Controller
 {
     public function index(Request $request)
     {
+        
+        $request->validate([
+            'search' => 'nullable|string',
+            'status' => 'nullable|string',
+            'page' => 'nullable|integer',
+            'date' => 'nullable|date',
+            'direction' => 'nullable|in:asc,desc',
+            'sort' => 'nullable|in:id,reference,client,total_amount,status,created_at'
+        ]);
         $orders = Order::with(['client', 'products', 'payment'])
-            ->latest()
-            ->paginate(PAGINATION)
-            ->withQueryString()
-            ;
+    ->withSum('products as total_amount', 'order_details.total_amount')
+    ->when($request->search, function ($query, $search) {
+        $query->where('reference', 'LIKE', "%{$search}%")
+            ->orWhereHas('client', function ($query) use ($search) {
+                $query->where('name', 'LIKE', "%{$search}%");
+            });
+    })
+    ->when($request->status, function ($query, $status) {
+        $query->where('status', $status);
+    })
+    ->when($request->date, function ($query, $date) {
+        $created_at=date('Y-m-d', strtotime($date));
+        $query->whereDate('created_at', $created_at);
+    })
+    ->when($request->sort === 'total_amount', function ($query) use ($request) {
+        $query->orderBy('total_amount', $request->direction ?? 'asc');
+    }, function ($query) use ($request) {
+        if ($request->sort === 'date') {
+            $query->orderBy($request->sort, $request->direction ?? 'asc');
+        }
+    })
+    ->orderBy('created_at', 'desc')
+    ->paginate(PAGINATION)
+    ->withQueryString();
 
+
+           
+
+            
+     
 
 
         // Calculate statistics
@@ -37,6 +71,7 @@ class SalesController extends Controller
             'pendingPayments' => Order::whereNull('payment_id')->count()
         ];
 
+        
         return inertia('Sales/Index', [
             'sales' => OrderResource::collection($orders),
             'stats' => $stats,
