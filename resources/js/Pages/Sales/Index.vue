@@ -96,7 +96,19 @@ const confirmDelete = (saleId) => {
 };
 
 const deleteSale = () => {
-    // Implement delete logic here
+    processing.value = true;
+    router.delete(route('sales.destroy', saleToDelete.value), {
+        onSuccess: () => {
+            closeDeleteModal();
+            toast.success('Sale deleted successfully');
+        },
+        onError: () => {
+            toast.error('Failed to delete sale');
+        },
+        onFinish: () => {
+            processing.value = false;
+        }
+    });
 };
 
 const closeDeleteModal = () => {
