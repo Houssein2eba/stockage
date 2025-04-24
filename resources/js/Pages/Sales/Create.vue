@@ -3,9 +3,23 @@
         <Head title="Create Sale" />
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="mb-8">
-                <h1 class="text-2xl font-bold text-gray-900">Create New Sale</h1>
-                <p class="text-gray-600 mt-1">Record a new sale transaction</p>
+            
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <H1 >Create Sale</H1>
+                    <P >Create a new sale record</P>
+                </div>
+                <div>
+                    <Link
+                        :href="route('sales.index')"
+                        class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Back to Sales
+                    </Link>
+                </div>
             </div>
 
             <form @submit.prevent="submitForm">

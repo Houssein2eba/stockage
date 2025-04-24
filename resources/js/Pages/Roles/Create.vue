@@ -1,6 +1,6 @@
 <script setup>
 import AuthLayout from '@/layouts/AuthLayout.vue'
-import { ref } from 'vue'
+import {Head, Link} from '@inertiajs/vue3'
 import { useForm } from '@inertiajs/vue3'
 import { useToast } from "vue-toastification"
 import InputError from '@/Components/InputError.vue'
@@ -38,15 +38,28 @@ const submit = () => {
 
 <template>
     <AuthLayout>
+        <Head title="Create Role" />
+       
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="flex items-center justify-between mb-8">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Create Role</h1>
-                    <p class="text-gray-600 mt-1">Create a new role with permissions</p>
+                    <H1>Create Role</H1>
+                    <P>Create a new role with permissions</P>
                 </div>
+                <div>
+                    <Link
+                        :href="route('roles.index')"
+                        class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Back to Roles
+                    </Link>
+                    </div>
             </div>
-
-            <div class="bg-white rounded-lg shadow-sm">
+<div class="m-auto w-3/4 sm:w-1/2">
+            <div class="bg-gray-200 rounded-lg shadow-sm">
                 <form @submit.prevent="submit" class="p-6 space-y-6">
                     <div>
                         <InputLabel for="name" value="Role Name" />
@@ -73,9 +86,9 @@ const submit = () => {
                             track-by="id"
                             label="name"
                             :placeholder="permissions.length > 0 ? 'Select Permissions' : 'No permissions available'"
-                            
+
                         />
-                         
+
                         <InputError :message="form.errors.permissions" class="mt-2" />
                     </div>
 
@@ -102,6 +115,7 @@ const submit = () => {
                     </div>
                 </form>
             </div>
+        </div>
         </div>
     </AuthLayout>
 </template>

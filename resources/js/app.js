@@ -7,6 +7,9 @@ import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import Toast, { POSITION, TYPE } from "vue-toastification";
 import "vue-toastification/dist/index.css";
+import H1 from '@/Components/H1.vue';
+import P from '@/Components/P.vue';
+import {Link, Head} from '@inertiajs/vue3';
 // Vuetify
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
@@ -31,11 +34,15 @@ createInertiaApp({
             .use(plugin)
             .use(ZiggyVue)
             .use(PrimeVue, {
-                
+
                 theme: {
                     preset: Aura,
                 },
             })
+            .component('H1', H1)
+            .component('P', P)
+            .component('Head', Head)
+            .component('Link', Link)
             .use(vuetify)
             .use(Toast, {
                 position: POSITION.TOP_RIGHT,
@@ -56,6 +63,6 @@ createInertiaApp({
             })
             .mount(el);
     },
-    
+
 });
 

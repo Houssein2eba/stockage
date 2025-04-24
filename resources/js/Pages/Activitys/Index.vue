@@ -36,7 +36,7 @@ const formatDate = (dateString) => {
 
 
 watch(date, (newDate) => {
-    
+
     const formattedDate = format(newDate, 'yyyy-MM-dd');
     router.get(`/activity`, { dates: formattedDate }, { preserveState: true, preserveScroll: true });
 });
@@ -49,13 +49,13 @@ const formatModelName = (modelType) => {
 
 <template>
     <Head title="Activities" />
-    
-        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Activity Log</h2>
+
+        <H1>Activity Log</H1>
 
         <div class="mb-4 w-1/2">
-            
-            <h1>Select Date</h1>
-        <DatePicker v-model="date" />   
+
+            <h2>Select Date</h2>
+        <DatePicker v-model="date" />
         </div>
 
         <Table class="w-full">
@@ -86,7 +86,7 @@ const formatModelName = (modelType) => {
                     </TableDataCell>
                     <TableDataCell>{{ formatDate(activity.created_at) }}</TableDataCell>
                     <TableDataCell>
-                        <Link 
+                        <Link
                             :href="route('activity.view', activity.id)"
                             class=" hover:text-green-600 hover:underline">
                             View Details
@@ -98,11 +98,11 @@ const formatModelName = (modelType) => {
                     <!-- Pagination  -->
         <div class="flex items-center justify-between mt-4">
             <div class="text-sm text-gray-700">
-                Showing <span class="font-medium">{{ activities.from }}</span> to 
-                <span class="font-medium">{{ activities.to }}</span> of 
+                Showing <span class="font-medium">{{ activities.from }}</span> to
+                <span class="font-medium">{{ activities.to }}</span> of
                 <span class="font-medium">{{ activities.total }}</span> results
             </div>
             <Pagination :links="activities.links" />
         </div>
-   
+
 </template>

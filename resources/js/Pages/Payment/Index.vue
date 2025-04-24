@@ -6,8 +6,8 @@
             <!-- Header -->
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Payment Settings</h1>
-                    <p class="text-gray-600 mt-1">Manage your payment methods</p>
+                    <H1>Payment Settings</H1>
+                    <P>Manage your payment methods</P>
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-3 bg-blue-50/80 px-4 py-2 rounded-lg border border-blue-100">
@@ -51,7 +51,7 @@
                     <div class="bg-white rounded-lg shadow w-full overflow-x-auto">
                         <div class="p-6 border-b border-gray-200">
                             <h2 class="text-lg font-medium text-gray-900">Payment Methods</h2>
-                            <p class="mt-1 text-sm text-gray-600">Manage the payment methods available in your system.</p>
+                            <P>Manage the payment methods available in your system.</P>
                         </div>
 
                         <div class="w-full overflow-x-auto">
@@ -121,8 +121,8 @@
                                                 <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                                                 </svg>
-                                                <p class="mt-2">No payment methods found</p>
-                                                <p class="text-sm text-gray-400">Add your first payment method using the form</p>
+                                                <P>No payment methods found</P>
+                                                <P>Add your first payment method using the form</P>
                                             </div>
                                         </TableDataCell>
                                     </TableRow>
@@ -154,7 +154,7 @@
                                 </svg>
                                 Add Payment Method
                             </h2>
-                            <p class="mt-1 text-sm text-gray-600">Add a new payment method to your system.</p>
+                            <P>Add a new payment method to your system.</P>
                         </div>
 
                         <form @submit.prevent="submitForm" class="p-6 space-y-6">

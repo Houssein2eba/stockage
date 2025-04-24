@@ -7,6 +7,7 @@ import InputError from '@/Components/InputError.vue'
 import InputLabel from '@/Components/InputLabel.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import TextInput from '@/Components/TextInput.vue'
+import VueMultiselect from 'vue-multiselect'
 
 const props = defineProps({
     role: {
@@ -22,7 +23,7 @@ const props = defineProps({
 const toast = useToast();
 const form = useForm({
     name: props.role.name,
-    permissions: props.role.permissions.map(p => p.id)
+    permissions: props.role.permissions.map(p => p)
 });
 
 const submit = () => {
@@ -42,8 +43,19 @@ const submit = () => {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="flex items-center justify-between mb-8">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Edit Role</h1>
-                    <p class="text-gray-600 mt-1">Modify role details and permissions</p>
+                    <H1>Edit Role</H1>
+                    <P>Modify role details and permissions</P>
+                </div>
+                <div>
+                    <Link
+                        :href="route('roles.index')"
+                        class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Back to Roles
+                    </Link>
                 </div>
             </div>
 
@@ -64,30 +76,17 @@ const submit = () => {
 
                     <div>
                         <InputLabel value="Permissions" />
-                        <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            <div
-                                v-for="permission in permissions"
-                                :key="permission.id"
-                                class="flex items-start"
-                            >
-                                <div class="flex items-center h-5">
-                                    <input
-                                        :id="'permission-' + permission.id"
-                                        type="checkbox"
-                                        :value="permission.id"
-                                        v-model="form.permissions"
-                                        class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                        aria-labelledby="'permission-' + permission.id"
-                                        aria-describedby="'permission-' + permission.id"
-                                    />
-                                </div>
-                                <div class="ml-3 text-sm">
-                                    <label :for="'permission-' + permission.id" class="font-medium text-gray-700">
-                                        {{ permission.name }}
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
+                        <VueMultiselect
+                            v-model="form.permissions"
+                            :options="permissions"
+                            :multiple="true"
+                            :close-on-select="false"
+                            :clear-on-select="false"
+                            :searchable="true"
+                            track-by="id"
+                            label="name"
+                            :placeholder="permissions.length > 0 ? 'Select Permissions' : 'No permissions available'"
+                        />
                         <InputError :message="form.errors.permissions" class="mt-2" />
                     </div>
 
@@ -117,4 +116,5 @@ const submit = () => {
         </div>
     </AuthLayout>
 </template>
+
 <style src="vue-multiselect/dist/vue-multiselect.css"></style>

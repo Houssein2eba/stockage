@@ -40,10 +40,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/', [ProfileController::class, 'destroy'])->name('profile.destroy');
     });
     // Clients Routes (resourceful)
-    Route::resource('clients', ClientsController::class)->except(['show']);
+    Route::get('/clients', [ClientsController::class, 'index'])->name('clients.index');
+    Route::get('/clients/create', [ClientsController::class, 'create'])->name('clients.create');
+    Route::post('/clients', [ClientsController::class, 'store'])->name('clients.store');
+    Route::get('/clients/{id}', [ClientsController::class, 'edit'])->name('clients.edit');
+    Route::put('/clients/{id}', [ClientsController::class, 'update'])->name('clients.update');
+    Route::delete('/clients/{id}', [ClientsController::class, 'destroy'])->name('clients.destroy');
     //sells Routes
     Route::prefix('sales')->name('sales.')->group(function () {
-        
+
         Route::get('/', [SalesController::class, 'index'])->name('index');
         Route::get('/sale/{id}', [SalesController::class, 'show'])->name('show');
         Route::get('/create', [SalesController::class, 'create'])->name('create');
@@ -54,7 +59,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{id}/invoice', [FactureController::class, 'generatePdf'])->name('invoice');
     });
 
- 
+
 });
 
 // Admin Routes

@@ -36,10 +36,23 @@ const submit = () => {
     <AuthLayout>
         <Head title="Edit Client" />
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="mb-8">
-                <h1 class="text-2xl font-bold text-gray-900">Edit Client</h1>
-                <p class="text-gray-600 mt-1">Update client information</p>
+        <div class="max-w-7xl  mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-8 flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Edit Client</h1>
+                    <p class="text-gray-600 mt-1">Update the client information</p>
+                </div>
+                <div>
+                    <Link
+                :href="route('clients.index')"
+                class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Clients
+            </Link>
+            </div>
             </div>
 
             <div class="bg-white rounded-lg shadow-sm p-6 max-w-xl">
@@ -68,7 +81,7 @@ const submit = () => {
                             title="Phone number must start with 2, 3, or 4 and be 8 digits long"
                         />
                         <InputError :message="form.errors.number" class="mt-2" />
-                        <p class="mt-1 text-sm text-gray-500">Format: Must start with 2, 3, or 4 followed by 7 digits</p>
+                        <P>Format: Must start with 2, 3, or 4 followed by 7 digits</P>
                     </div>
 
                     <div class="flex items-center justify-end gap-4">

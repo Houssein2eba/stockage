@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
-
+import { Head, Link } from '@inertiajs/vue3';
 const props = defineProps({
   activity: {
     type: Object,
@@ -30,6 +30,25 @@ const formatDate = (date) => {
 
 <template>
   <AuthLayout>
+    <Head title="Activity Details" />
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <H1>Activity Details</H1>
+          <P >View the details of the activity</P>
+
+        </div>
+        <Link
+                    :href="route('activity.index')"
+                    class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back to Activities
+                </Link>
+      </div>
+      </div>
     <div class="space-y-6">
       <div class="bg-white shadow-sm rounded-lg p-4">
         <div class="flex items-center justify-between">

@@ -5,9 +5,10 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-8 flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Create New Product</h1>
-          <p class="mt-1 text-sm text-gray-600">Add a new product to your inventory</p>
+          <H1 >Create New Product</H1>
+          <P>Add a new product to your inventory</P>
         </div>
+        <div>
         <Link
           :href="route('products.index')"
           class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -17,10 +18,11 @@
           </svg>
           Back to Products
         </Link>
+    </div>
       </div>
 
-      <div class="bg-white rounded-lg shadow max-w-3xl mx-auto">
-        <div class="px-4 py-5 sm:p-6">
+      <div class="  rounded-lg shadow bg-white max-w-3xl mx-auto">
+        <div class="px-4 py-5 sm:p-6 ">
           <form @submit.prevent="form.post(route('products.store'), {
             onSuccess: () => {
               toast.success('Product created successfully');
@@ -48,7 +50,7 @@
               <textarea
                 id="description"
                 rows="3"
-                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                class="w-full ring-1 ring-gray-300 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
                 v-model="form.description"
                 placeholder="Enter product description"
                 :class="{ 'border-red-500': form.errors.description }"

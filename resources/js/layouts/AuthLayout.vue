@@ -366,12 +366,12 @@ onMounted(() => {
       </header>
 
       <!-- Page Content -->
-      <main class="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 to-blue-50/30 p-4 md:p-6">
-        <div class="max-w-7xl mx-auto">
-          <div class="bg-white/80 backdrop-blur-sm shadow-lg rounded-xl p-6">
+      <main class="flex-1 overflow-y-auto bg-teal-50 font-sans p-4 md:p-6">
+
+          <div class=" backdrop-blur-sm ">
             <slot />
           </div>
-        </div>
+
       </main>
     </div>
   </div>

@@ -24,9 +24,10 @@ class RolesController extends Controller
             'page' => 'nullable|integer|min:1',
         ]);
         $roles = Role::with(['permissions', 'users'])
+        ->withCount('users')
             ->when($request->has('search'), function ($query) use ($request) {
                 $query->where('name', 'like', '%' . $request->input('search') . '%');
-                
+
             })
             ->when($request->has('sort'), function ($query) use ($request) {
                 if($request->input('sort') === 'users_count'){
@@ -38,7 +39,7 @@ class RolesController extends Controller
             ->where('name', '!=', 'admin')
             ->paginate(PAGINATION)
             ->withQueryString();
-
+          
         return Inertia::render('Roles/Index', [
             'roles' => RolesResource::collection($roles),
         ]);
@@ -64,7 +65,7 @@ class RolesController extends Controller
             $role->syncPermissions($permissions);
 
             $attributes = $role->toArray();
-           
+
             unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
             activity()
                 ->causedBy(auth()->user())

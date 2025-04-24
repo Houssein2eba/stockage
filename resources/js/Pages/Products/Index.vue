@@ -168,8 +168,8 @@ const cancelDelete = () => {
       <!-- Header with stats -->
       <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Product Management</h1>
-          <p class="text-gray-600 mt-1">Manage your product inventory</p>
+          <H1>Product Management</H1>
+          <P>Manage your product inventory</P>
         </div>
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-3 bg-blue-50/80 px-4 py-2 rounded-lg border border-blue-100">
@@ -351,8 +351,8 @@ const cancelDelete = () => {
                     <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                     </svg>
-                    <p class="mt-3 text-gray-600 font-medium">No products found</p>
-                    <p class="text-sm text-gray-400 mt-1">Add your first product using the form</p>
+                    <P>No products found</P>
+                    <P>Add your first product using the form</P>
                   </div>
                 </TableDataCell>
               </TableRow>
@@ -393,7 +393,7 @@ const cancelDelete = () => {
                 <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                   <h3 class="text-lg leading-6 font-medium text-gray-900">Delete Product</h3>
                   <div class="mt-2">
-                    <p class="text-sm text-gray-500">Are you sure you want to delete this product? This action cannot be undone.</p>
+                    <P>Are you sure you want to delete this product? This action cannot be undone.</P>
                   </div>
                 </div>
               </div>

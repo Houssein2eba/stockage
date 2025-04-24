@@ -2,25 +2,30 @@
   <AuthLayout>
     <Head title="Create Category" />
 
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-8 flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Create New Category</h1>
-          <p class="mt-1 text-sm text-gray-600">Add a new category to organize your products</p>
+          <H1 >Create New Category</H1>
+          <P>Add a new category to organize your Products</P>
+          
+
         </div>
-        <Link
-          :href="route('categories.index')"
-          class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
-          </svg>
-          Back to Categories
-        </Link>
+        <div>
+            <Link
+                :href="route('categories.index')"
+                class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Categories
+            </Link>
+        </div>
       </div>
 
-      <div class="bg-white rounded-lg shadow max-w-3xl mx-auto">
-        <div class="px-4 py-5 sm:p-6">
+      <div class="bg-white rounded-lg shadow lg:w-1/2 sm:w-1/3 mx-auto">
+        <div class="px-4  rounded-md py-5 sm:p-6">
           <form @submit.prevent="form.post(route('categories.store'), {
             onSuccess: () => {
               toast.success('Category created successfully');
@@ -48,7 +53,7 @@
               <textarea
                 id="description"
                 rows="3"
-                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                class="w-full rounded-md ring-1 ring-gray-300 bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
                 v-model="form.description"
                 placeholder="Enter category description"
                 :class="{ 'border-red-500': form.errors.description }"

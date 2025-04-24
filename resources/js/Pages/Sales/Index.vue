@@ -1,3 +1,98 @@
+<script setup>
+import { Head, Link } from '@inertiajs/vue3';
+import { useToast } from 'vue-toastification';
+import { format } from 'date-fns';
+import AuthLayout from '@/layouts/AuthLayout.vue';
+import Table from '@/Components/Table.vue';
+import TableRow from '@/Components/TableRow.vue';
+import TableHeaderCell from '@/Components/TableHeaderCell.vue';
+import TableDataCell from '@/Components/TableDataCell.vue';
+import TextInput from '@/Components/TextInput.vue';
+import Modal from '@/Components/Modal.vue';
+import DatePicker from 'primevue/datepicker';
+import { ref, computed, watch } from 'vue';
+import { usePagination } from '@/composables/usePagination';
+import TablePagination from '@/Components/TablePagination.vue';
+import SortableTableHeader from '@/Components/SortableTableHeader.vue';
+import VueMultiselect from 'vue-multiselect';
+import { useForm } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
+
+const props = defineProps({
+    sales: Object,
+    stats: Object,
+    filters: Object
+});
+
+const toast = useToast();
+const showDeleteModal = ref(false);
+const saleToDelete = ref(null);
+const processing = ref(false);
+const search = ref(props.filters?.search || '');
+const statusFilter = ref(props.filters?.status || '');
+const dateFilter = ref(props.filters?.date || '');
+
+// Status options for multiselect
+const statusOptions = [
+    { label: 'All Status', value: '' },
+    { label: 'Paid', value: 'paid' },
+    { label: 'Pending', value: 'pending' },
+    { label: 'Cancelled', value: 'cancelled' }
+];
+
+// Watch for search and status filter changes
+watch([search, statusFilter, dateFilter], () => {
+    router.get(route('sales.index'), {
+        search: search.value,
+        status: statusFilter.value,
+        date: dateFilter.value
+    }, {
+        preserveState: true,
+        preserveScroll: true
+    });
+});
+
+const handleSort = (field) => {
+    // Implement sorting logic here
+};
+
+const handlePageChange = (url) => {
+    // Implement pagination logic here
+};
+
+const formatPrice = (price) => {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    }).format(price);
+};
+
+const formatDate = (date) => {
+    return format(new Date(date), 'PP');
+};
+
+const confirmDelete = (saleId) => {
+    saleToDelete.value = saleId;
+    showDeleteModal.value = true;
+};
+
+const deleteSale = () => {
+    // Implement delete logic here
+};
+
+const closeDeleteModal = () => {
+    showDeleteModal.value = false;
+    saleToDelete.value = null;
+};
+const getSortIcon = (field) => {
+    // Assuming you have a sort object to track the current sort field and direction
+    const sort = ref({ field: props.filters?.sort || 'created_at', direction: props.filters?.direction || 'desc' });
+
+    if (sort.value.field !== field) return 'none';
+    return sort.value.direction === 'asc' ? 'asc' : 'desc';
+};
+</script>
+
 <template>
     <AuthLayout>
         <Head title="Sales Management" />
@@ -24,6 +119,7 @@
 
             <!-- Sales Stats -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <!-- Total Revenue -->
                 <div class="bg-white rounded-lg shadow p-6">
                     <div class="flex items-center">
                         <div class="p-3 rounded-full bg-green-100">
@@ -38,6 +134,7 @@
                     </div>
                 </div>
 
+                <!-- Total Sales -->
                 <div class="bg-white rounded-lg shadow p-6">
                     <div class="flex items-center">
                         <div class="p-3 rounded-full bg-blue-100">
@@ -52,6 +149,7 @@
                     </div>
                 </div>
 
+                <!-- Today's Sales -->
                 <div class="bg-white rounded-lg shadow p-6">
                     <div class="flex items-center">
                         <div class="p-3 rounded-full bg-yellow-100">
@@ -66,6 +164,7 @@
                     </div>
                 </div>
 
+                <!-- Pending Payments -->
                 <div class="bg-white rounded-lg shadow p-6">
                     <div class="flex items-center">
                         <div class="p-3 rounded-full bg-red-100">
@@ -95,14 +194,16 @@
                         </div>
                         <div class="flex items-center gap-4">
                             <div class="w-48">
-                                <FilterMultiselect
+                                
+                                <VueMultiselect
                                     v-model="statusFilter"
                                     :options="statusOptions"
-                                    label="Status"
+                                    :multiple="false"
+                                    :close-on-select="true"
+                                    :show-labels="false"
                                     placeholder="Select status"
-                                    track-by="value"
-                                    @update:modelValue="handleStatusChange"
-                                />
+                                    class="w-full"
+                                    />
                             </div>
                             <DatePicker
                                 v-model="dateFilter"
@@ -269,142 +370,5 @@
         </Modal>
     </AuthLayout>
 </template>
-
-<script setup>
-import { Head, Link } from '@inertiajs/vue3'
-import { useToast } from 'vue-toastification'
-import { format } from 'date-fns'
-import AuthLayout from '@/layouts/AuthLayout.vue'
-import Table from '@/Components/Table.vue'
-import TableRow from '@/Components/TableRow.vue'
-import TableHeaderCell from '@/Components/TableHeaderCell.vue'
-import TableDataCell from '@/Components/TableDataCell.vue'
-import TextInput from '@/Components/TextInput.vue'
-import Modal from '@/Components/Modal.vue'
-import DatePicker from 'primevue/datepicker'
-import { ref, computed, watch } from 'vue'
-import { usePagination } from '@/composables/usePagination';
-import TablePagination from '@/Components/TablePagination.vue';
-import SortableTableHeader from '@/Components/SortableTableHeader.vue';
-import FilterMultiselect from '@/Components/FilterMultiselect.vue';
-import { router } from '@inertiajs/vue3';
-
-const props = defineProps({
-    sales: Object,
-    stats: Object,
-    filters: Object
-})
-
-const toast = useToast()
-const showDeleteModal = ref(false)
-const saleToDelete = ref(null)
-const processing = ref(false)
-
-// Status options for multiselect
-const statusOptions = [
-    { label: 'All Status', value: '' },
-    { label: 'Paid', value: 'paid' },
-    { label: 'Pending', value: 'pending' },
-    { label: 'Cancelled', value: 'cancelled' }
-];
-
-// Initialize status filter from props
-const statusFilter = ref(
-    props.filters?.status 
-        ? statusOptions.find(option => option.value === props.filters.status) 
-        : statusOptions[0]
-);
-
-const dateFilter = ref(props.filters?.date ? new Date(props.filters.date) : null);
-
-const stats = computed(() => ({
-    totalRevenue: props.stats?.totalRevenue || 0,
-    totalSales: props.stats?.totalSales || 0,
-    todaySales: props.stats?.todaySales || 0,
-    pendingPayments: props.stats?.pendingPayments || 0
-}))
-
-// Initialize pagination with usePagination composable
-const {
-    search,
-    sort,
-    page,
-    handleSort,
-    handlePageChange,
-    getSortIcon,
-    updateRoute,
-    updateFilters
-} = usePagination({
-    routeName: 'sales.index',
-    initialFilters: props.filters,
-    initialMeta: props.sales?.meta,
-    watchDependencies: [search],
-    additionalParams: {}, 
-    debounceTime: 300
-});
-
-// Handle status filter change
-const handleStatusChange = (value) => {
-    updateFilters({ status: value?.value || '' });
-};
-
-// Handle date filter change
-const handleDateChange = (date) => {
-    updateFilters({ 
-        date: date ? format(date, 'yyyy-MM-dd') : null 
-    });
-};
-
-const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'MRU'
-    }).format(price || 0)
-}
-
-const formatDate = (date) => {
-    return format(new Date(date), 'MMM dd, yyyy HH:mm')
-}
-
-const confirmDelete = (sale) => {
-    saleToDelete.value = sale
-    showDeleteModal.value = true
-}
-
-const closeDeleteModal = () => {
-    showDeleteModal.value = false
-    saleToDelete.value = null
-    processing.value = false
-}
-
-const deleteSale = () => {
-    router.delete(route('sales.destroy', saleToDelete.value), {
-        onSuccess: () => {
-            toast.success('Sale deleted successfully')
-            showDeleteModal.value = false
-            saleToDelete.value = null
-        },
-        onError: () => {
-            toast.error('Failed to delete sale')
-            showDeleteModal.value = false
-            saleToDelete.value = null
-        },
-        preserveScroll: true
-    })
-}
-
-const markAsPaid = (sale) => {
-    router.put(route('sales.update', sale.id), {
-        status: 'paid'
-    }, {
-        onSuccess: () => {
-            toast.success('Sale marked as paid')
-        },
-        onError: () => {
-            toast.error('Failed to update sale status')
-        }
-    })
-}
-</script>
 
 <style src="vue-multiselect/dist/vue-multiselect.css"></style>

@@ -28,7 +28,7 @@ const props = defineProps({
         type: Object,
         default: () => ({})
     },
-    
+
     categories_count: {
         type: Number,
         default: 0
@@ -69,7 +69,7 @@ const handleSort = (field) => {
         sort.value.field = field;
         sort.value.direction = 'asc';
     }
-    
+
     // Keep the current page when sorting
     router.get(route('categories.index'), {
         search: search.value,
@@ -139,14 +139,14 @@ const updateCategory = () => {
 // Handle pagination link clicks
 const handlePageChange = (url) => {
     if (!url) return;
-    
+
     // Extract page number from URL
     const urlObj = new URL(url);
     const pageParam = urlObj.searchParams.get('page');
-    
+
     if (pageParam) {
         page.value = parseInt(pageParam);
-        
+
         router.get(route('categories.index'), {
             search: search.value,
             sort: sort.value.field,
@@ -168,8 +168,8 @@ const handlePageChange = (url) => {
             <!-- Header with stats -->
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Categories</h1>
-                    <p class="text-gray-600 mt-1">Manage your product categories</p>
+                    <H1>Categories</H1>
+                    <P>Manage your product categories</P>
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-3 bg-blue-50/80 px-4 py-2 rounded-lg border border-blue-100">
@@ -307,13 +307,13 @@ const handlePageChange = (url) => {
                             </TableRow>
                         </template>
                     </Table>
-                     
+
                 </div>
                  <!-- Pagination  -->
                  <div class="flex items-center justify-between mt-4">
               <div class="text-sm text-gray-700" v-if="categories_count > 0">
-                Showing <span class="font-medium">{{ categories.meta.from }}</span> to 
-                <span class="font-medium">{{ categories.meta.to }}</span> of 
+                Showing <span class="font-medium">{{ categories.meta.from }}</span> to
+                <span class="font-medium">{{ categories.meta.to }}</span> of
                 <span class="font-medium">{{ categories.meta.total }}</span> results
               </div>
                 <Pagination :links="categories.meta.links" @change="handlePageChange" />

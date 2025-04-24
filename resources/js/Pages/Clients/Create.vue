@@ -1,13 +1,14 @@
 <template>
     <AuthLayout>
         <Head title="Create Client" />
-        
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="mb-8 flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Create New Client</h1>
-                    <p class="text-gray-600 mt-1">Add a new client to your system</p>
+                    <H1>Create New Client</H1>
+                    <P>Add a new client to your system</P>
                 </div>
+                <div>
                 <Link
                     :href="route('clients.index')"
                     class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
@@ -17,10 +18,11 @@
                     </svg>
                     Back to Clients
                 </Link>
+                </div>
             </div>
 
-            <div class="bg-white rounded-lg shadow">
-                <div class="p-6">
+            <div >
+                <div class=" bg-white rounded-xl shadow-lg p-8 text-gray-900 lg:w-1/2 sm:w-1/3 mx-auto">
                     <form @submit.prevent="form.post(route('clients.store'), {
                         onSuccess: () => {
                             toast.success('Client created successfully');
