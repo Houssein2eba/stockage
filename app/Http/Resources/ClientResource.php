@@ -14,6 +14,7 @@ class ClientResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        
         return [
             "id"=> $this->id,
             "name"=>$this->name,
@@ -24,6 +25,9 @@ class ClientResource extends JsonResource
             }),
             'orders_count'=> $this->whenLoaded('orders', function () {
                 return $this->orders->count();
+            }),
+            'depts_amount'=> $this->whenLoaded('orders', function () {
+                return $this->orders->where('status', 'pending')->sum('total_amount');
             }),
         ];
     }

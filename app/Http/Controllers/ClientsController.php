@@ -12,31 +12,46 @@ class ClientsController extends Controller
 {
     public function index(Request $request)
     {
+        
         $request->validate([
             'search' => 'nullable|string',
-            'sort' => 'nullable|string|in:name,number,orders_count',
+            'sort' => 'nullable|string|in:name,number,orders_count,depts_amount,created_at',
             'direction' => 'nullable|string|in:asc,desc',
             'page' => 'nullable|integer|min:1',
+
         ]);
-        $clients = Client::query()
-            ->when($request->search, function ($query) use ($request) {
-                $query->where('name', 'like', '%' . $request->search . '%')
-                    ->orWhere('number', 'like', '%' . $request->search . '%');
-            })
-            ->when($request->sort && $request->direction, function ($query) use ($request) {
+        $clients = Client::with(['orders' => function ($q) {
+            $q->with('products'); // if you need product info
+        }])
+        ->withCount('orders') // to allow sorting by number of orders
+        ->when($request->search, function ($query) use ($request) {
+            $query->where('name', 'like', '%' . $request->search . '%')
+                ->orWhere('number', 'like', '%' . $request->search . '%');
+        })
+        ->when($request->sort && $request->direction, function ($query) use ($request) {
+            if ($request->sort === 'orders_count') {
+                $query->orderBy('orders_count', $request->direction);
+            } elseif ($request->sort === 'total_order_amount') {
+                $query->orderBy('total_order_amount', $request->direction);
+            } elseif ($request->sort === 'depts_amount') {
+                $query->orderBy('depts_amount', $request->direction);
+            } else {
                 $query->orderBy($request->sort, $request->direction);
-            })
-            ->with('orders')
-            ->latest()
-            ->paginate(PAGINATION)
-            ->withQueryString();
+            }
+        }, function ($query) {
+            $query->latest();
+        })
+        ->paginate(PAGINATION)
+        ->withQueryString();
+    
 
 
-        return inertia('Clients/Index', [
+        
+            return inertia('Clients/Index', [
              'clients' => ClientResource::collection($clients),
             'filters' => $request->only(['search', 'sort', 'direction', 'page']),
             'clients_count' => DB::table('clients')->count(),
-        ]);
+            ]);
     }
 
     public function create()

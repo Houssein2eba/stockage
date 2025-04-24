@@ -34,6 +34,7 @@ const tableHeaders = computed(() => [
     { label: 'Name', field: 'name', sortable: true },
     { label: 'Number', field: 'number', sortable: true },
     { label: 'Orders', field: 'orders_count', sortable: true },
+    {label:'Depts','field':'depts_amount','sortable':true},
     { label: 'Edit', field: null, sortable: false },
     { label: 'Delete', field: null, sortable: false }
 ]);
@@ -231,6 +232,9 @@ const handlePageChange = (url) => {
                                 </TableDataCell>
                                 <TableDataCell>
                                     {{ client.orders_count }} orders
+                                </TableDataCell>
+                                <TableDataCell>
+                                    {{ client.depts_amount }} depts
                                 </TableDataCell>
                                 <TableDataCell class="px-4 sm:px-6 py-4">
                                     
