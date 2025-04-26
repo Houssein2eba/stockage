@@ -27,7 +27,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'login' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -41,11 +41,16 @@ class LoginRequest extends FormRequest
 {
     $this->ensureIsNotRateLimited();
 
-    $credentials = $this->only('email', 'password');
+    $credentials = $this->only('login', 'password');
+    if(filter_var($this->input('login'), FILTER_VALIDATE_EMAIL)) {
+        $field='email';
+    } else {
+        $field='number';
+    }
     $remember = $this->boolean('remember');
 
     // Attempt to authenticate the user
-    if (Auth::attempt($credentials, $remember)) {
+    if (Auth::attempt([$field=> $credentials['login'],'password'=>$credentials['password']], $remember)) {
         // If authentication is successful, regenerate the session
         $this->session()->regenerate();
 
@@ -54,11 +59,11 @@ class LoginRequest extends FormRequest
 
 
 
-    // If both guards fail
+    // If authentication fails, increment the rate limiter attempts
     RateLimiter::hit($this->throttleKey());
 
     throw ValidationException::withMessages([
-        'email' => trans('auth.failed'),
+        'login' => trans('auth.failed'),
     ]);
 }
 
@@ -78,7 +83,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
+            'login' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
@@ -90,6 +95,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        return Str::transliterate(Str::lower($this->string('login')).'|'.$this->ip());
     }
 }

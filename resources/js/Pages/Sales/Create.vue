@@ -211,7 +211,8 @@ const props = defineProps({
     payments: {
         type: Array,
         default: () => []
-    }
+    },
+
 })
 console.log(props.errors)
 const form = useForm({
@@ -265,8 +266,13 @@ const submitForm = () => {
             toast.success('Sale created successfully');
             form.reset();
         },
-        onError: () => {
-            toast.error('Failed to create sale')
+        onError: (errors) => {
+            Object.keys(errors).forEach((key) => {
+                toast.error(errors[key], {
+                    position: 'top-right',
+                    timeout: 5000,
+                });
+            });
         }
     })
 }
