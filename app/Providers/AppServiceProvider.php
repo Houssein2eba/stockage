@@ -2,11 +2,15 @@
 
 namespace App\Providers;
 
+use App\Broadcasting\TwilioChannel;
 use App\Models\Admin;
+use App\Models\Product;
+use App\Observers\ProductObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Permission\Models\Permission;
@@ -37,8 +41,13 @@ class AppServiceProvider extends ServiceProvider
 
        JsonResource::withoutWrapping();
 
-    //    Model::automaticallyEagerLoadRelationships();
+       Model::automaticallyEagerLoadRelationships();
 
+       Product::observe(ProductObserver::class);
+
+       Notification::extend('twilio', function ($app) {
+        return new \App\Channels\TwilioChannel();
+    });
 
 
 
