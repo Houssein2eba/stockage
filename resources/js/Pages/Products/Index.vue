@@ -145,8 +145,13 @@ const deleteProduct = () => {
       showDeleteModal.value = false;
       productToDelete.value = null;
     },
-    onError: () => {
-      toast.error('Failed to delete product');
+    onError: (errors) => {
+      Object.keys(errors).forEach((key) => {
+        toast.error(errors[key], {
+          position: 'top-right',
+          timeout: 5000,
+        });
+      });
       showDeleteModal.value = false;
       productToDelete.value = null;
     },

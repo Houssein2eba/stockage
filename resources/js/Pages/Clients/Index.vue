@@ -95,10 +95,13 @@ const deleteClient = () => {
             showDeleteModal.value = false;
             clientToDelete.value = null;
         },
-        onError: () => {
-            toast.error('Failed to delete client');
-            showDeleteModal.value = false;
-            clientToDelete.value = null;
+        onError: (errors) => {
+            Object.keys(errors).forEach((key) => {
+                toast.error(errors[key], {
+                    position: 'top-right',
+                    timeout: 5000,
+                });
+            });
         },
     });
 };
@@ -125,6 +128,10 @@ const handlePageChange = (url) => {
         });
     }
 };
+const amountFormat = (amount) => {
+    return Number(amount).toFixed(2);
+};
+
 </script>
 
 <template>
@@ -225,16 +232,21 @@ const handlePageChange = (url) => {
                         <template #body>
                             <TableRow v-for="client in props.clients.data" :key="client.id" class="hover:bg-gray-50/50 transition-colors">
                                 <TableDataCell class="px-4 sm:px-6 py-4">
+                                    <Link
+                                        :href="route('clients.show', client.id)"
+                                        class="text-blue-600 hover:text-blue-900 transition-colors flex items-center gap-1 whitespace-nowrap"
+                                    >
                                     <span class="font-medium text-gray-900">{{ client.name }}</span>
+                                </Link>
                                 </TableDataCell>
                                 <TableDataCell class="px-4 sm:px-6 py-4">
                                     <div class="text-gray-600">{{ client.number }}</div>
                                 </TableDataCell>
                                 <TableDataCell>
-                                    {{ client.orders_count }} orders
+                                    {{ client.orders_count }} 
                                 </TableDataCell>
                                 <TableDataCell>
-                                    {{ client.depts_amount }} depts
+                                    {{ amountFormat(client.depts_amount) }} MRU
                                 </TableDataCell>
                                 <TableDataCell class="px-4 sm:px-6 py-4">
                                     

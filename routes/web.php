@@ -43,6 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/clients', [ClientsController::class, 'index'])->name('clients.index');
     Route::get('/clients/create', [ClientsController::class, 'create'])->name('clients.create');
     Route::post('/clients', [ClientsController::class, 'store'])->name('clients.store');
+    Route::get('client/show/{id}', [ClientsController::class, 'show'])->name('clients.show');
     Route::get('/clients/{id}', [ClientsController::class, 'edit'])->name('clients.edit');
     Route::put('/clients/{id}', [ClientsController::class, 'update'])->name('clients.update');
     Route::delete('/clients/{id}', [ClientsController::class, 'destroy'])->name('clients.destroy');

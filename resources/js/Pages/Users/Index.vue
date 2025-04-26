@@ -39,9 +39,13 @@ const deleteUser=(user)=> {
       toast.success('User deleted successfully')
     },
     onError: (errors) => {
-      // Show error message
-      toast.error('Failed to delete user')
-    },
+            Object.keys(errors).forEach((key) => {
+                toast.error(errors[key], {
+                    position: 'top-right',
+                    timeout: 5000,
+                });
+            });
+        },
     onFinish: () => {
       showConfirmDeleteUserModal = false;
     }

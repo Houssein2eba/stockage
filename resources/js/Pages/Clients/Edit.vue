@@ -25,8 +25,13 @@ const submit = () => {
         onSuccess: () => {
             toast.success('Client updated successfully');
         },
-        onError: () => {
-            toast.error('Failed to update client');
+        onError: (errors) => {
+            Object.keys(errors).forEach((key) => {
+                toast.error(errors[key], {
+                    position: 'top-right',
+                    timeout: 5000,
+                });
+            });
         }
     });
 };

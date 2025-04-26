@@ -102,8 +102,13 @@ const deleteCategory = () => {
             toast.success("Category deleted successfully");
             showDeleteModal.value = false;
         },
-        onError: () => {
-            toast.error("Failed to delete category");
+        onError: (errors) => {
+            Object.keys(errors).forEach((key) => {
+                toast.error(errors[key], {
+                    position: 'top-right',
+                    timeout: 5000,
+                });
+            });
         },
     });
 };
@@ -130,8 +135,13 @@ const updateCategory = () => {
             showEditModal.value = false;
             editForm.reset();
         },
-        onError: () => {
-            toast.error("Failed to update category");
+        onError: (errors) => {
+            Object.keys(errors).forEach((key) => {
+                toast.error(errors[key], {
+                    position: 'top-right',
+                    timeout: 5000,
+                });
+            });
         },
     });
 };

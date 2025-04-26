@@ -102,8 +102,13 @@ const deleteSale = () => {
             closeDeleteModal();
             toast.success('Sale deleted successfully');
         },
-        onError: () => {
-            toast.error('Failed to delete sale');
+        onError: (errors) => {
+            Object.keys(errors).forEach((key) => {
+                toast.error(errors[key], {
+                    position: 'top-right',
+                    timeout: 5000,
+                });
+            });
         },
         onFinish: () => {
             processing.value = false;

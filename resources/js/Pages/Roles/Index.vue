@@ -113,8 +113,13 @@ const deleteRole = () => {
             toast.success('Role deleted successfully');
             showDeleteModal.value = false;
         },
-        onError: () => {
-            toast.error('Failed to delete role');
+        onError: (errors) => {
+            Object.keys(errors).forEach((key) => {
+                toast.error(errors[key], {
+                    position: 'top-right',
+                    timeout: 5000,
+                });
+            });
         },
     });
 };

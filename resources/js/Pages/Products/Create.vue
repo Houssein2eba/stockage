@@ -28,9 +28,14 @@
               toast.success('Product created successfully');
               router.visit(route('products.index'));
             },
-            onError: () => {
-              toast.error('Failed to create product');
-            },
+            onError: (errors) => {
+            Object.keys(errors).forEach((key) => {
+                toast.error(errors[key], {
+                    position: 'top-right',
+                    timeout: 5000,
+                });
+            });
+        },
           })" class="space-y-6">
             <div>
               <InputLabel for="name" value="Product Name" class="mb-1.5" />

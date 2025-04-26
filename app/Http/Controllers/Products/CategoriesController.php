@@ -8,6 +8,7 @@ use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use App\Traits\Sortable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class CategoriesController extends Controller
@@ -54,17 +55,23 @@ class CategoriesController extends Controller
 
     public function store(CategoriesRequest $request){
 
-        $category = Category::create([
-            'name'=>$request->name,
-            'description'=>$request->description,
-        ]);
-        $attributes = $category->toArray();
-        unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
-        activity()
-            ->causedBy(auth()->user())
-            ->performedOn($category)
-            ->withProperties(['attributes' => $attributes])
-            ->log('Category Created');
+        try{
+            DB::beginTransaction();
+            $category = Category::create($request->all());
+            $category->refresh();
+            $attributes = $category->toArray();
+            unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($category)
+                ->withProperties(['attributes' => $attributes])
+                ->log('Category Created');
+            DB::commit();
+        }catch (\Exception $e){
+            DB::rollBack();
+            return back()->withErrors('Error creating category: ' . $e->getMessage());
+        }
+        
         return back();
     }
     public function destroy($id){

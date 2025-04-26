@@ -348,8 +348,13 @@ const submitForm = () => {
             logoPreview.value = null;
             toast.success('Payment method added successfully');
         },
-        onError: () => {
-            toast.error('Failed to add payment method');
+        onError: (errors) => {
+            Object.keys(errors).forEach((key) => {
+                toast.error(errors[key], {
+                    position: 'top-right',
+                    timeout: 5000,
+                });
+            });
         }
     });
 };
@@ -361,9 +366,14 @@ const deletePayment = (id) => {
             onSuccess: () => {
                 toast.success('Payment method deleted successfully');
             },
-            onError: () => {
-                toast.error('Failed to delete payment method');
-            }
+            onError: (errors) => {
+            Object.keys(errors).forEach((key) => {
+                toast.error(errors[key], {
+                    position: 'top-right',
+                    timeout: 5000,
+                });
+            });
+        }
         });
     }
 };

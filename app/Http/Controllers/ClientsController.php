@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ClientResource;
 use App\Http\Requests\ClientRequest;
+use App\Http\Resources\OrderResource;
 use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -53,6 +54,22 @@ class ClientsController extends Controller
             'clients_count' => DB::table('clients')->count(),
             ]);
     }
+    public function show($id)
+{
+    $client = Client::with('orders')->findOrFail($id);
+
+    $orders = $client->orders()
+        ->with('products')
+        ->latest()
+        ->paginate(PAGINATION) 
+        ->withQueryString();
+
+    return inertia('Clients/Show', [
+        'client' => new ClientResource($client),
+        'orders' => OrderResource::collection($orders),
+    ]);
+}
+
 
     public function create()
     {

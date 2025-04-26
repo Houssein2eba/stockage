@@ -29,8 +29,12 @@ const submit = () => {
             form.reset();
         },
         onError: (errors) => {
-            toast.error('Failed to create role');
-            console.error(errors);
+            Object.keys(errors).forEach((key) => {
+                toast.error(errors[key], {
+                    position: 'top-right',
+                    timeout: 5000,
+                });
+            });
         }
     });
 };

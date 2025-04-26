@@ -236,8 +236,13 @@ const updateSale = () => {
         onSuccess: () => {
             toast.success('Sale updated successfully')
         },
-        onError: () => {
-            toast.error('Failed to update sale')
+        onError: (errors) => {
+            Object.keys(errors).forEach((key) => {
+                toast.error(errors[key], {
+                    position: 'top-right',
+                    timeout: 5000,
+                });
+            });
         }
     })
 }

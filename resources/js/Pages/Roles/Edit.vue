@@ -31,8 +31,13 @@ const submit = () => {
         onSuccess: () => {
             toast.success('Role updated successfully');
         },
-        onError: () => {
-            toast.error('Failed to update role');
+        onError: (errors) => {
+            Object.keys(errors).forEach((key) => {
+                toast.error(errors[key], {
+                    position: 'top-right',
+                    timeout: 5000,
+                });
+            });
         }
     });
 };
