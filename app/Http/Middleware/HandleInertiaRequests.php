@@ -33,7 +33,8 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
 
-    $user = User::find(1) ?? null;
+    $user = auth()->user() ?? null;
+
 
 
     return array_merge(parent::share($request), [
@@ -42,8 +43,14 @@ class HandleInertiaRequests extends Middleware
             'user' => $user ?? null,
             'permissions' =>$user ? PermissionsResource::collection($user->getPermissionsViaRoles())  : [],
             'roles' => $user ? new RolesResource($user->roles->first()) : [],
+            'notifications' => fn () => $request->user()
+            ? $request->user()->unreadNotifications
+            : null,
+        'notificationCount' => fn () => $request->user()
+            ? $request->user()->unreadNotifications->count()
+            : 0,
         ],
-        
+
     ]);
     }
 }

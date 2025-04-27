@@ -14,6 +14,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Users\UsersController;
 use App\Models\Order;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -119,7 +120,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::post('/', [PaymentMethodController::class, 'store'])->name('store');
         Route::delete('/{payment}', [PaymentMethodController::class, 'destroy'])->name('destroy');
     });
-
+    //Notification routes
+    Route::get('/notifications', [\App\Http\Controllers\Notifications\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/mark-as-read/{id}', [\App\Http\Controllers\Notifications\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    
+    
     Route::post('/status/{id}',function (Request $request, $id) {
         $order = Order ::findOrFail($id);
         $order->update(['status' => $request->status]);

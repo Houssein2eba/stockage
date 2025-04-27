@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Models\Admin;
+use App\Models\Product;
+use App\Observers\ProductObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
@@ -39,7 +41,7 @@ class AppServiceProvider extends ServiceProvider
 
        Model::automaticallyEagerLoadRelationships();
 
-
+       Product::observe(ProductObserver::class);
 
 
 

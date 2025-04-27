@@ -3,6 +3,9 @@
 namespace App\Observers;
 
 use App\Models\Product;
+use App\Models\User;
+use App\Notifications\LowStockNotification;
+use Illuminate\Support\Facades\Notification;
 
 class ProductObserver
 {
@@ -19,7 +22,12 @@ class ProductObserver
      */
     public function updated(Product $product): void
     {
-        //
+        if($product->isDirty('quantity') && $product->quantity <= $product->min_quantity) {
+            $users=User::all();
+            foreach($users as $user) {
+                Notification::send($user, new LowStockNotification($product));
+            }
+        }
     }
 
     /**

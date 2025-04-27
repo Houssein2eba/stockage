@@ -1,16 +1,80 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
+import { Link, router } from '@inertiajs/vue3';
 import SidebarLink from '@/Components/SidebarLink.vue';
 import { usePermission } from '@/composables/permissions';
 import { useAdmin } from '@/composables/admins';
+import { format } from 'date-fns';
+import { usePage } from '@inertiajs/vue3';
 
-// Reactive state
+// Notification System
+const showNotifications = ref(false);
+const page = usePage();
+
+// Notification state management
+const notifications = ref([...page.props.auth.notifications || []]);
+const unreadNotificationsCount = ref(page.props.auth.notificationCount || 0);
+
+// Watch for page updates
+watch(() => page.props.auth.notifications, (newVal) => {
+  notifications.value = [...newVal || []];
+});
+
+watch(() => page.props.auth.notificationCount, (newVal) => {
+  unreadNotificationsCount.value = newVal || 0;
+});
+
+const formatDate = (date) => {
+  return format(new Date(date), 'MMM d, yyyy h:mm a');
+};
+
+const markAsRead = (id) => {
+  router.post(route('notifications.markAsRead', { id }), {}, {
+    preserveScroll: true,
+    onSuccess: () => {
+      const notification = notifications.value.find(n => n.id === id);
+      if (notification && !notification.read_at) {
+        notification.read_at = new Date().toISOString();
+        unreadNotificationsCount.value = Math.max(0, unreadNotificationsCount.value - 1);
+      }
+    }
+  });
+};
+
+const toggleNotifications = () => {
+  showNotifications.value = !showNotifications.value;
+  if (showNotifications.value) {
+    router.reload({
+      only: ['auth.notifications', 'auth.notificationCount'],
+      preserveScroll: true,
+      preserveState: true,
+    });
+  }
+};
+
+// Polling setup
+let pollInterval;
+onMounted(() => {
+  pollInterval = setInterval(() => {
+    router.reload({
+      only: ['auth.notifications', 'auth.notificationCount'],
+      preserveScroll: true,
+      preserveState: true,
+    });
+  }, 60000);
+});
+
+onUnmounted(() => {
+  clearInterval(pollInterval);
+});
+
+// Sidebar State
 const isSidebarOpen = ref(false);
 const isUsersDropdownOpen = ref(false);
 const isPostsDropdownOpen = ref(false);
 const isProductsDropdownOpen = ref(false);
 const isClientsDropdownOpen = ref(false);
+
 // Composable functions
 const { hasPermission } = usePermission();
 const { hasRole } = usePermission();
@@ -25,43 +89,41 @@ const toggleUsersDropdown = () => {
   isUsersDropdownOpen.value = !isUsersDropdownOpen.value;
   isPostsDropdownOpen.value = false;
   isProductsDropdownOpen.value = false;
-    isClientsDropdownOpen.value = false;
+  isClientsDropdownOpen.value = false;
 };
 
 const togglePostsDropdown = () => {
   isPostsDropdownOpen.value = !isPostsDropdownOpen.value;
   isUsersDropdownOpen.value = false;
   isProductsDropdownOpen.value = false;
-    isClientsDropdownOpen.value = false;
+  isClientsDropdownOpen.value = false;
 };
+
 const toggleProductsDropdown = () => {
   isProductsDropdownOpen.value = !isProductsDropdownOpen.value;
   isUsersDropdownOpen.value = false;
   isPostsDropdownOpen.value = false;
-    isClientsDropdownOpen.value = false;
+  isClientsDropdownOpen.value = false;
 };
+
 const toggleClientsDropdown = () => {
   isClientsDropdownOpen.value = !isClientsDropdownOpen.value;
   isUsersDropdownOpen.value = false;
   isPostsDropdownOpen.value = false;
-    isProductsDropdownOpen.value = false;
+  isProductsDropdownOpen.value = false;
 };
 
-// Handle body overflow on mobile
+// Mobile sidebar handling
 watch(isSidebarOpen, (newVal) => {
   if (window.innerWidth < 1024) {
     document.body.style.overflow = newVal ? 'hidden' : 'auto';
   }
 });
 
-// Close sidebar on larger screens
+// Responsive sidebar
 onMounted(() => {
   const handleResize = () => {
-    if (window.innerWidth >= 1024) {
-      isSidebarOpen.value = true;
-    } else {
-      isSidebarOpen.value = false;
-    }
+    isSidebarOpen.value = window.innerWidth >= 1024;
   };
 
   handleResize();
@@ -69,8 +131,49 @@ onMounted(() => {
 });
 </script>
 
+
 <template>
   <div class="flex h-screen bg-slate-50">
+    <!-- Notification Bell Icon and Dropdown -->
+    <div class="fixed top-4 right-4 z-50">
+      <button @click="toggleNotifications" class="relative p-2 text-gray-600 hover:text-blue-600 focus:outline-none">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+        <span v-if="unreadNotificationsCount> 0" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+          {{ unreadNotificationsCount }}
+        </span>
+      </button>
+
+      <!-- Notifications Dropdown -->
+      <div v-if="showNotifications" class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl overflow-hidden">
+        <div class="p-4 border-b bg-gray-50">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900">Notifications</h3>
+            <Link :href="route('notifications.index')" class="text-sm text-blue-600 hover:text-blue-800">View All</Link>
+          </div>
+        </div>
+        <div class="max-h-96 overflow-y-auto">
+          <div v-if="notifications.length > 0" class="divide-y">
+            <div v-for="notification in notifications" :key="notification.id" class="p-4 border-b hover:bg-gray-50">
+              <div class="flex items-center justify-between">
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-gray-900">{{ notification.data.title }}</p>
+                  <p class="text-sm text-gray-600">{{ notification.data.message }}</p>
+                  <p class="text-xs text-gray-500 mt-1">{{ formatDate(notification.created_at) }}</p>
+                </div>
+                <button v-if="!notification.read_at" @click="markAsRead(notification.id)" class="ml-4 text-sm text-blue-600 hover:text-blue-800">
+                  Mark as read
+                </button>
+              </div>
+            </div>
+          </div>
+          <div  class="p-4 text-center text-gray-600">
+            No notifications
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- Mobile Backdrop -->
     <div
       v-if="isSidebarOpen"
