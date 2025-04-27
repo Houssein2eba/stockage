@@ -64,6 +64,7 @@ class StockSeeder extends Seeder
                 'price' => 999.99,
                 'quantity' => 50,
                 'min_quantity' => 10,
+                'cost' => 800,
                 'image' => 'products/laptop.jpg',
                 'categories' => ['Electronics']
             ],
@@ -73,6 +74,7 @@ class StockSeeder extends Seeder
                 'price' => 19.99,
                 'quantity' => 100,
                 'min_quantity' => 20,
+                'cost' => 10,
                 'image' => 'products/tshirt.jpg',
                 'categories' => ['Clothing']
             ],
@@ -82,6 +84,7 @@ class StockSeeder extends Seeder
                 'price' => 79.99,
                 'quantity' => 30,
                 'min_quantity' => 5,
+                'cost' => 50,
                 'image' => 'products/coffee-maker.jpg',
                 'categories' => ['Home & Kitchen', 'Electronics']
             ]
@@ -95,9 +98,9 @@ class StockSeeder extends Seeder
         foreach ($products as $productData) {
             $categories = $productData['categories'];
             unset($productData['categories']);
-            
+
             $product = Product::create($productData);
-            
+
             // Attach categories
             $categoryIds = Category::whereIn('name', $categories)->pluck('id');
             $product->categories()->attach($categoryIds);

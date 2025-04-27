@@ -24,9 +24,12 @@ class ProductsController extends Controller
             'direction' => 'nullable|string|in:asc,desc',
             'page' => 'nullable|integer|min:1',
         ]);
-        
+
+
+
+
         $products = Product::query()
-            ->with('categories')
+            ->with(['categories', 'orders'])
             ->when($request->search, function ($query) use ($request) {
                 $query->where(function($q) use ($request) {
                     $q->where('name', 'like', "%{$request->search}%")
@@ -160,7 +163,7 @@ class ProductsController extends Controller
         activity()
             ->causedBy(auth()->user())
             ->log('Products Exported');
-            
+
             return Excel::download(new ProductsExport(), 'products.xlsx');
     }
 }
