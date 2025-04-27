@@ -14,5 +14,8 @@ class Client extends Model
     {
         return $this->hasMany(Order::class);
     }
+    public function products(){
+        return $this->hasManyThrough(Product::class, Order::class);
+    }
     
 }

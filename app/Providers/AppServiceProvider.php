@@ -35,6 +35,7 @@ class AppServiceProvider extends ServiceProvider
             if($user->hasRole('admin')){
                 return true;
             }
+            return null;
         });
 
        JsonResource::withoutWrapping();
