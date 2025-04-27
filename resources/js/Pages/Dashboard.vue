@@ -78,7 +78,7 @@ const formatPrice = (value) => {
                         </div>
                         <div class="mt-4">
                             <Link
-                            
+
                             class="text-sm font-medium text-red-600 hover:text-red-500"
                             :href="route('products.index', { filter: 'low-stock' })"
                             >  View Low Stock</Link>
@@ -193,6 +193,39 @@ const formatPrice = (value) => {
                                             {{ sale.status }}
                                         </span>
                                     </TableDataCell>
+                                </TableRow>
+                            </template>
+                        </Table>
+                    </div>
+                </div>
+
+                <!-- Popular products -->
+                <div class="mb-8 bg-white rounded-lg shadow-md">
+                    <div class="flex items-center justify-between px-6 py-4 border-b">
+                        <h3 class="text-lg font-semibold text-gray-700">Popular Products</h3>
+                        <a href="/sales" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">View All</a>
+                    </div>
+                    <div class="p-6">
+                        <Table class="w-full">
+                            <template #header>
+                                <TableRow>
+                                    <TableHeaderCell>Name</TableHeaderCell>
+                                    <TableHeaderCell>Description</TableHeaderCell>
+                                    <TableHeaderCell>Price</TableHeaderCell>
+                                    <TableHeaderCell>Sold</TableHeaderCell>
+                                    <TableHeaderCell>Total Revenue</TableHeaderCell>
+                                </TableRow>
+                            </template>
+                            <template #body>
+                                <TableRow v-for="product in props.stats.popular_products" :key="product.id">
+                                    <TableDataCell class="py-3">{{ product.name }}</TableDataCell>
+                                    <TableDataCell class="py-3">
+                                        {{ product.description }}
+
+                                    </TableDataCell>
+                                    <TableDataCell class="py-3">{{ formatPrice(product.price) }} MRU</TableDataCell>
+                                    <TableDataCell class="py-3">{{ product.items_sold }} MRU</TableDataCell>
+                                    <TableDataCell class="py-3">{{ formatPrice(product.total_revenue) }} MRU</TableDataCell>
                                 </TableRow>
                             </template>
                         </Table>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\productResource;
 use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\Order;
@@ -17,6 +18,31 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // Get popular products (top 5 most sold)
+        $popular = Product::query()
+    ->select([
+        'products.id',
+        'products.name',
+        'products.price',
+        'products.description',
+        DB::raw('COUNT(DISTINCT order_details.order_id) as orders_count'),
+        DB::raw('SUM(order_details.quantity) as items_sold'),
+        DB::raw('SUM(order_details.total_amount) as total_revenue'),
+    ])
+    ->leftJoin('order_details', 'products.id', '=', 'order_details.product_id')
+    ->leftJoin('orders', 'order_details.order_id', '=', 'orders.id')
+    ->groupBy('products.id')
+    ->whereHas('orders')
+    ->orderByDesc('items_sold')
+    ->take(5)
+    ->get();
+
+
+
+        // Return as collection using ProductResource
+
+
+
         $stats = [
             'totalProducts' => Product::count(),
             'lowStockCount' => Product::whereRaw('quantity <= min_quantity')->count(),
@@ -30,8 +56,10 @@ class DashboardController extends Controller
                 ->where('status', 'paid')
                 ->join('order_details', 'orders.id', '=', 'order_details.order_id')
                 ->sum('order_details.total_amount'),
-            
+            'popular_products' => $popular,
+
         ];
+
         $stats['dueAmount']=$stats['totalRevenue']-$stats['paidAmount'];
 
         $recentSales = OrderResource::collection(Order::with('client')

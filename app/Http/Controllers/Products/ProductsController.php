@@ -44,7 +44,7 @@ class ProductsController extends Controller
             ->when($request->sort && $request->direction, function ($query) use ($request) {
                 $query->orderBy($request->sort, $request->direction);
             })
-            ->when($request->filter, function ($query) {
+            ->when($request->filter, function ($query): void {
                 $query->whereRaw('quantity <= min_quantity');
             })
             ->latest()
@@ -56,6 +56,13 @@ class ProductsController extends Controller
             'products' => ProductResource::collection($products),
             'products_count' => DB::table('products')->count(),
             'filters' => $request->only(['search', 'category', 'sort', 'direction'])
+        ]);
+    }
+    public function show($id)
+    {
+        $product = Product::with(['categories', 'orders'])->findOrFail($id);
+        return inertia('Products/Show', [
+            'product' => new productResource($product),
         ]);
     }
 

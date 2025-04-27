@@ -34,6 +34,14 @@ class productResource extends JsonResource
             'categories'=>$this->whenLoaded('categories', fn () => $this->categories),
             'created_at'=>$this->created_at,
             'cost'=>$this->cost,
+            'updated_at'=>$this->updated_at,
+            'sold'=>$this->whenLoaded('orders', function () {
+                return $this->orders->sum(function ($order) {
+                    return $order->pivot->quantity;
+                });
+            }),
+            
+
         ];
     }
 }

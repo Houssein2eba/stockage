@@ -109,6 +109,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('/create', [ProductsController::class, 'create'])->name('create');
         Route::post('/', [ProductsController::class, 'store'])->name('store');
         Route::get('/export', [ProductsController::class, 'export'])->name('export');
+        Route::get('/{id}/show', [ProductsController::class, 'show'])->name('show');
         Route::get('/{id}', [ProductsController::class, 'edit'])->name('edit');
         Route::put('/{id}', [ProductsController::class, 'update'])->name('update');
         Route::delete('/{id}', [ProductsController::class, 'destroy'])->name('destroy');
@@ -123,15 +124,15 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     //Notification routes
     Route::get('/notifications', [\App\Http\Controllers\Notifications\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/mark-as-read/{id}', [\App\Http\Controllers\Notifications\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
-    
-    
+
+
     Route::post('/status/{id}',function (Request $request, $id) {
         $order = Order ::findOrFail($id);
         $order->update(['status' => $request->status]);
         return redirect()->back()->with('success', 'Order status updated successfully.');
     })->name('orders.status');
-    
-  
+
+
 });
 
 

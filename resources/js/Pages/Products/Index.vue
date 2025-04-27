@@ -70,7 +70,7 @@ const handleSort = (field) => {
         sort.value.field = field;
         sort.value.direction = 'asc';
     }
-    
+
     // Keep the current page when sorting
     router.get(route('products.index'), {
         search: search.value,
@@ -87,14 +87,14 @@ const handleSort = (field) => {
 // Handle pagination link clicks
 const handlePageChange = (url) => {
     if (!url) return;
-    
+
     // Extract page number from URL
     const urlObj = new URL(url);
     const pageParam = urlObj.searchParams.get('page');
-    
+
     if (pageParam) {
         page.value = parseInt(pageParam);
-        
+
         router.get(route('products.index'), {
             search: search.value,
             category: selectedCategory.value,
@@ -289,7 +289,13 @@ const exportExcel=() => {
             <template #body>
               <TableRow v-for="product in props.products.data" :key="product.id" class="hover:bg-gray-50/50 transition-colors">
                 <TableDataCell class="py-4 pl-6">
-                  <div class="font-medium text-gray-900">{{ product.name }}</div>
+
+                  <Link
+                    :href="route('products.show', product.id)"
+                    class="text-blue-600 hover:text-blue-900 transition-colors font-medium"
+                  >
+                    {{ product.name }}
+                  </Link>
                 </TableDataCell>
                 <TableDataCell class="text-gray-600 text-sm">
                   <div class="line-clamp-2">{{ product.description || "No description" }}</div>
@@ -375,13 +381,13 @@ const exportExcel=() => {
             </template>
           </Table>
         </div>
-        
+
         <!-- Pagination -->
         <div class="px-6 py-4 border-t border-gray-200">
           <div class="flex items-center justify-between">
             <div class="text-sm text-gray-700" v-if="props.products_count > 0">
-              Showing <span class="font-medium">{{ props.products.meta.from }}</span> to 
-              <span class="font-medium">{{ props.products.meta.to }}</span> of 
+              Showing <span class="font-medium">{{ props.products.meta.from }}</span> to
+              <span class="font-medium">{{ props.products.meta.to }}</span> of
               <span class="font-medium">{{ props.products.meta.total }}</span> results
             </div>
             <Pagination v-if="props.products.meta && props.products.meta.links" :links="props.products.meta.links" @change="handlePageChange" />
