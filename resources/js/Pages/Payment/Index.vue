@@ -182,6 +182,7 @@
                                             class="hidden"
                                             @change="updateLogo"
                                             accept="image/*"
+                                            :class="{ 'ring-1 ring-red-500 mt-2': form.errors.logo }"
                                         />
                                         <span>Select Logo</span>
                                     </label>

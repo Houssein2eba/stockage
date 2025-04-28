@@ -23,6 +23,7 @@ class OrderRequest extends FormRequest
      */
     public function rules(): array
     {
+        dd($this->all());
 
         $isClient = $this->client_id===null ? false : true;
         

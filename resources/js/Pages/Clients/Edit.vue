@@ -70,6 +70,7 @@ const submit = () => {
                             type="text"
                             class="mt-1 block w-full"
                             required
+                            :class="{ 'ring-1 ring-red-500  mt-2': form.errors.name }"
                         />
                         <InputError :message="form.errors.name" class="mt-2" />
                     </div>
@@ -84,6 +85,7 @@ const submit = () => {
                             required
                             pattern="^[2-4][0-9]{7}$"
                             title="Phone number must start with 2, 3, or 4 and be 8 digits long"
+                            :class="{ 'ring-1 ring-red-500  mt-2': form.errors.number }"
                         />
                         <InputError :message="form.errors.number" class="mt-2" />
                         <P>Format: Must start with 2, 3, or 4 followed by 7 digits</P>

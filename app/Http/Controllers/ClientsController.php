@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ClientsExport;
 use App\Http\Resources\ClientResource;
 use App\Http\Requests\ClientRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Excel;
 
 class ClientsController extends Controller
 {
@@ -139,5 +141,12 @@ class ClientsController extends Controller
         });
 
         return back();
+    }
+
+    public function export(){
+        activity()->causedBy(auth()->user())->log('Clients Exported')
+        
+        ;
+        return \Maatwebsite\Excel\Facades\Excel::download(new ClientsExport(), 'clients.xlsx');
     }
 }

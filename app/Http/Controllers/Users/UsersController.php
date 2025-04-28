@@ -14,12 +14,12 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\UserssExport;
+use App\Exports\UsersExport;
 class UsersController extends Controller
 {
     public function export()
     {
-        return Excel::download(new UserssExport(), 'users.xlsx');
+        return Excel::download(new UsersExport(), 'users.xlsx');
     }
     public function index(Request $request): Response
     {

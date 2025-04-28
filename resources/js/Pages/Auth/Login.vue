@@ -58,13 +58,14 @@ const submit = () => {
                     required
                     autofocus
                     autocomplete="username"
+                    :class="{ 'ring-1 ring-red-500  mt-2': form.errors.login }"
                 />
 
                 <InputError class="mt-2" :message="form.errors.login" />
             </div>
 
             <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+                <InputLabel for="password" value="Password" class="animate-pulse" />
 
                 <TextInput
                     id="password"
@@ -73,8 +74,9 @@ const submit = () => {
                     v-model="form.password"
                     required
                     autocomplete="current-password"
+                    :class="{ 'ring-1 ring-red-500  mt-2': form.errors.password }"
                 />
-
+                 
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>
 

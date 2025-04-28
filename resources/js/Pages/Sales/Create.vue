@@ -3,11 +3,10 @@
         <Head title="Create Sale" />
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            
             <div class="flex items-center justify-between mb-8">
                 <div>
-                    <H1 >Create Sale</H1>
-                    <P >Create a new sale record</P>
+                    <h1 class="text-2xl font-bold text-gray-900">Create Sale</h1>
+                    <p class="text-sm text-gray-500">Create a new sale record</p>
                 </div>
                 <div>
                     <Link
@@ -27,32 +26,17 @@
                     <!-- Client Selection -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Client</label>
-                        <Combobox v-model="form.client_id">
-                            <div class="relative">
-                                <ComboboxInput 
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                    :displayValue="(id) => clients.find(client => client.id === id)?.name || ''"
-                                    @change="searchClients"
-                                    placeholder="Select or search client..." />
-                                    <InputError class="mt-1.5" :message="form.errors.client_id" />
-
-                                 <ComboboxOptions class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                                    <ComboboxOption
-                                        v-for="client in clients"
-                                        :key="client.id"
-                                        :value="client.id"
-                                        class="relative cursor-default select-none py-2 pl-3 pr-9 hover:bg-blue-50"
-                                        v-slot="{ active, selected }"
-                                    >
-                                        <div>
-                                            <span class="block truncate font-medium">{{ client.name }}</span>
-                                            <span class="block truncate text-sm text-gray-500">{{ client.number }}</span>
-                                        </div>
-                                    </ComboboxOption>
-                                </ComboboxOptions>
-
-                            </div>
-                        </Combobox>
+                        <VueMultiselect
+                            v-model="form.client_id"
+                            :options="clients"
+                            :custom-label="client => `${client.name} - ${client.number}`"
+                            placeholder="Select or search client"
+                            label="name"
+                            track-by="id"
+                            @search-change="clientSearch"
+                            :class="{ 'border-red-500': form.errors.client_id }"
+                        />
+                        <InputError class="mt-1.5" :message="form.errors.client_id" />
                     </div>
 
                     <!-- Products -->
@@ -61,71 +45,54 @@
                         <div class="space-y-4">
                             <div v-for="(item, index) in form.items" :key="index" class="flex items-start gap-4 p-4 border rounded-lg">
                                 <!-- Product Selection -->
-                                 <div class="flex-1">
-                                    <Combobox v-model="item.product_id">
-                                        <div class="relative">
-                                            <ComboboxInput 
-                                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                                :displayValue="(id) => products.find(p => p.id === id)?.name || ''"
-                                                @change="searchProducts"
-                                                placeholder="Select product..." />
-                                            <ComboboxOptions class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                                                <ComboboxOption
-                                                    v-for="product in products"
-                                                    :key="product.id"
-                                                    :value="product.id"
-                                                    class="relative cursor-default select-none py-2 pl-3 pr-9 hover:bg-blue-50"
-                                                    v-slot="{ active, selected }"
-                                                >
-                                                    <div>
-                                                        <span class="block truncate font-medium">{{ product.name }}</span>
-                                                        <span class="block truncate text-sm text-gray-500">
-                                                            Price: {{ formatPrice(product.price) }} | Stock: {{ product.quantity }}
-                                                        </span>
-                                                    </div>
-                                                </ComboboxOption>
-                                            </ComboboxOptions>
-                                        </div>
-                                    </Combobox>
-                                    
+                                <div class="flex-1">
+                                    <VueMultiselect
+                                        v-model="item.product_id"
+                                        :options="products"
+                                        :custom-label="product => `${product.name} - ${formatPrice(product.price)} (Stock: ${product.quantity})`"
+                                        placeholder="Select product"
+                                        label="name"
+                                        track-by="id"
+                                        @search-change="productSearch"
+                                        :class="{ 'border-red-500': form.errors[`items.${index}.product_id`] }"
+                                    />
+                                    <InputError class="mt-1.5" :message="form.errors[`items.${index}.product_id`]" />
                                 </div>
-
+                                
                                 <!-- Quantity -->
-                                <div class="w-32">
+                                <div class="w-24">
                                     <TextInput
-                                        v-model="item.quantity"
                                         type="number"
                                         min="1"
-                                        placeholder="Quantity"
+                                        v-model.number="item.quantity"
                                         class="w-full"
+                                        placeholder="Qty"
+                                        :class="{ 'border-red-500': form.errors[`items.${index}.quantity`] }"
                                     />
+                                    <InputError class="mt-1.5" :message="form.errors[`items.${index}.quantity`]" />
                                 </div>
-
-                                <!-- Subtotal -->
-                                <div class="w-32 pt-2">
-                                    {{ formatPrice(calculateItemTotal(item)) }}
+                                
+                                <!-- Total -->
+                                <div class="w-32 flex items-center justify-end">
+                                    <span class="font-medium">{{ formatPrice(calculateItemTotal(item)) }}</span>
                                 </div>
-
-                                <!-- Remove Button -->
+                                
+                                <!-- Remove button -->
                                 <button
                                     type="button"
                                     @click="removeItem(index)"
-                                    class="text-red-600 hover:text-red-800"
+                                    class="text-red-500 hover:text-red-700"
+                                    v-if="form.items.length > 1"
                                 >
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
+                                    Remove
                                 </button>
                             </div>
-
+                            
                             <button
                                 type="button"
                                 @click="addItem"
-                                class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                             >
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
                                 Add Product
                             </button>
                         </div>
@@ -136,6 +103,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
                         <select
                             v-model="form.payment_id"
+                            :class="{ 'border-red-500': form.errors.payment_id }"
                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                         >
                             <option value="">Select payment method</option>
@@ -154,6 +122,7 @@
                             rows="3"
                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             placeholder="Add any notes about this sale..."
+                            :class="{ 'border-red-500': form.errors.notes }"
                         ></textarea>
                     </div>
 
@@ -161,7 +130,7 @@
                     <div class="border-t pt-4">
                         <div class="flex justify-between items-center text-lg font-medium">
                             <span>Total Amount:</span>
-                            <span>{{ formatPrice(calculateTotal()) }}</span>
+                            <span>{{ formatPrice(calculateTotal) }}</span>
                         </div>
                     </div>
 
@@ -190,13 +159,15 @@
 </template>
 
 <script setup>
-
-import { Link, router, useForm } from '@inertiajs/vue3'
+import { computed } from 'vue'
+import { Head, Link, useForm } from '@inertiajs/vue3'
 import { useToast } from 'vue-toastification'
 import AuthLayout from '@/layouts/AuthLayout.vue'
 import TextInput from '@/Components/TextInput.vue'
-import { Combobox, ComboboxInput, ComboboxOptions, ComboboxOption } from '@headlessui/vue'
 import InputError from '@/Components/InputError.vue'
+import VueMultiselect from 'vue-multiselect'
+import 'vue-multiselect/dist/vue-multiselect.css'
+
 const toast = useToast()
 
 const props = defineProps({
@@ -212,12 +183,11 @@ const props = defineProps({
         type: Array,
         default: () => []
     },
-
 })
-console.log(props.errors)
+
 const form = useForm({
     client_id: null,
-    items: [{ product_id: null, quantity: 1 }],
+    items: [{ product_id: null, quantity: 0 }],
     payment_id: null,
     notes: ''
 })
@@ -227,18 +197,33 @@ const addItem = () => {
 }
 
 const removeItem = (index) => {
-    form.items.splice(index, 1)
+    if (form.items.length > 1) {
+        form.items.splice(index, 1)
+    }
 }
 
 const calculateItemTotal = (item) => {
+    console.log(item.product_id)
     if (!item.product_id || !item.quantity) return 0
-    const product = props.products.find(p => p.id === item.product_id)
-    return product ? product.price * item.quantity : 0
+    const productId = item.product_id?.id || item.product_id;
+    
+    const product = props.products.find(p => String(p.id) === String(productId));
+
+    if (!product) {
+        console.error('Product not found for ID:', item.product_id)
+        return 0
+    }
+    
+    // Ensure quantity is treated as a number
+    const quantity = Number(item.quantity) || 0
+    const price = Number(product.price) || 0
+    
+    return price * quantity
 }
 
-const calculateTotal = () => {
+const calculateTotal = computed(() => {
     return form.items.reduce((total, item) => total + calculateItemTotal(item), 0)
-}
+})
 
 const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
@@ -247,32 +232,30 @@ const formatPrice = (price) => {
     }).format(price || 0)
 }
 
-const searchClients = (query) => {
-    // TODO: Implement client search
+const clientSearch = (query) => {
+    // Implement client search if needed
 }
 
-const searchProducts = (query) => {
-    // TODO: Implement product search
+const productSearch = (query) => {
+    // Implement product search if needed
 }
 
 const submitForm = () => {
-    if (form.items.some(item => !item.product_id)) {
-        toast.error('Please select products for all items')
-        return
-    }
+    // Validate required fields
+
 
     form.post(route('sales.store'), {
         onSuccess: () => {
-            toast.success('Sale created successfully');
-            form.reset();
+            toast.success('Sale created successfully')
+            form.reset()
         },
         onError: (errors) => {
             Object.keys(errors).forEach((key) => {
                 toast.error(errors[key], {
                     position: 'top-right',
                     timeout: 5000,
-                });
-            });
+                })
+            })
         }
     })
 }

@@ -26,20 +26,7 @@
 
       <div class="bg-white rounded-lg shadow lg:w-1/2 sm:w-1/3 mx-auto">
         <div class="px-4  rounded-md py-5 sm:p-6">
-          <form @submit.prevent="form.post(route('categories.store'), {
-            onSuccess: () => {
-              toast.success('Category created successfully');
-              router.visit(route('categories.index'));
-            },
-            onError: (errors) => {
-            Object.keys(errors).forEach((key) => {
-                toast.error(errors[key], {
-                    position: 'top-right',
-                    timeout: 5000,
-                });
-            });
-        }
-          })" class="space-y-6">
+          <form @submit.prevent="submit" class="space-y-6">
             <div>
               <InputLabel for="name" value="Category Name" class="mb-1.5" />
               <TextInput
@@ -48,7 +35,7 @@
                 class="w-full"
                 v-model="form.name"
                 placeholder="Enter category name"
-                :class="{ 'border-red-500': form.errors.name }"
+                :class="{ 'ring-1 ring-red-500  mt-2': form.errors.name }"
               />
               <InputError class="mt-1.5" :message="form.errors.name" />
             </div>
@@ -61,7 +48,7 @@
                 class="w-full rounded-md ring-1 ring-gray-300 bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
                 v-model="form.description"
                 placeholder="Enter category description"
-                :class="{ 'border-red-500': form.errors.description }"
+                :class="{ 'ring-1 ring-red-500  mt-2': form.errors.description }"
               ></textarea>
               <InputError class="mt-1.5" :message="form.errors.description" />
             </div>
@@ -111,4 +98,21 @@ const form = useForm({
   name: '',
   description: ''
 });
+
+const submit=()=>{
+    form.post(route('categories.store'), {
+            onSuccess: () => {
+              toast.success('Category created successfully');
+              router.visit(route('categories.index'));
+            },
+            onError: (errors) => {
+            Object.keys(errors).forEach((key) => {
+                toast.error(errors[key], {
+                    position: 'top-right',
+                    timeout: 5000,
+                });
+            });
+        }
+          })
+}
 </script>

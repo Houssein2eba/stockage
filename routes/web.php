@@ -50,6 +50,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [ClientsController::class, 'index'])->name('index');
         Route::get('/create', [ClientsController::class, 'create'])->name('create');
         Route::post('/', [ClientsController::class, 'store'])->name('store');
+        Route::get('/export', [ClientsController::class, 'export'])->name('export');
         Route::get('/{id}/show', [ClientsController::class, 'show'])->name('show');
         Route::get('/{id}/edit', [ClientsController::class, 'edit'])->name('edit');
         Route::put('/{id}', [ClientsController::class, 'update'])->name('update');

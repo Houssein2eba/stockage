@@ -23,20 +23,7 @@
 
             <div >
                 <div class=" bg-white rounded-xl shadow-lg p-8 text-gray-900 lg:w-1/2 sm:w-1/3 mx-auto">
-                    <form @submit.prevent="form.post(route('clients.store'), {
-                        onSuccess: () => {
-                            toast.success('Client created successfully');
-                            router.visit(route('clients.index'));
-                        },
-                        onError: (errors) => {
-            Object.keys(errors).forEach((key) => {
-                toast.error(errors[key], {
-                    position: 'top-right',
-                    timeout: 5000,
-                });
-            });
-        },
-                    })" class="space-y-6 max-w-xl">
+                    <form @submit.prevent="submit" class="space-y-6 max-w-xl">
                         <div>
                             <InputLabel for="name" value="Client Name" class="mb-1.5" />
                             <TextInput
@@ -45,7 +32,7 @@
                                 class="w-full"
                                 v-model="form.name"
                                 placeholder="Enter client name"
-                                :class="{ 'border-red-500': form.errors.name }"
+                                :class="{ 'ring-1 ring-red-500  mt-2': form.errors.name }"
                             />
                             <InputError class="mt-1.5" :message="form.errors.name" />
                         </div>
@@ -58,7 +45,7 @@
                                 class="w-full"
                                 v-model="form.number"
                                 placeholder="Enter client number"
-                                :class="{ 'border-red-500': form.errors.number }"
+                                :class="{ 'ring-1 ring-red-500 mt-2': form.errors.number }"
                             />
                             <InputError class="mt-1.5" :message="form.errors.number" />
                         </div>
@@ -110,4 +97,21 @@ const form = useForm({
     name: "",
     number: "",
 });
+
+const submit = () => {
+    form.post(route('clients.store'), {
+                        onSuccess: () => {
+                            toast.success('Client created successfully');
+                        },
+                        onError: (errors) => {
+            Object.keys(errors).forEach((key) => {
+                toast.error(errors[key], {
+                    position: 'top-right',
+                    timeout: 5000,
+                });
+            });
+        },
+                    })
+}
+
 </script>
