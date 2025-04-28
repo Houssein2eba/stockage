@@ -27,16 +27,16 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Client</label>
                         <VueMultiselect
-                            v-model="form.client_id"
+                            v-model="form.client"
                             :options="clients"
                             :custom-label="client => `${client.name} - ${client.number}`"
                             placeholder="Select or search client"
                             label="name"
                             track-by="id"
                             @search-change="clientSearch"
-                            :class="{ 'border-red-500': form.errors.client_id }"
+                            :class="{ 'border-red-500': form.errors.client }"
                         />
-                        <InputError class="mt-1.5" :message="form.errors.client_id" />
+                        <InputError class="mt-1.5" :message="form.errors.client" />
                     </div>
 
                     <!-- Products -->
@@ -47,16 +47,16 @@
                                 <!-- Product Selection -->
                                 <div class="flex-1">
                                     <VueMultiselect
-                                        v-model="item.product_id"
+                                        v-model="item.product"
                                         :options="products"
                                         :custom-label="product => `${product.name} - ${formatPrice(product.price)} (Stock: ${product.quantity})`"
                                         placeholder="Select product"
                                         label="name"
                                         track-by="id"
                                         @search-change="productSearch"
-                                        :class="{ 'border-red-500': form.errors[`items.${index}.product_id`] }"
+                                        :class="{ 'border-red-500': form.errors[`items.${index}.product`] }"
                                     />
-                                    <InputError class="mt-1.5" :message="form.errors[`items.${index}.product_id`]" />
+                                    <InputError class="mt-1.5" :message="form.errors[`items.${index}.product`]" />
                                 </div>
                                 
                                 <!-- Quantity -->
@@ -186,14 +186,14 @@ const props = defineProps({
 })
 
 const form = useForm({
-    client_id: null,
-    items: [{ product_id: null, quantity: 0 }],
+    client: null,
+    items: [{ product: null, quantity: 0 }],
     payment_id: null,
     notes: ''
 })
 
 const addItem = () => {
-    form.items.push({ product_id: null, quantity: 1 })
+    form.items.push({ product: null, quantity: 1 })
 }
 
 const removeItem = (index) => {
@@ -203,14 +203,14 @@ const removeItem = (index) => {
 }
 
 const calculateItemTotal = (item) => {
-    console.log(item.product_id)
-    if (!item.product_id || !item.quantity) return 0
-    const productId = item.product_id?.id || item.product_id;
+    
+    if (!item.product || !item.quantity) return 0
+    const productId = item.product?.id || item.product;
     
     const product = props.products.find(p => String(p.id) === String(productId));
 
     if (!product) {
-        console.error('Product not found for ID:', item.product_id)
+        console.error('Product not found for ID:', item.product)
         return 0
     }
     
@@ -232,13 +232,7 @@ const formatPrice = (price) => {
     }).format(price || 0)
 }
 
-const clientSearch = (query) => {
-    // Implement client search if needed
-}
 
-const productSearch = (query) => {
-    // Implement product search if needed
-}
 
 const submitForm = () => {
     // Validate required fields

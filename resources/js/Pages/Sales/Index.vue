@@ -1,22 +1,17 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
-import { useToast } from 'vue-toastification';
-import { format } from 'date-fns';
-import AuthLayout from '@/layouts/AuthLayout.vue';
-import Table from '@/Components/Table.vue';
-import TableRow from '@/Components/TableRow.vue';
-import TableHeaderCell from '@/Components/TableHeaderCell.vue';
-import TableDataCell from '@/Components/TableDataCell.vue';
-import TextInput from '@/Components/TextInput.vue';
-import Modal from '@/Components/Modal.vue';
-import DatePicker from 'primevue/datepicker';
-import { ref, computed, watch } from 'vue';
-import { usePagination } from '@/composables/usePagination';
-import TablePagination from '@/Components/TablePagination.vue';
-import SortableTableHeader from '@/Components/SortableTableHeader.vue';
-import VueMultiselect from 'vue-multiselect';
-import { useForm } from '@inertiajs/vue3';
+import AuthLayout from "@/layouts/AuthLayout.vue";
+import PrimaryButton from "@/Components/PrimaryButton.vue";
+import { Head, Link, useForm } from "@inertiajs/vue3";
+import { useToast } from "vue-toastification";
+import Table from "@/Components/Table.vue";
+import TableRow from "@/Components/TableRow.vue";
+import TableHeaderCell from "@/Components/TableHeaderCell.vue";
+import TableDataCell from "@/Components/TableDataCell.vue";
+import { ref, watch, computed } from 'vue';
+import { debounce } from 'lodash';
 import { router } from '@inertiajs/vue3';
+import Pagination from "@/Components/Pagination.vue";
+import { format } from 'date-fns';
 
 const props = defineProps({
     sales: Object,
@@ -27,33 +22,42 @@ const props = defineProps({
 const toast = useToast();
 const showDeleteModal = ref(false);
 const saleToDelete = ref(null);
-const processing = ref(false);
+const sort = ref({ 
+    field: props.filters?.sort || 'created_at', 
+    direction: props.filters?.direction || 'desc' 
+});
 const search = ref(props.filters?.search || '');
 const statusFilter = ref(props.filters?.status || '');
 const dateFilter = ref(props.filters?.date || '');
+const page = ref(props.sales?.meta?.current_page || 1);
 
-// Status options for multiselect
-const statusOptions = [
-    { label: 'All Status', value: '' },
-    { label: 'Paid', value: 'paid' },
-    { label: 'Pending', value: 'pending' },
-    { label: 'Cancelled', value: 'cancelled' }
-];
+// Computed property for table headers with sorting
+const tableHeaders = computed(() => [
+    { label: 'Reference', field: 'reference', sortable: true },
+    { label: 'Client', field: 'client_id', sortable: true },
+    { label: 'Total', field: 'total_amount', sortable: true },
+    { label: 'Status', field: 'status', sortable: true },
+    { label: 'Date', field: 'created_at', sortable: true },
+    { label: 'Actions', field: null, sortable: false }
+]);
 
-// Watch for search and status filter changes
-watch([search, statusFilter, dateFilter], () => {
+// Watch for filter changes with debounce
+watch([search, statusFilter, dateFilter], debounce(() => {
     router.get(route('sales.index'), {
         search: search.value,
         status: statusFilter.value,
-        date: dateFilter.value
+        date: dateFilter.value,
+        sort: sort.value.field,
+        direction: sort.value.direction,
+        page: 1 // Reset to page 1 when filtering
     }, {
         preserveState: true,
         preserveScroll: true
     });
-});
+}, 300));
 
 const handleSort = (field) => {
-    if (!field) return;
+    if (!field || !tableHeaders.value.find(header => header.field === field)?.sortable) return;
 
     if (sort.value.field === field) {
         sort.value.direction = sort.value.direction === 'asc' ? 'desc' : 'asc';
@@ -68,7 +72,7 @@ const handleSort = (field) => {
         date: dateFilter.value,
         sort: sort.value.field,
         direction: sort.value.direction,
-        page: 1
+        page: page.value
     }, {
         preserveState: true,
         preserveScroll: true
@@ -76,7 +80,30 @@ const handleSort = (field) => {
 };
 
 const handlePageChange = (url) => {
-    // Implement pagination logic here
+    if (!url) return;
+
+    const urlObj = new URL(url);
+    const pageParam = urlObj.searchParams.get('page');
+
+    if (pageParam) {
+        page.value = parseInt(pageParam);
+        router.get(route('sales.index'), {
+            search: search.value,
+            status: statusFilter.value,
+            date: dateFilter.value,
+            sort: sort.value.field,
+            direction: sort.value.direction,
+            page: page.value
+        }, {
+            preserveState: true,
+            preserveScroll: true
+        });
+    }
+};
+
+const getSortIcon = (field) => {
+    if (!field || sort.value.field !== field) return 'none';
+    return sort.value.direction === 'asc' ? 'asc' : 'desc';
 };
 
 const formatPrice = (price) => {
@@ -96,11 +123,10 @@ const confirmDelete = (saleId) => {
 };
 
 const deleteSale = () => {
-    processing.value = true;
     router.delete(route('sales.destroy', saleToDelete.value), {
         onSuccess: () => {
-            closeDeleteModal();
             toast.success('Sale deleted successfully');
+            showDeleteModal.value = false;
         },
         onError: (errors) => {
             Object.keys(errors).forEach((key) => {
@@ -109,9 +135,7 @@ const deleteSale = () => {
                     timeout: 5000,
                 });
             });
-        },
-        onFinish: () => {
-            processing.value = false;
+            showDeleteModal.value = false;
         }
     });
 };
@@ -120,11 +144,21 @@ const closeDeleteModal = () => {
     showDeleteModal.value = false;
     saleToDelete.value = null;
 };
-const sort = ref({ field: props.filters?.sort || 'created_at', direction: props.filters?.direction || 'desc' });
 
-const getSortIcon = (field) => {
-    if (!field || sort.value.field !== field) return 'none';
-    return sort.value.direction === 'asc' ? 'asc' : 'desc';
+const markAsPaid = (sale) => {
+    router.put(route('sales.markAsPaid', sale.id), {
+        onSuccess: () => {
+            toast.success('Sale marked as paid');
+        },
+        onError: (errors) => {
+            Object.keys(errors).forEach((key) => {
+                toast.error(errors[key], {
+                    position: 'top-right',
+                    timeout: 5000,
+                });
+            });
+        }
+    });
 };
 </script>
 
@@ -215,36 +249,46 @@ const getSortIcon = (field) => {
                 </div>
             </div>
 
-            <!-- Filters -->
-            <div class="bg-white rounded-lg shadow mb-6">
-                <div class="p-4 border-b border-gray-200">
-                    <div class="flex flex-wrap items-center gap-4">
-                        <div class="flex-1 min-w-[200px]">
-                            <TextInput
-                                v-model="search"
-                                type="search"
-                                placeholder="Search sales..."
-                                class="w-full"
-                            />
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <div class="w-48">
-                                
-                                <VueMultiselect
-                                    v-model="statusFilter"
-                                    :options="statusOptions"
-                                    :multiple="false"
-                                    :close-on-select="true"
-                                    :show-labels="false"
-                                    placeholder="Select status"
-                                    class="w-full"
-                                    />
+            <!-- Search and Filter Card -->
+            <div class="bg-white rounded-lg border border-gray-200 shadow-xs mb-6">
+                <div class="p-4">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <!-- Search Input -->
+                        <div class="flex-1">
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <input
+                                    type="text"
+                                    v-model="search"
+                                    class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    placeholder="Search sales..."
+                                />
                             </div>
-                            <DatePicker
+                        </div>
+
+                        <!-- Status Filter -->
+                        <div class="w-full sm:w-48">
+                            <select
+                                v-model="statusFilter"
+                                class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                            >
+                                <option value="">All Statuses</option>
+                                <option value="pending">Pending</option>
+                                <option value="paid">Paid</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+
+                        <!-- Date Filter -->
+                        <div class="w-full sm:w-48">
+                            <input
+                                type="date"
                                 v-model="dateFilter"
-                                placeholder="Select date"
-                                class="w-[200px]"
-                                @update:modelValue="handleDateChange"
+                                class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                             />
                         </div>
                     </div>
@@ -252,70 +296,66 @@ const getSortIcon = (field) => {
             </div>
 
             <!-- Sales Table -->
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="overflow-x-auto">
-                    <Table >
+            <div class="bg-white rounded-lg border border-gray-200 shadow-xs flex flex-col">
+                <div class="overflow-x-auto flex-1">
+                    <Table>
                         <template #header>
                             <TableRow>
-                                <SortableTableHeader 
-                                    label="Reference" 
-                                    field="reference" 
-                                    :sortable="true"
-                                    :sortDirection="getSortIcon('reference')"
-                                    @sort="handleSort"
-                                />
-                                <SortableTableHeader 
-                                    label="Client" 
-                                    field="client_id" 
-                                    :sortable="true"
-                                    :sortDirection="getSortIcon('client_id')"
-                                    @sort="handleSort"
-                                />
-                                <SortableTableHeader label="Items" />
-                                <SortableTableHeader 
-                                    label="Total" 
-                                    field="total_amount" 
-                                    :sortable="true"
-                                    :sortDirection="getSortIcon('total_amount')"
-                                    @sort="handleSort"
-                                />
-                                <SortableTableHeader 
-                                    label="Status" 
-                                    field="status" 
-                                    :sortable="true"
-                                    :sortDirection="getSortIcon('status')"
-                                    @sort="handleSort"
-                                />
-                                <SortableTableHeader 
-                                    label="Date" 
-                                    field="created_at" 
-                                    :sortable="true"
-                                    :sortDirection="getSortIcon('created_at')"
-                                    @sort="handleSort"
-                                />
-                                <SortableTableHeader label="Actions" align="right" :colspan="3" />
+                                <TableHeaderCell
+                                    v-for="header in tableHeaders"
+                                    :key="header.field || header.label"
+                                    :class="[
+                                        header.sortable ? 'cursor-pointer hover:bg-gray-100' : '',
+                                        'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
+                                    ]"
+                                    @click="handleSort(header.field)"
+                                >
+                                    <div class="flex items-center space-x-1">
+                                        <span>{{ header.label }}</span>
+                                        <span v-if="header.sortable" class="flex flex-col">
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                class="h-3 w-3"
+                                                :class="{'text-blue-600': getSortIcon(header.field) === 'asc'}"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
+                                            >
+                                                <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                class="h-3 w-3"
+                                                :class="{'text-blue-600': getSortIcon(header.field) === 'desc'}"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
+                                            >
+                                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </span>
+                                    </div>
+                                </TableHeaderCell>
                             </TableRow>
                         </template>
                         <template #body>
-                            <TableRow v-for="sale in sales.data" :key="sale.id" class="hover:bg-gray-50">
-                                <TableDataCell class="max-w-[120px] truncate">
-                                    <div class="font-medium text-gray-900">#{{ sale.reference }}</div>
-                                </TableDataCell>
-                                <TableDataCell class="max-w-[150px]">
-                                    <div class="truncate">
-                                        <div class="text-sm font-medium text-gray-900">{{ sale.client?.name || 'No Client' }}</div>
-                                        <div class="text-xs text-gray-400">{{ sale.client?.number || '-' }}</div>
-                                    </div>
-                                </TableDataCell>
-                                <TableDataCell>
-                                    <div class="text-sm">{{ sale.items }}</div>
+                            <TableRow v-for="sale in sales.data" :key="sale.id" class="hover:bg-gray-50/50 transition-colors">
+                                <TableDataCell class="py-4 pl-6">
+                                    <Link
+                                        :href="route('sales.show', sale.id)"
+                                        class="text-blue-600 hover:text-blue-900 transition-colors font-medium"
+                                    >
+                                        #{{ sale.reference }}
+                                    </Link>
                                 </TableDataCell>
                                 <TableDataCell>
-                                    <div class="font-medium whitespace-nowrap">{{ formatPrice(sale.total_amount) }}</div>
+                                    <div class="text-sm font-medium text-gray-900">{{ sale.client?.name || 'No Client' }}</div>
+                                    <div class="text-xs text-gray-500">{{ sale.client?.number || '-' }}</div>
+                                </TableDataCell>
+                                <TableDataCell class="font-medium text-gray-900">
+                                    {{ formatPrice(sale.total_amount) }}
                                 </TableDataCell>
                                 <TableDataCell>
                                     <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize whitespace-nowrap"
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize"
                                         :class="{
                                             'bg-green-100 text-green-800': sale.status === 'paid',
                                             'bg-yellow-100 text-yellow-800': sale.status === 'pending',
@@ -325,85 +365,122 @@ const getSortIcon = (field) => {
                                         {{ sale.status }}
                                     </span>
                                 </TableDataCell>
-                                <TableDataCell class="whitespace-nowrap">
-                                    <div class="text-sm text-gray-500">
-                                        {{ formatDate(sale.created_at) }}
-                                    </div>
+                                <TableDataCell class="text-sm text-gray-500">
+                                    {{ formatDate(sale.created_at) }}
                                 </TableDataCell>
-                                <TableDataCell class="whitespace-nowrap">
+                                <TableDataCell class="text-right pr-6">
                                     <div class="flex items-center justify-end gap-3">
                                         <button
                                             v-if="sale.status !== 'paid'"
                                             @click="markAsPaid(sale)"
-                                            class="text-green-600 hover:text-green-900 text-sm font-medium"
+                                            class="text-green-600 hover:text-green-900 transition-colors flex items-center gap-1 text-sm"
                                         >
-                                            Mark as Paid
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            Mark Paid
                                         </button>
                                         <Link
                                             :href="route('sales.show', sale.id)"
-                                            class="text-blue-600 hover:text-blue-900 text-sm font-medium"
+                                            class="text-blue-600 hover:text-blue-900 transition-colors flex items-center gap-1 text-sm"
                                         >
-                                            View Details
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            View
                                         </Link>
                                         <button
                                             @click="confirmDelete(sale.id)"
-                                            class="text-red-600 hover:text-red-900 text-sm font-medium"
+                                            class="text-red-600 hover:text-red-900 transition-colors flex items-center gap-1 text-sm"
                                         >
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
                                             Delete
                                         </button>
                                     </div>
                                 </TableDataCell>
                             </TableRow>
-                            <TableRow v-if="sales.data && sales.data.length === 0">
-                                <TableDataCell colspan="7" class="px-6 py-12 text-center">
-                                    <div class="flex flex-col items-center">
+                            <TableRow v-if="sales.data.length === 0">
+                                <TableDataCell colspan="6" class="text-center py-12 text-gray-500">
+                                    <div class="flex flex-col items-center justify-center">
                                         <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                                         </svg>
-                                        <p class="mt-4 text-lg font-medium text-gray-900">No sales found</p>
-                                        <p class="mt-1 text-sm text-gray-500">Get started by creating a new sale.</p>
+                                        <p class="mt-2 text-sm">No sales found</p>
+                                        <p class="text-sm">Get started by creating a new sale</p>
                                     </div>
                                 </TableDataCell>
                             </TableRow>
                         </template>
                     </Table>
                 </div>
-            </div>
 
-            <!-- Pagination -->
-            <TablePagination 
-                :meta="sales.meta" 
-                @change="handlePageChange" 
-            />
-        </div>
-
-        <!-- Delete Confirmation Modal -->
-        <Modal :show="showDeleteModal" @close="closeDeleteModal">
-            <div class="p-6">
-                <h2 class="text-lg font-medium text-gray-900 mb-4">Delete Sale</h2>
-                <p class="text-sm text-gray-500 mb-6">
-                    Are you sure you want to delete this sale? This action cannot be undone.
-                </p>
-                <div class="flex justify-end space-x-3">
-                    <button
-                        @click="closeDeleteModal"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
-                        :disabled="processing"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        @click="deleteSale"
-                        class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700"
-                        
-                    >
-                        <span >Delete Sale</span>
-                        
-                    </button>
+                <!-- Pagination -->
+                <div class="px-6 py-4 border-t border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-700" v-if="sales.meta.total > 0">
+                            Showing <span class="font-medium">{{ sales.meta.from }}</span> to
+                            <span class="font-medium">{{ sales.meta.to }}</span> of
+                            <span class="font-medium">{{ sales.meta.total }}</span> results
+                        </div>
+                        <Pagination v-if="sales.meta.links" :links="sales.meta.links" @change="handlePageChange" />
+                    </div>
                 </div>
             </div>
-        </Modal>
+        </div>
+
+        <!-- Delete confirmation modal -->
+        <Transition name="fade">
+            <div v-if="showDeleteModal" class="fixed inset-0 z-50 overflow-y-auto">
+                <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                    </div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="sm:flex sm:items-start">
+                                <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                                    <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                </div>
+                                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900">Delete Sale</h3>
+                                    <div class="mt-2">
+                                        <p class="text-sm text-gray-500">Are you sure you want to delete this sale? This action cannot be undone.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                            <PrimaryButton
+                                @click="deleteSale"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
+                            >
+                                Delete
+                            </PrimaryButton>
+                            <button
+                                @click="closeDeleteModal"
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
     </AuthLayout>
 </template>
 
-<style src="vue-multiselect/dist/vue-multiselect.css"></style>
+<style>
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 150ms ease-out;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+</style>

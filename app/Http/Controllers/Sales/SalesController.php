@@ -22,9 +22,10 @@ class SalesController extends Controller
 {
     public function index(Request $request)
     {
+        // dd($request->all());
         $request->validate([
             'search' => 'nullable|string',
-            'status' => 'nullable|string',
+            'status' => 'nullable|string|in:paid,pending',
             'page' => 'nullable|integer',
             'date' => 'nullable|date',
             'direction' => 'nullable|in:asc,desc',
@@ -50,6 +51,10 @@ class SalesController extends Controller
                 $query->orderBy('total_amount', $request->direction ?? 'asc');
             }, function ($query) use ($request) {
                 if ($request->sort === 'date') {
+                    $query->orderBy($request->sort, $request->direction ?? 'asc');
+                }elseif ($request->sort === 'reference') {
+                    $query->orderBy($request->sort, $request->direction ?? 'asc');
+                } else {
                     $query->orderBy($request->sort, $request->direction ?? 'asc');
                 }
             })
@@ -96,61 +101,75 @@ class SalesController extends Controller
 
     public function store(OrderRequest $request)
     {
-        try{
-        $id=DB::transaction(function () use ($request) {
+        $id = DB::transaction(function () use ($request) {
             // 1. Create the order
             $order = Order::create([
                 'reference' => Order::generateReference(),
-                'client_id' => $request->client_id,
-                'payment_id' => $request->payment_id,
+                'client_id' => $request->client['id'],
+                'payment_id' => $request->payment_id['id'] ?? $request->payment_id, // Handle both array and direct ID
                 'status' => $request->payment_id ? 'paid' : 'pending',
+                'notes' => $request->notes,
             ]);
     
             // 2. Load all products in one query
-            $productIds = collect($request->items)->pluck('product_id');
+            $productIds = collect($request->items)->pluck('product.id');
             $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
     
-            // 3. Prepare order-product pivot data
+            // 3. Prepare order-product pivot data and calculate order total
             $productData = [];
+            $orderTotal = 0;
+    
             foreach ($request->items as $item) {
-                $product = $products[$item['product_id']] ?? null;
+                $productId = $item['product']['id']; // Fixed: Access 'product' array
+                $product = $products[$productId] ?? null;
     
                 if (!$product) {
-                    throw new \Exception("Product not found: ID {$item['product_id']}");
+                    throw new \Exception("Product not found: ID {$productId}");
                 }
     
-                if ($product->quantity < $item['quantity']) {
-                    throw new \Exception("Insufficient stock for product: {$product->name}");
+                $quantity = (int)$item['quantity'];
+                if ($quantity <= 0) {
+                    throw new \Exception("Invalid quantity for product: {$product->name}");
                 }
     
-                $productData[$product->id] = [
-                    'quantity' => $item['quantity'],
-                    'total_amount' => $item['quantity'] * $product->price,
-                ];
-                
-                $product->decrement('quantity', $item['quantity']);
+                if ($product->quantity < $quantity) {
+                    throw new \Exception("Insufficient stock for {$product->name}. Available: {$product->quantity}");
+                }
+    
 
+    
+                $itemTotal = $quantity * $product->price;
+                $orderTotal += $itemTotal;
+    
+                $productData[$productId] = [
+                    'quantity' => $quantity,
+                    'unit_price' => $product->price,
+                    'total_amount' => $itemTotal,
+                ];
+    
+                $product->decrement('quantity', $quantity);
             }
     
-            // 4. Attach products
-            $order->products()->attach($productData);
+            // 4. Update order total and attach products
+            $order->update(['total_amount' => $orderTotal]);
+            $order->products()->sync($productData);
     
             // 5. Log activity
-            $attributes = $order->only(['reference', 'client_id', 'payment_id', 'status']);
             activity()
                 ->causedBy(auth()->user())
                 ->performedOn($order)
-                ->withProperties(['attributes' => $attributes])
+                ->withProperties([
+                    'attributes' => $order->only(['reference', 'client_id', 'payment_id', 'status', 'total_amount'])
+                ])
                 ->log('Order Created');
     
-            // 6. Return response
             return $order->id;
         });
+    
         return to_route('sales.show', $id);
-        }catch(\Exception $e){
-            return back()->withErrors(['error' => $e->getMessage()]);
-        }
     }
+        
+    
     
     public function edit($id)
     {
