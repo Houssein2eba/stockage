@@ -19,29 +19,15 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        
-        
+
+
         // Get popular products (top 5 most sold)
-        $popular = Product::query()
-    ->select([
-        'products.id',
-        'products.name',
-        'products.price',
-        'products.description',
-        DB::raw('COUNT(DISTINCT order_details.order_id) as orders_count'),
-        DB::raw('SUM(order_details.quantity) as items_sold'),
-        DB::raw('SUM(order_details.total_amount) as total_revenue'),
-    ])
-    ->leftJoin('order_details', 'products.id', '=', 'order_details.product_id')
-    ->leftJoin('orders', 'order_details.order_id', '=', 'orders.id')
-    ->groupBy('products.id')
-    ->whereHas('orders')
-    ->orderByDesc('items_sold')
-    ->take(5)
-    ->get();
-
-
-
+        $popular = Product::withSum('orders as total_quantity', 'order_details.quantity')
+        ->withSum('orders as total_amount', 'order_details.total_amount')
+        ->where('total_quantity', '>', 0)
+            ->orderByDesc('total_quantity')
+            ->take(5)
+            ->get();
         // Return as collection using ProductResource
 
 

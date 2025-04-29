@@ -9,23 +9,20 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 class OrderDetail extends Pivot
 {
     use HasUuids;
-    
+
     protected $table = 'order_details';
-    
+
     public $incrementing = false;
 
-    protected $fillable = [
-        'order_id',
-        'product_id',
-        'quantity',
-        'total_amount'
-    ];
+    protected $guarded = ['id'];
 
     public function order()
     {
         return $this->belongsTo(Order::class);
     }
-    public function product(){
+
+    public function product()
+    {
         return $this->belongsTo(Product::class);
     }
 }

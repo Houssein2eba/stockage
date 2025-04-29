@@ -14,8 +14,11 @@ class Client extends Model
     {
         return $this->hasMany(Order::class);
     }
-    public function products(){
-        return $this->hasManyThrough(Product::class, Order::class);
-    }
-    
+    public function products()
+{
+    return $this->hasManyThrough(Product::class, Order::class, 'client_id', 'id', 'id', 'order_id')
+        ->join('order_details', 'products.id', '=', 'order_details.product_id')
+        ->select('products.*');
+}
+
 }

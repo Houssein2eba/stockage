@@ -11,7 +11,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Order extends Model
 {
     use HasUuids, LogsActivity;
-    
+
     protected $guarded = ['id','created_at','updated_at'];
 
     protected $fillable = [
@@ -43,6 +43,10 @@ class Order extends Model
             ->withPivot(['quantity','total_amount'])
             ->withTimestamps();
     }
+    public function order_details()
+{
+    return $this->hasMany(OrderDetail::class); 
+}
 
     public function payment()
     {
@@ -57,7 +61,7 @@ class Order extends Model
     public static function generateReference(): string
     {
         $latest = self::latest()->first();
-        
+
         if (!$latest) {
             return 'ORD-000001';
         }
@@ -80,4 +84,5 @@ class Order extends Model
         $totalAmount = DB::table('order_details')->where('order_id', $this->id)->sum('total_amount');
         return (float) $totalAmount;
     }
+
 }

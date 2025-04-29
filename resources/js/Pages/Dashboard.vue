@@ -224,8 +224,8 @@ const formatPrice = (value) => {
 
                                     </TableDataCell>
                                     <TableDataCell class="py-3">{{ formatPrice(product.price) }} MRU</TableDataCell>
-                                    <TableDataCell class="py-3">{{ product.items_sold }} MRU</TableDataCell>
-                                    <TableDataCell class="py-3">{{ formatPrice(product.total_revenue) }} MRU</TableDataCell>
+                                    <TableDataCell class="py-3">{{ product.total_quantity }}</TableDataCell>
+                                    <TableDataCell class="py-3">{{ formatPrice(product.total_amount) }} MRU</TableDataCell>
                                 </TableRow>
                             </template>
                         </Table>

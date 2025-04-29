@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ClientExport;
 use App\Exports\ClientsExport;
 use App\Http\Resources\ClientResource;
 use App\Http\Requests\ClientRequest;
@@ -15,7 +16,7 @@ class ClientsController extends Controller
 {
     public function index(Request $request)
     {
-        
+
         $request->validate([
             'search' => 'nullable|string',
             'sort' => 'nullable|string|in:name,number,orders_count,depts_amount,created_at',
@@ -46,10 +47,10 @@ class ClientsController extends Controller
         })
         ->paginate(PAGINATION)
         ->withQueryString();
-    
 
 
-        
+
+
             return inertia('Clients/Index', [
              'clients' => ClientResource::collection($clients),
             'filters' => $request->only(['search', 'sort', 'direction', 'page']),
@@ -63,7 +64,7 @@ class ClientsController extends Controller
     $orders = $client->orders()
         ->with('products')
         ->latest()
-        ->paginate(PAGINATION) 
+        ->paginate(PAGINATION)
         ->withQueryString();
 
     return inertia('Clients/Show', [
@@ -145,8 +146,14 @@ class ClientsController extends Controller
 
     public function export(){
         activity()->causedBy(auth()->user())->log('Clients Exported')
-        
+
         ;
         return \Maatwebsite\Excel\Facades\Excel::download(new ClientsExport(), 'clients.xlsx');
+    }
+    public function exportclient($id){
+        $client = Client::findOrFail($id);
+        activity()->causedBy(auth()->user())->log('Client Exported')
+        ;
+        return \Maatwebsite\Excel\Facades\Excel::download(new ClientExport($client), 'client.xlsx');
     }
 }

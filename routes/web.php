@@ -14,6 +14,7 @@ use App\Http\Controllers\Sales\SalesController;
 use App\Http\Controllers\Users\UsersController;
 use App\Http\Controllers\Notifications\NotificationController;
 use App\Models\Order;
+use App\Models\Product;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -51,6 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/create', [ClientsController::class, 'create'])->name('create');
         Route::post('/', [ClientsController::class, 'store'])->name('store');
         Route::get('/export', [ClientsController::class, 'export'])->name('export');
+        Route::get('/exportclient/{id}', [ClientsController::class, 'exportclient'])->name('exportclient');
         Route::get('/{id}/show', [ClientsController::class, 'show'])->name('show');
         Route::get('/{id}/edit', [ClientsController::class, 'edit'])->name('edit');
         Route::put('/{id}', [ClientsController::class, 'update'])->name('update');
