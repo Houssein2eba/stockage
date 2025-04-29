@@ -29,7 +29,7 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
         // Return as collection using ProductResource
-
+       
 
 
         $stats = [
