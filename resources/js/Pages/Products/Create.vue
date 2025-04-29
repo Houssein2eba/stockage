@@ -124,7 +124,8 @@
               </div>
             </div>
 
-            <div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
               <InputLabel for="min_quantity" value="Min Quantity" class="mb-1.5" />
               <TextInput
                 id="min_quantity"
@@ -136,6 +137,20 @@
                 placeholder="1"
               />
               <InputError class="mt-1.5" :message="form.errors.min_quantity" />
+            </div>
+            <div>
+              <InputLabel for="cost" value="Cost" class="mb-1.5" />
+              <TextInput
+                id="cost"
+                type="number"
+                step="1"
+                min="1"
+                class="w-full"
+                v-model="form.cost"
+                placeholder="1"
+              />
+              <InputError class="mt-1.5" :message="form.errors.cost" />
+            </div>
             </div>
 
             <div>
@@ -207,6 +222,7 @@ const form = useForm({
   price: '',
   quantity: '',
   min_quantity: '',
+  cost:'',
   category: null,
   image: null
 });

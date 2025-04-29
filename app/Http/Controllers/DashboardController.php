@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\productResource;
+use App\Models\Client;
 use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\Order;
@@ -18,6 +19,8 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        
+        
         // Get popular products (top 5 most sold)
         $popular = Product::query()
     ->select([

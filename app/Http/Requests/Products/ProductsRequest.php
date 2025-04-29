@@ -53,11 +53,11 @@ class ProductsRequest extends FormRequest
         ],
 
         'image' => [
-            $isUpdate ? 'nullable' : 'required',
+            'nullable',
             'image',
             'mimes:jpeg,png,jpg,gif,webp',
             'max:2048',
-            'dimensions:min_width=100,min_height=100'
+            
         ],
 
         'price' => [
@@ -66,6 +66,11 @@ class ProductsRequest extends FormRequest
             'min:0.1',
             'max:1000000',
             'regex:/^\d+(\.\d{1,2})?$/'
+        ],
+        'cost'=> [
+            'required',
+            'numeric',
+            'lte:price',
         ],
 
         'quantity' => [

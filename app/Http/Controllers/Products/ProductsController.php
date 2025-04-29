@@ -10,6 +10,7 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ProductsExport;
 
@@ -75,16 +76,21 @@ class ProductsController extends Controller
 
     public function store(ProductsRequest $request)
     {
-        $request->validated();
+        
 
         DB::transaction(function () use ($request) {
+            if($request->hasFile('image')){
             $url = $request->file('image')->store('products', 'public');
-
+            
+            }else{
+                $url = 'products/product.png';
+            }
             $product = Product::create([
                 'name' => $request->name,
                 'description' => $request->description,
                 'price' => $request->price,
                 'quantity' => $request->quantity,
+                'cost' => $request->cost,
                 'image' => $url,
                 'min_quantity' => $request->min_quantity,
             ]);
@@ -98,7 +104,7 @@ class ProductsController extends Controller
                 ->log('Product Created');
         });
 
-        return back();
+        return to_route('products.create');
     }
 
     public function edit($id)
@@ -153,7 +159,16 @@ class ProductsController extends Controller
     public function destroy($id)
     {
         $product = Product::findOrFail($id);
+        
+     
+            
+            if ($product->image && $product->image !== 'products/product.png') {
+                // Delete the image from storage
+                Storage::disk('public')->delete($product->image);
+            }
+        
         $old = $product->toArray();
+        
         $product->categories()->detach();
         $product->delete();
         unset($old['id'], $old['created_at'], $old['updated_at']);
