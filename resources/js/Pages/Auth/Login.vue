@@ -38,74 +38,89 @@ const submit = () => {
 };
 </script>
 
+
 <template>
     <GuestLayout>
         <Head title="Log in" />
 
-        <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
-            {{ status }}
-        </div>
-
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="login" value="Email or phone" />
-
-                <TextInput
-                    id="login"
-                    type="text"
-                    class="mt-1 block w-full"
-                    v-model="form.login"
-                    required
-                    autofocus
-                    autocomplete="username"
-                    :class="{ 'ring-1 ring-red-500  mt-2': form.errors.login }"
-                />
-
-                <InputError class="mt-2" :message="form.errors.login" />
+        <div class="w-full max-w-md mx-auto p-6">
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-bold text-gray-900">Welcome Back</h1>
+                <p class="text-gray-600 mt-2">Please sign in to continue</p>
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" class="animate-pulse" />
-
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="current-password"
-                    :class="{ 'ring-1 ring-red-500  mt-2': form.errors.password }"
-                />
-                 
-                <InputError class="mt-2" :message="form.errors.password" />
+            <div v-if="status" class="mb-4 p-4 rounded-lg bg-green-50 text-green-700">
+                {{ status }}
             </div>
 
-            <div class="mt-4 block">
-                <label class="flex items-center">
-                    <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600"
-                        >Remember me</span
+            <form @submit.prevent="submit" class="space-y-6">
+                <div>
+                    <InputLabel for="login" value="Email or phone" class="text-gray-700" />
+                    <div class="mt-2 relative">
+                        <TextInput
+                            id="login"
+                            type="text"
+                            class="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            v-model="form.login"
+                            required
+                            autofocus
+                            autocomplete="username"
+                            :class="{ 'border-red-500 ring-red-500': form.errors.login }"
+                        />
+                        <InputError class="mt-1" :message="form.errors.login" />
+                    </div>
+                </div>
+
+                <div>
+                    <InputLabel for="password" value="Password" class="text-gray-700" />
+                    <div class="mt-2 relative">
+                        <TextInput
+                            id="password"
+                            type="password"
+                            class="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            v-model="form.password"
+                            required
+                            autocomplete="current-password"
+                            :class="{ 'border-red-500 ring-red-500': form.errors.password }"
+                        />
+                        <InputError class="mt-1" :message="form.errors.password" />
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center">
+                        <Checkbox name="remember" v-model:checked="form.remember" class="text-blue-500 focus:ring-blue-500" />
+                        <span class="ml-2 text-sm text-gray-600">Remember me</span>
+                    </label>
+
+                    <Link
+                        v-if="canResetPassword"
+                        :href="route('password.request')"
+                        class="text-sm text-blue-600 hover:text-blue-800 hover:underline"
                     >
-                </label>
-            </div>
-
-            <div class="mt-4 flex items-center justify-end">
-                <Link
-                    v-if="canResetPassword"
-                    :href="route('password.request')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                >
-                    Forgot your password?
-                </Link>
+                        Forgot password?
+                    </Link>
+                </div>
 
                 <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
+                    class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                    :class="{ 'opacity-75 cursor-not-allowed': form.processing }"
                     :disabled="form.processing"
                 >
-                    Log in
+                    <span v-if="form.processing">Signing in...</span>
+                    <span v-else>Sign In</span>
                 </PrimaryButton>
-            </div>
-        </form>
+
+                <div class="text-center mt-4">
+                    <span class="text-gray-600 text-sm">Don't have an account?</span>
+                    <Link
+                        :href="route('register')"
+                        class="text-blue-600 hover:text-blue-800 text-sm ml-1 hover:underline"
+                    >
+                        Create account
+                    </Link>
+                </div>
+            </form>
+        </div>
     </GuestLayout>
 </template>

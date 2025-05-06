@@ -24,11 +24,12 @@ const props = defineProps({
 });
 
 const formatPrice = (value) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('fr-MR', {
         style: 'currency',
-        currency: 'USD'
+        currency: 'MRU' // or 'MRO' if you're using the old code
     }).format(value);
 };
+
 </script>
 
 <template>
@@ -130,7 +131,7 @@ const formatPrice = (value) => {
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Sales Today</p>
-                                <p class="text-xl font-bold text-gray-700">{{ stats.todaySales }}</p>
+                                <p class="text-xl font-bold text-green-700">{{ stats.todaySales }} </p>
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Revenue Today</p>
