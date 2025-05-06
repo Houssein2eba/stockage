@@ -98,6 +98,8 @@
 </template>
 
 <script setup>
+
+import { formatPrice } from '@/utils/format.js'
 import AuthLayout from '@/layouts/AuthLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 import { computed } from 'vue'
@@ -112,12 +114,7 @@ const props = defineProps({
 
 const totalAmount = props.sale.total_amount;
 
-const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD'
-    }).format(price || 0)
-}
+
 
 const printInvoice = () => {
     window.print()

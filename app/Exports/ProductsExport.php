@@ -9,12 +9,31 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 
 class ProductsExport implements FromCollection,WithHeadings,WithMapping
 {
+    protected $products;
+
     /**
     * @return \Illuminate\Support\Collection
     */
     public function collection()
     {
-        return Product::all();
+        $products = Product::with('categories')->get();
+
+        $rows = collect();
+
+        foreach ($products as $product) {
+            $categories = $product->categories->pluck('name')->implode(', ');
+            $rows->push([
+                'name' => $product->name,
+                'description' => $product->description,
+                'category' => $categories,
+                'price' => $product->price,
+                'quantity' => $product->quantity,
+                'min_quantity' => $product->min_quantity,
+                'created_at' => $product->created_at->format('d/m/Y'),
+
+            ]);
+        }
+        return $rows;
     }
 
     public function headings():array
@@ -22,27 +41,25 @@ class ProductsExport implements FromCollection,WithHeadings,WithMapping
         return [
             'name',
             'description',
+            'category',
             'price',
             'quantity',
             'min_quantity',
             'created_at',
-            'updated_at'
+
         ];
     }
-    public function map($product):array
+
+    public function map($row): array
     {
         return [
-            $product->name,
-            $product->description,
-            $product->price,
-            $product->quantity,
-            $product->min_quantity,
-            $product->created_at,
-            $product->updated_at
+            $row['name'],
+            $row['description'],
+            $row['category'],
+            $row['price'],
+            $row['quantity'],
+            $row['min_quantity'],
+            $row['created_at'],
         ];
     }
-
-
- 
-    
 }

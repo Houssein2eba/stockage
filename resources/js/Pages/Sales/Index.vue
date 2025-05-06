@@ -12,7 +12,7 @@ import { debounce } from 'lodash';
 import { router } from '@inertiajs/vue3';
 import Pagination from "@/Components/Pagination.vue";
 import { format } from 'date-fns';
-
+import { formatPrice } from "@/utils/format.js";
 const props = defineProps({
     sales: Object,
     stats: Object,
@@ -22,9 +22,9 @@ const props = defineProps({
 const toast = useToast();
 const showDeleteModal = ref(false);
 const saleToDelete = ref(null);
-const sort = ref({ 
-    field: props.filters?.sort || 'created_at', 
-    direction: props.filters?.direction || 'desc' 
+const sort = ref({
+    field: props.filters?.sort || 'created_at',
+    direction: props.filters?.direction || 'desc'
 });
 const search = ref(props.filters?.search || '');
 const statusFilter = ref(props.filters?.status || '');
@@ -106,12 +106,7 @@ const getSortIcon = (field) => {
     return sort.value.direction === 'asc' ? 'asc' : 'desc';
 };
 
-const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD'
-    }).format(price);
-};
+
 
 const formatDate = (date) => {
     return format(new Date(date), 'PP');

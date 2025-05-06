@@ -160,6 +160,7 @@
 </template>
 
 <script setup>
+import {formatPrice} from '@/utils/format.js'
 import { computed } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { useToast } from 'vue-toastification'
@@ -226,12 +227,7 @@ const calculateTotal = computed(() => {
     return form.items.reduce((total, item) => total + calculateItemTotal(item), 0)
 })
 
-const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'MRU'
-    }).format(price || 0)
-}
+
 
 
 

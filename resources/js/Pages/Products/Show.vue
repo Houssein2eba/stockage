@@ -2,20 +2,15 @@
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import { Head, Link } from "@inertiajs/vue3";
 import { useToast } from "vue-toastification";
-import PrimaryButton from "@/Components/PrimaryButton.vue";
 
+import {formatPrice} from "@/utils/format.js";
 const props = defineProps({
     product: Object
 });
 
 const toast = useToast();
 
-const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'MRU'
-    }).format(price);
-};
+
 
 const getImageLink = (image) => {
     return image ? '/storage/' + image : '/images/placeholder-product.png';

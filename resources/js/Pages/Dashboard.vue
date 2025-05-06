@@ -8,6 +8,8 @@ import TableDataCell from "@/Components/TableDataCell.vue";
 import {Link} from '@inertiajs/vue3';
 import { useToast } from 'vue-toastification';
 import { ref } from 'vue';
+import { formatPrice } from '@/utils/format';
+
 const props = defineProps({
     stats: {
         type: Object,
@@ -22,14 +24,6 @@ const props = defineProps({
         required: true
     },
 });
-
-const formatPrice = (value) => {
-    return new Intl.NumberFormat('fr-MR', {
-        style: 'currency',
-        currency: 'MRU' // or 'MRO' if you're using the old code
-    }).format(value);
-};
-
 </script>
 
 <template>

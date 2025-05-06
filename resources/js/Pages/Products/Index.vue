@@ -10,7 +10,7 @@ import Table from "@/Components/Table.vue";
 import TableRow from "@/Components/TableRow.vue";
 import TableHeaderCell from "@/Components/TableHeaderCell.vue";
 import TableDataCell from "@/Components/TableDataCell.vue";
-
+import {formatPrice} from "@/utils/format.js";
 import { ref, watch, computed } from 'vue';
 import { debounce } from 'lodash';
 import { router } from '@inertiajs/vue3';
@@ -121,12 +121,7 @@ const handleImageChange = (e) => {
     }
 };
 
-const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'MRU'
-    }).format(price);
-};
+
 //get image link
 const getImageLink = (image) => {
     return image ? '/storage/' + image : '/images/placeholder-product.png';

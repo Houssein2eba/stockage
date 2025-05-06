@@ -110,14 +110,14 @@ const deleteClient = () => {
 // Handle pagination link clicks
 const handlePageChange = (url) => {
     if (!url) return;
-    
+
     // Extract page number from URL
     const urlObj = new URL(url);
     const pageParam = urlObj.searchParams.get('page');
-    
+
     if (pageParam) {
         page.value = parseInt(pageParam);
-        
+
         router.get(route('clients.index'), {
             search: search.value,
             sort: sort.value.field,
@@ -248,20 +248,20 @@ const exportExcel=() => {
                                         :href="route('clients.show', client.id)"
                                         class="text-blue-600 hover:text-blue-900 transition-colors flex items-center gap-1 whitespace-nowrap"
                                     >
-                                    <span class="font-medium text-gray-900">{{ client.name }}</span>
+                                    <span class="font-medium  text-blue-600">{{ client.name }}</span>
                                 </Link>
                                 </TableDataCell>
                                 <TableDataCell class="px-4 sm:px-6 py-4">
                                     <div class="text-gray-600">{{ client.number }}</div>
                                 </TableDataCell>
                                 <TableDataCell>
-                                    {{ client.orders_count }} 
+                                    {{ client.orders_count }}
                                 </TableDataCell>
                                 <TableDataCell>
                                     {{ amountFormat(client.depts_amount) }} MRU
                                 </TableDataCell>
                                 <TableDataCell class="px-4 sm:px-6 py-4">
-                                    
+
                                         <Link
                                             :href="route('clients.edit', client.id)"
                                             class="text-blue-600 hover:text-blue-900 transition-colors flex items-center gap-1 whitespace-nowrap"
@@ -271,7 +271,7 @@ const exportExcel=() => {
                                             </svg>
                                             <span class="hidden sm:inline">Edit</span>
                                         </Link>
-                                   
+
                                 </TableDataCell>
                                 <TableDataCell class="px-4 sm:px-6 py-4">
                                     <button
@@ -299,12 +299,12 @@ const exportExcel=() => {
                         </template>
                     </Table>
                     <!-- Pagination  -->
-                 
+
                 </div>
                 <div class="flex items-center justify-between mt-4">
               <div class="text-sm text-gray-700" v-if="props.clients_count > 0">
-                Showing <span class="font-medium">{{ props.clients.meta.from }}</span> to 
-                <span class="font-medium">{{ props.clients.meta.to }}</span> of 
+                Showing <span class="font-medium">{{ props.clients.meta.from }}</span> to
+                <span class="font-medium">{{ props.clients.meta.to }}</span> of
                 <span class="font-medium">{{ props.clients.meta.total }}</span> results
               </div>
                 <Pagination :links="props.clients.meta.links" @change="handlePageChange" />

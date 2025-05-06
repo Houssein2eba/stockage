@@ -29,7 +29,7 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
         // Return as collection using ProductResource
-       
+
 
 
         $stats = [
@@ -38,7 +38,7 @@ class DashboardController extends Controller
             'totalSales' => Order::count(),
             'totalCategories' => Category::count(),
             'totalRevenue' => OrderDetail::sum('total_amount'),
-            'totalProfit' => Order::sum('total_amount') * 0.2, // Assuming 20% profit margin
+            'totalProfit' => Order::sum('total_amount'), // Assuming 20% profit margin
             'todaySales' => OrderDetail::whereDate('created_at', Carbon::today())->count(),
             'todayRevenue' => OrderDetail::whereDate('created_at', Carbon::today())->sum('total_amount'),
             'paidAmount' =>DB::table('orders')

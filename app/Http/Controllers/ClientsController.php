@@ -10,6 +10,7 @@ use App\Http\Resources\OrderResource;
 use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 use Maatwebsite\Excel\Excel;
 
 class ClientsController extends Controller
@@ -51,11 +52,12 @@ class ClientsController extends Controller
 
 
 
-            return inertia('Clients/Index', [
-             'clients' => ClientResource::collection($clients),
+        return Inertia::render('Clients/Index', [
+            'clients' => ClientResource::collection($clients),
             'filters' => $request->only(['search', 'sort', 'direction', 'page']),
             'clients_count' => DB::table('clients')->count(),
-            ]);
+        ]);
+            
     }
     public function show($id)
 {
@@ -68,10 +70,10 @@ $orders = $client->orders()
     ->withQueryString();
 
 
-    
-    
 
-    
+
+
+
 
     return inertia('Clients/Show', [
         'client' => new ClientResource($client),

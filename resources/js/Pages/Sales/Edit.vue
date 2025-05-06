@@ -174,7 +174,7 @@ import { useToast } from 'vue-toastification'
 import InputError from '@/Components/InputError.vue'
 import TextInput from '@/Components/TextInput.vue'
 import VueMultiselect from 'vue-multiselect'
-
+import {formatPrice} from '@/utils/format.js'
 const props = defineProps({
     sale: Object,
     clients: Array,
@@ -224,12 +224,7 @@ const removeItem = (index) => {
     form.items.splice(index, 1)
 }
 
-const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'MRU'
-    }).format(price || 0)
-}
+
 
 const updateSale = () => {
     form.put(route('sales.update', props.sale.id), {

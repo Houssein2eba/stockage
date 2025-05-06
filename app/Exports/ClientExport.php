@@ -28,16 +28,28 @@ class ClientExport implements FromCollection, WithHeadings, WithEvents
         $orders = $this->client->orders()->with('products')->get();
 
         $rows = collect();
+        $totalPaid = 0;
+        $totalDebts = 0;
 
         foreach ($orders as $order) {
             $productNames = $order->products->pluck('name')->implode(', ');
             $amount = $order->products->sum(fn ($p) => $p->pivot->quantity * $p->price);
 
+            // Calculate paid and unpaid amounts
+            if ($order->status === 'paid') {
+                $totalPaid += $amount;
+            } else {
+                $totalDebts += $amount;
+            }
+
             $rows->push([
                 'reference' => $order->reference,
                 'products' => $productNames,
-                 'date' =>  $order->created_at->format('d/m/Y'),
+                'date' => $order->created_at->format('d/m/Y'),
                 'amount' => $amount,
+                'status' => $order->status,
+                'paid_amount' => $order->status === 'paid' ? $amount : 0,
+                'unpaid_amount' => $order->status !== 'paid' ? $amount : 0,
             ]);
         }
 
@@ -46,8 +58,11 @@ class ClientExport implements FromCollection, WithHeadings, WithEvents
         $rows->push([
             'reference' => '',
             'products' => 'Total',
-            'date' =>  '',
-            'amount' => $total
+            'date' => '',
+            'amount' => $total,
+            'status' => '',
+            'paid_amount' => $totalPaid,
+            'unpaid_amount' => $totalDebts,
         ]);
 
         return $rows;
@@ -55,7 +70,15 @@ class ClientExport implements FromCollection, WithHeadings, WithEvents
 
     public function headings(): array
     {
-        return ['Reference', 'Products', 'Date', 'Amount'];
+        return [
+            'Reference',
+            'Products',
+            'Date',
+            'Amount',
+            'Status',
+            'Paid Amount',
+            'Unpaid Amount'
+        ];
     }
 
     public function registerEvents(): array
