@@ -1,0 +1,307 @@
+\documentclass{report}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{enumitem}
+
+\geometry{a4paper, margin=2.5cm}
+
+% Define colors for listings
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% Listing style configuration
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\begin{document}
+
+\title{Développement d'une Application de Gestion de Stock et de Facturation}
+\author{STAGE DE FIN D'ÉTUDES}
+\date{2025}
+
+\maketitle
+
+\tableofcontents
+
+\chapter{Introduction}
+
+Le stage de fin d'études est une étape cruciale dans la formation d'un ingénieur, offrant une opportunité unique de mettre en pratique les connaissances théoriques acquises au cours du cursus universitaire. Ce rapport présente le travail effectué durant mon stage au sein de [Nom de l'entreprise], axé sur le développement d'une application de gestion de stock et de facturation.
+
+\section{Contexte du Stage}
+
+Dans le cadre de la modernisation de ses processus de gestion, [Nom de l'entreprise] a exprimé le besoin de développer une solution informatique permettant d'optimiser la gestion de son stock et l'émission de factures. Ce projet s'inscrit dans une démarche globale de digitalisation des processus métier de l'entreprise.
+
+\section{Objectifs du Stage}
+
+Les principaux objectifs de ce stage sont :
+\begin{itemize}
+    \item Analyser les besoins spécifiques de l'entreprise en matière de gestion de stock
+    \item Concevoir et développer une application répondant à ces besoins
+    \item Implémenter un système de facturation automatisé
+    \item Mettre en place une interface utilisateur intuitive
+    \item Former les utilisateurs finaux à l'utilisation de l'application
+\end{itemize}
+
+\chapter{Technologies et Outils Utilisés}
+
+\section{Framework Laravel}
+Laravel est un framework PHP open-source qui suit le pattern architectural MVC (Modèle-Vue-Contrôleur). Il offre une structure robuste pour le développement d'applications web et inclut de nombreuses fonctionnalités :
+
+\begin{itemize}
+    \item Système d'authentification intégré
+    \item ORM Eloquent pour la gestion de la base de données
+    \item Système de migration pour le versioning de la base de données
+    \item Blade, un moteur de template puissant et intuitif
+    \item Artisan, une interface en ligne de commande
+\end{itemize}
+
+\section{Frontend Technologies}
+Pour la partie frontend de l'application, nous avons utilisé :
+
+\begin{itemize}
+    \item Vue.js pour la création d'interfaces utilisateur réactives
+    \item Tailwind CSS pour le design et la mise en page
+    \item Inertia.js pour connecter le frontend Vue.js avec le backend Laravel
+\end{itemize}
+
+\section{Base de Données}
+Le système de gestion de base de données choisi est MySQL, offrant :
+\begin{itemize}
+    \item Une grande fiabilité et performance
+    \item Une excellente intégration avec Laravel via Eloquent
+    \item Des fonctionnalités avancées de requêtage et d'indexation
+\end{itemize}
+
+\chapter{Analyse et Conception}
+
+\section{Analyse des Besoins}
+\subsection{Besoins Fonctionnels}
+L'application doit permettre :
+\begin{itemize}
+    \item La gestion complète des produits (ajout, modification, suppression)
+    \item Le suivi des mouvements de stock
+    \item La gestion des clients et fournisseurs
+    \item L'émission et le suivi des factures
+    \item La génération de rapports et statistiques
+\end{itemize}
+
+\subsection{Besoins Non Fonctionnels}
+\begin{itemize}
+    \item Performance : temps de réponse rapide pour les opérations courantes
+    \item Sécurité : authentification robuste et gestion des droits d'accès
+    \item Ergonomie : interface intuitive et responsive
+    \item Maintenabilité : code documenté et structuré
+\end{itemize}
+
+\section{Conception de la Base de Données}
+La base de données a été conçue pour répondre aux besoins de l'application avec les tables principales suivantes :
+
+\begin{itemize}
+    \item Users : gestion des utilisateurs et leurs rôles
+    \item Products : catalogue des produits
+    \item Categories : catégorisation des produits
+    \item Clients : informations sur les clients
+    \item Orders : commandes des clients
+    \item OrderDetails : détails des commandes
+    \item Stock : suivi des mouvements de stock
+\end{itemize}
+
+\chapter{Implémentation et Développement}
+
+\section{Architecture du Projet}
+L'application suit une architecture MVC (Modèle-Vue-Contrôleur) avec :
+
+\subsection{Organisation des Dossiers}
+\begin{itemize}
+    \item \texttt{app/Models/} : Définition des modèles Eloquent
+    \item \texttt{app/Http/Controllers/} : Logique métier et traitement des requêtes
+    \item \texttt{app/Http/Requests/} : Validation des requêtes
+    \item \texttt{resources/js/} : Composants Vue.js et logique frontend
+    \item \texttt{database/migrations/} : Schémas de base de données
+\end{itemize}
+
+\section{Fonctionnalités Implémentées}
+
+\subsection{Gestion des Utilisateurs}
+\begin{itemize}
+    \item Authentification sécurisée
+    \item Gestion des rôles et permissions
+    \item Profils utilisateurs personnalisables
+\end{itemize}
+
+\subsection{Gestion des Produits}
+\begin{itemize}
+    \item CRUD complet des produits
+    \item Gestion des catégories
+    \item Suivi des prix et quantités
+    \item Système d'alerte de stock bas
+\end{itemize}
+
+\subsection{Gestion des Commandes}
+\begin{itemize}
+    \item Création de commandes
+    \item Suivi des états des commandes
+    \item Génération automatique de factures
+    \item Historique des transactions
+\end{itemize}
+
+\section{Interfaces Principales}
+
+\subsection{Dashboard}
+Le tableau de bord principal offre :
+\begin{itemize}
+    \item Vue d'ensemble des stocks
+    \item Statistiques des ventes
+    \item Alertes de stock bas
+    \item Graphiques de performance
+\end{itemize}
+
+\subsection{Interface de Gestion des Produits}
+\begin{lstlisting}[language=php]
+public function index()
+{
+    $products = Product::with(['category'])
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
+
+    return Inertia::render('Products/Index', [
+        'products' => $products
+    ]);
+}
+\end{lstlisting}
+
+\subsection{Système de Facturation}
+Le système de facturation automatise :
+\begin{itemize}
+    \item La génération de factures PDF
+    \item Le calcul des taxes et remises
+    \item L'historique des paiements
+    \item Les rappels automatiques
+\end{itemize}
+
+\chapter{Tests et Validation}
+
+\section{Stratégie de Test}
+Les tests ont été réalisés à plusieurs niveaux :
+\begin{itemize}
+    \item Tests unitaires des composants
+    \item Tests d'intégration
+    \item Tests de charge et performance
+    \item Tests utilisateurs
+\end{itemize}
+
+\section{Résultats et Corrections}
+Les principales améliorations apportées suite aux tests :
+\begin{itemize}
+    \item Optimisation des requêtes SQL
+    \item Amélioration des temps de réponse
+    \item Correction des bugs d'interface
+    \item Renforcement de la sécurité
+\end{itemize}
+
+\chapter{Conclusion et Perspectives}
+
+\section{Bilan du Projet}
+Le développement de l'application de gestion de stock et de facturation a permis de :
+\begin{itemize}
+    \item Moderniser les processus de gestion de l'entreprise
+    \item Améliorer la traçabilité des produits
+    \item Réduire le temps de traitement des commandes
+    \item Optimiser la gestion des stocks
+    \item Automatiser la génération des factures
+\end{itemize}
+
+\section{Compétences Acquises}
+Ce stage a été l'occasion de développer plusieurs compétences :
+\begin{itemize}
+    \item Maîtrise du framework Laravel et de l'écosystème PHP moderne
+    \item Expérience en développement frontend avec Vue.js et Tailwind CSS
+    \item Gestion de projet et méthodologies agiles
+    \item Communication avec les parties prenantes
+    \item Résolution de problèmes techniques complexes
+\end{itemize}
+
+\section{Recommandations et Perspectives}
+Pour les développements futurs, il serait intéressant de :
+\begin{itemize}
+    \item Implémenter une application mobile
+    \item Ajouter des fonctionnalités de prévision des stocks
+    \item Intégrer un système de paiement en ligne
+    \item Développer une API pour l'intégration avec d'autres systèmes
+    \item Améliorer les fonctionnalités de reporting
+\end{itemize}
+
+\appendix
+\chapter{Annexes}
+
+\section{Diagrammes UML}
+\subsection{Diagramme de Classes}
+[Insérer le diagramme de classes]
+
+\subsection{Diagramme de Séquence}
+[Insérer le diagramme de séquence]
+
+\section{Documentation Technique}
+\subsection{Guide d'Installation}
+\begin{enumerate}
+    \item Cloner le repository
+    \item Installer les dépendances avec Composer
+    \item Configurer le fichier .env
+    \item Exécuter les migrations
+    \item Lancer le serveur de développement
+\end{enumerate}
+
+\subsection{Configuration Requise}
+\begin{itemize}
+    \item PHP >= 8.0
+    \item MySQL >= 5.7
+    \item Node.js >= 14.0
+    \item Composer
+    \item NPM ou Yarn
+\end{itemize}
+
+\section{Manuel Utilisateur}
+\subsection{Guide de Démarrage Rapide}
+[Instructions détaillées pour l'utilisation de l'application]
+
+\section{Références Bibliographiques}
+\begin{enumerate}
+    \item Documentation officielle Laravel
+    \item Documentation Vue.js
+    \item Documentation Tailwind CSS
+    \item Ressources sur la gestion de stock
+    \item Articles techniques et bonnes pratiques
+\end{enumerate}
+
+% End of document
+\end{document}

@@ -2,7 +2,7 @@
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import SidebarLink from '@/Components/SidebarLink.vue';
-import { usePermission } from '@/composables/permissions';
+import { useRole } from '@/composables/roles';
 import { useAdmin } from '@/composables/admins';
 import { format } from 'date-fns';
 import { usePage } from '@inertiajs/vue3';
@@ -76,8 +76,9 @@ const isProductsDropdownOpen = ref(false);
 const isClientsDropdownOpen = ref(false);
 
 // Composable functions
-const { hasPermission } = usePermission();
-const { hasRole } = usePermission();
+
+const { hasRole } = useRole();
+
 const { isAdmin } = useAdmin();
 
 // Toggle functions
@@ -129,6 +130,7 @@ onMounted(() => {
   handleResize();
   window.addEventListener('resize', handleResize);
 });
+
 </script>
 
 
@@ -207,12 +209,12 @@ onMounted(() => {
                   <path d="M13 15a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-1Z" class="fill-current text-blue-300 group-hover:text-blue-400"/>
                 </svg>
               </template>
-              <span class="font-medium">Dashboard</span>
+              <span class="font-medium">Dashboard </span>
             </SidebarLink>
           </li>
 
           <!-- Users Dropdown -->
-          <li class="group">
+          <li v-if="hasRole('admin')" class="group">
             <div class="relative">
               <button
                 @click="toggleUsersDropdown"
@@ -247,7 +249,7 @@ onMounted(() => {
                   All Users
                 </SidebarLink>
                 <SidebarLink
-                  v-if="isAdmin || hasPermission('create_users')"
+
                   :href="route('users.create')"
                   :active="route().current('users.create')"
                   class="text-sm hover:bg-blue-50"
@@ -258,7 +260,7 @@ onMounted(() => {
             </div>
           </li>
           <!-- Clients dropdown -->
-<li>
+<li v-if="hasRole('admin')" class="group">
   <div class="relative">
     <button
       @click="toggleClientsDropdown"
