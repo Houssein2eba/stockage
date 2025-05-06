@@ -38,7 +38,9 @@ class DashboardController extends Controller
             'totalSales' => Order::count(),
             'totalCategories' => Category::count(),
             'totalRevenue' => OrderDetail::sum('total_amount'),
-            'totalProfit' => Order::sum('total_amount'), // Assuming 20% profit margin
+            'totalProfit' => DB::table('order_details')
+                ->join('products', 'products.id', '=', 'order_details.product_id')
+                ->sum(DB::raw('(products.price - products.cost) * order_details.quantity')),
             'todaySales' => OrderDetail::whereDate('created_at', Carbon::today())->count(),
             'todayRevenue' => OrderDetail::whereDate('created_at', Carbon::today())->sum('total_amount'),
             'paidAmount' =>DB::table('orders')

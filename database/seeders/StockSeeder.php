@@ -61,7 +61,7 @@ class StockSeeder extends Seeder
             [
                 'name' => 'Laptop Pro',
                 'description' => 'High-performance laptop',
-                'price' => 999.99,
+                'price' => 1000,
                 'quantity' => 50,
                 'min_quantity' => 10,
                 'cost' => 800,
@@ -71,7 +71,7 @@ class StockSeeder extends Seeder
             [
                 'name' => 'Cotton T-Shirt',
                 'description' => 'Comfortable cotton t-shirt',
-                'price' => 19.99,
+                'price' => 20,
                 'quantity' => 100,
                 'min_quantity' => 20,
                 'cost' => 10,
@@ -81,10 +81,10 @@ class StockSeeder extends Seeder
             [
                 'name' => 'Coffee Maker',
                 'description' => 'Automatic coffee maker',
-                'price' => 79.99,
+                'price' => 80,
                 'quantity' => 30,
                 'min_quantity' => 5,
-                'cost' => 50,
+                'cost' => 60,
                 'image' => 'products/coffee-maker.jpg',
                 'categories' => ['Home & Kitchen', 'Electronics']
             ]
