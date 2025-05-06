@@ -92,6 +92,13 @@ const exportExcel=() => {
                             <p class="font-semibold text-gray-800">#{{ order.reference }}</p>
                             <p class="text-gray-500 text-sm">Total: {{ amountFormat(order.total_amount) }} MRU</p>
                         </div>
+                        <div value="">
+                            <p class="text-gray-500 text-sm">Created: {{ formatDate(order.created_at) }}</p>
+                            <p class="text-gray-500 text-sm">Paid at: {{ formatDate(order.updated_at) }}</p>
+                        </div>
+                        <div>
+                            <span >{{ order.payment.name }}</span>
+                        </div>
                         <div>
                             <span
                                 :class="{

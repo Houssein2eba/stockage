@@ -58,7 +58,7 @@
                                     />
                                     <InputError class="mt-1.5" :message="form.errors[`items.${index}.product`]" />
                                 </div>
-                                
+
                                 <!-- Quantity -->
                                 <div class="w-24">
                                     <TextInput
@@ -71,12 +71,12 @@
                                     />
                                     <InputError class="mt-1.5" :message="form.errors[`items.${index}.quantity`]" />
                                 </div>
-                                
+
                                 <!-- Total -->
                                 <div class="w-32 flex items-center justify-end">
                                     <span class="font-medium">{{ formatPrice(calculateItemTotal(item)) }}</span>
                                 </div>
-                                
+
                                 <!-- Remove button -->
                                 <button
                                     type="button"
@@ -87,7 +87,7 @@
                                     Remove
                                 </button>
                             </div>
-                            
+
                             <button
                                 type="button"
                                 @click="addItem"
@@ -101,17 +101,18 @@
                     <!-- Payment Method -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
-                        <select
-                            v-model="form.payment_id"
-                            :class="{ 'border-red-500': form.errors.payment_id }"
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        >
-                            <option value="">Select payment method</option>
-                            <option v-for="payment in payments" :key="payment.id" :value="payment.id">
-                                {{ payment.name }}
-                            </option>
-                        </select>
-                        <InputError class="mt-1.5" :message="form.errors.payment_id" />
+
+                        <VueMultiselect
+                            v-model="form.payment"
+                            :options="payments"
+                            :custom-label="payment => payment.name"
+                            placeholder="Select payment method"
+                            label="name"
+                            track-by="id"
+                            :class="{ 'ring-2 ring-red-500': form.errors['payment.id'] }"
+                        />
+
+                        <InputError class="mt-1.5" :message="form.errors['payment.id']" />
                     </div>
 
                     <!-- Notes -->
@@ -148,7 +149,7 @@
                             :disabled="form.processing"
                             :class="{ 'opacity-75 cursor-not-allowed': form.processing }"
                         >
-                            <span v-if="form.processing">Saving...</span>   
+                            <span v-if="form.processing">Saving...</span>
                             <span v-else>Save Sale</span>
                         </button>
                     </div>
@@ -167,7 +168,7 @@ import TextInput from '@/Components/TextInput.vue'
 import InputError from '@/Components/InputError.vue'
 import VueMultiselect from 'vue-multiselect'
 import 'vue-multiselect/dist/vue-multiselect.css'
-
+import SelectPayment from '@/Components/SelectPayment.vue'
 const toast = useToast()
 
 const props = defineProps({
@@ -188,7 +189,7 @@ const props = defineProps({
 const form = useForm({
     client: null,
     items: [{ product: null, quantity: 0 }],
-    payment_id: null,
+    payment: null,
     notes: ''
 })
 
@@ -203,21 +204,21 @@ const removeItem = (index) => {
 }
 
 const calculateItemTotal = (item) => {
-    
+
     if (!item.product || !item.quantity) return 0
     const productId = item.product?.id || item.product;
-    
+
     const product = props.products.find(p => String(p.id) === String(productId));
 
     if (!product) {
         console.error('Product not found for ID:', item.product)
         return 0
     }
-    
+
     // Ensure quantity is treated as a number
     const quantity = Number(item.quantity) || 0
     const price = Number(product.price) || 0
-    
+
     return price * quantity
 }
 

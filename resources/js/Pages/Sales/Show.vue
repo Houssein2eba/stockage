@@ -18,7 +18,7 @@
                         <div class="text-4xl font-bold text-blue-600">#{{ sale.reference }}</div>
                         <p class="text-sm text-gray-600 mt-1">Date: {{ formatDate(sale.created_at) }}</p>
                         <p class="text-sm text-gray-600">Payment Method: {{ sale.payment?.name || 'Cash' }}</p>
-                        <p class="text-sm text-gray-600">Status: 
+                        <p class="text-sm text-gray-600">Status:
                             <span :class="{
                                 'px-2 py-0.5 rounded-full text-xs font-medium': true,
                                 'bg-green-100 text-green-800': sale.status === 'paid',
@@ -32,7 +32,7 @@
                 </div>
 
                 <!-- Client Details -->
-                <div class="border-t border-b border-gray-200 py-6 mb-8">
+                <div v-if="sale.client" class="border-t border-b border-gray-200 py-6 mb-8">
                     <h2 class="text-lg font-semibold text-gray-800 mb-4">Client Information</h2>
                     <div class="grid grid-cols-2 gap-x-8">
                         <div>
@@ -72,7 +72,7 @@
                     </table>
                 </div>
 
-                
+
                 <!-- Actions -->
                 <div class="mx-8 flex justify-end space-x-4 print:hidden">
                     <Link
@@ -142,12 +142,12 @@ const formatDate = (date) => {
     body * {
         visibility: hidden;
     }
-    
+
     /* Show only the invoice section */
     .max-w-4xl, .max-w-4xl * {
         visibility: visible;
     }
-    
+
     /* Position the invoice at the top */
     .max-w-4xl {
         position: absolute;
@@ -157,23 +157,23 @@ const formatDate = (date) => {
         padding: 0;
         width: 100%;
     }
-    
+
     /* Hide all buttons and navigation */
     button, .print\:hidden {
         display: none !important;
     }
-    
+
     /* Ensure background colors and borders print */
     * {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }
-    
+
     /* Add page break inside prevention */
-    table { 
+    table {
         page-break-inside: avoid;
     }
-    
+
     /* Ensure white background */
     .bg-white {
         background-color: white !important;

@@ -61,11 +61,17 @@ class ClientsController extends Controller
 {
     $client = Client::with('orders')->findOrFail($id);
 
-    $orders = $client->orders()
-        ->with('products')
-        ->latest()
-        ->paginate(PAGINATION)
-        ->withQueryString();
+$orders = $client->orders()
+    ->with(['products', 'payment']) // Eager load relationships per order
+    ->latest()
+    ->paginate(PAGINATION)
+    ->withQueryString();
+
+
+    
+    
+
+    
 
     return inertia('Clients/Show', [
         'client' => new ClientResource($client),

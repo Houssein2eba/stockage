@@ -23,14 +23,15 @@ class OrderRequest extends FormRequest
      */
     public function rules(): array
     {
-        
+
+        // dd($this->all());
 
         $isClient = $this->client===null ? false : true;
-        
-        
+
+
         return [
             'client.id' => ['nullable', 'exists:clients,id'],
-            'payment_id' => $isClient ? ['nullable', 'exists:payments,id'] : ['required', 'exists:payments,id'],
+            'payment.id' => $isClient ? ['nullable', 'exists:payments,id'] : ['required', 'exists:payments,id'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.product.id' => ['required', 'exists:products,id'],
             'items.*.quantity' => [
@@ -44,17 +45,13 @@ class OrderRequest extends FormRequest
 
 
     }
-
-    /**
-     * Get custom messages for validator errors.
-     *
-     * @return array<string, string>
-     */
-    public function messages(): array
+    public function messages()
     {
         return [
             'client.id.exists' => 'Client not found',
-            'payment_id.exists' => 'Payment method not found',
+            'payment.id.exists' => 'Payment method not found',
+            'payment.id.required' => 'Payment method is required for non-registered clients',
+
             'items.*.product.id.exists' => 'Product not found',
             'items.*.quantity.required' => 'Quantity is required',
             'items.*.quantity.integer' => 'Quantity must be an integer',
@@ -62,5 +59,12 @@ class OrderRequest extends FormRequest
             'items.*.quantity.max' => 'Quantity cannot exceed :max',
         ];
     }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    
 }
 

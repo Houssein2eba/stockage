@@ -31,7 +31,7 @@ class SalesController extends Controller
             'direction' => 'nullable|in:asc,desc',
             'sort' => 'nullable|in:id,reference,client,total_amount,status,created_at'
         ]);
-        
+
         $orders = Order::with(['client', 'products', 'payment'])
             ->withSum('products as total_amount', 'order_details.total_amount')
             ->when($request->search, function ($query, $search) {
@@ -69,7 +69,7 @@ class SalesController extends Controller
             'todaySales' => Order::whereDate('created_at', today())->count(),
             'pendingPayments' => Order::whereNull('payment_id')->count()
         ];
-        
+
         return inertia('Sales/Index', [
             'sales' => OrderResource::collection($orders),
             'stats' => $stats,
@@ -80,7 +80,7 @@ class SalesController extends Controller
     public function show($id)
     {
         $order = Order::with(['client', 'products', 'payment'])->findOrFail($id);
-        
+
         return inertia('Sales/Show', [
             'sale' => new OrderResource($order)
         ]);
@@ -101,59 +101,71 @@ class SalesController extends Controller
 
     public function store(OrderRequest $request)
     {
+
         $id = DB::transaction(function () use ($request) {
             // 1. Create the order
-            $order = Order::create([
-                'reference' => Order::generateReference(),
-                'client_id' => $request->client['id'],
-                'payment_id' => $request->payment_id['id'] ?? $request->payment_id, // Handle both array and direct ID
-                'status' => $request->payment_id ? 'paid' : 'pending',
-                'notes' => $request->notes,
-            ]);
-    
+            if($request->client){
+                $order = Order::create([
+                    'reference' => Order::generateReference(),
+
+                    'client_id' => $request->client['id'],
+                    'payment_id' => $request->payment ? $request->payment['id'] : null,
+                    // 'notes' => $request->notes,
+                    'status' => $request->payment ? 'paid' : 'pending'
+                ]);
+            }else{
+                $order = Order::create([
+                    'reference' => Order::generateReference(),
+                    'client_id' => null,
+                    'payment_id' =>  $request->payment['id'],
+                    // 'notes' => $request->notes,
+                    'status' => 'paid'
+                ]);
+            }
+
             // 2. Load all products in one query
             $productIds = collect($request->items)->pluck('product.id');
             $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
-    
+
             // 3. Prepare order-product pivot data and calculate order total
             $productData = [];
             $orderTotal = 0;
-    
+
             foreach ($request->items as $item) {
                 $productId = $item['product']['id']; // Fixed: Access 'product' array
                 $product = $products[$productId] ?? null;
-    
+
                 if (!$product) {
                     throw new \Exception("Product not found: ID {$productId}");
                 }
-    
+
                 $quantity = (int)$item['quantity'];
                 if ($quantity <= 0) {
                     throw new \Exception("Invalid quantity for product: {$product->name}");
                 }
-    
+
                 if ($product->quantity < $quantity) {
                     throw new \Exception("Insufficient stock for {$product->name}. Available: {$product->quantity}");
                 }
-    
 
-    
+
+
                 $itemTotal = $quantity * $product->price;
                 $orderTotal += $itemTotal;
-    
+
                 $productData[$productId] = [
                     'quantity' => $quantity,
                     'unit_price' => $product->price,
                     'total_amount' => $itemTotal,
                 ];
-    
+
                 $product->decrement('quantity', $quantity);
             }
-    
+
             // 4. Update order total and attach products
             $order->update(['total_amount' => $orderTotal]);
             $order->products()->sync($productData);
-    
+
             // 5. Log activity
             activity()
                 ->causedBy(auth()->user())
@@ -162,15 +174,15 @@ class SalesController extends Controller
                     'attributes' => $order->only(['reference', 'client_id', 'payment_id', 'status', 'total_amount'])
                 ])
                 ->log('Order Created');
-    
+
             return $order->id;
         });
-    
+
         return to_route('sales.show', $id);
     }
-        
-    
-    
+
+
+
     public function edit($id)
     {
         $order = Order::with(['client', 'products', 'payment'])->findOrFail($id);
@@ -235,18 +247,18 @@ class SalesController extends Controller
                 }
                 $product->decrement('quantity', $item['quantity']);
             }
-            
+
             $order->refresh();
             $attributes = $order->toArray();
             unset($old['id'], $old['created_at'], $old['updated_at']);
             unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
-            
+
             activity()
                 ->causedBy(auth()->user())
                 ->performedOn($order)
                 ->withProperties(['old' => $old, 'attributes' => $attributes])
                 ->log('Order Updated');
-                
+
             return back();
         });
     }
@@ -257,15 +269,27 @@ class SalesController extends Controller
             $order = Order::findOrFail($id);
             $old = $order->toArray();
             $order->delete();
-            
+
             unset($old['id'], $old['created_at'], $old['updated_at']);
-            
+
             activity()
                 ->causedBy(auth()->user())
                 ->performedOn($order)
                 ->withProperties(['old' => $old])
                 ->log('Order Deleted');
         });
+
+        return back();
+    }
+    public function markAsPaid($id)
+    {
+        $order = Order::findOrFail($id);
+        $order->update(['status' => 'paid']);
+
+        activity()
+            ->causedBy(auth()->user())
+            ->performedOn($order)
+            ->log('Order Marked as Paid');
 
         return back();
     }

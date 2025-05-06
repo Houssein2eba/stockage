@@ -19,9 +19,9 @@ class PaymentMethodController extends Controller
             'direction' => 'nullable|string|in:asc,desc',
             'page' => 'nullable|integer|min:1',
         ]);
-        
-        
-        
+
+
+
         $paymentMethods = Payment::query()
             ->when($request->search, function ($query) use ($request) {
                 $query->where('name', 'like', '%' . $request->search . '%');
@@ -32,7 +32,7 @@ class PaymentMethodController extends Controller
             ->latest()
             ->paginate(PAGINATION)
             ->withQueryString();
-        
+
         return Inertia::render('Payment/Index', [
             'paymentMethods' => PaymentResource::collection($paymentMethods),
             'filters' => $request->only(['search', 'sort', 'direction']),
@@ -77,7 +77,7 @@ class PaymentMethodController extends Controller
         if ($payment->logo) {
             Storage::disk('public')->delete($payment->logo);
         }
-        
+
         $payment->delete();
 
         // Log activity (deletion)

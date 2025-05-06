@@ -177,8 +177,8 @@ const formatPrice = (value) => {
                                     <TableDataCell class="py-3">{{ sale.reference }}</TableDataCell>
                                     <TableDataCell class="py-3">
                                         <div class="truncate">
-                                        <div class="text-sm font-medium text-gray-900">{{ sale.client.name || 'No Client' }}</div>
-                                        <div class="text-xs text-gray-400">{{ sale.client.number || '--' }}</div>
+                                        <div class="text-sm font-medium text-gray-900">{{ sale.client?.name || 'No Client' }}</div>
+                                        <div class="text-xs text-gray-400">{{ sale.client?.number || '--' }}</div>
                                     </div>
                                     </TableDataCell>
                                     <TableDataCell class="py-3">{{ new Date(sale.created_at).toLocaleDateString() }}</TableDataCell>
