@@ -76,12 +76,12 @@ class ProductsController extends Controller
 
     public function store(ProductsRequest $request)
     {
-        
+
 
         DB::transaction(function () use ($request) {
             if($request->hasFile('image')){
             $url = $request->file('image')->store('products', 'public');
-            
+
             }else{
                 $url = 'products/product.png';
             }
@@ -131,6 +131,7 @@ class ProductsController extends Controller
                     'quantity' => $request->quantity,
                     'image' => $url,
                     'min_quantity' => $request->min_quantity,
+                    'cost'=> $request->cost,
                 ]);
             } else {
                 $product->update([
@@ -139,6 +140,8 @@ class ProductsController extends Controller
                     'price' => $request->price,
                     'quantity' => $request->quantity,
                     'min_quantity' => $request->min_quantity,
+                    'cost'=> $request->cost,
+
                 ]);
             }
             $product->categories()->sync(collect($request->category)->pluck('id'));
@@ -159,16 +162,16 @@ class ProductsController extends Controller
     public function destroy($id)
     {
         $product = Product::findOrFail($id);
-        
-     
-            
+
+
+
             if ($product->image && $product->image !== 'products/product.png') {
                 // Delete the image from storage
                 Storage::disk('public')->delete($product->image);
             }
-        
+
         $old = $product->toArray();
-        
+
         $product->categories()->detach();
         $product->delete();
         unset($old['id'], $old['created_at'], $old['updated_at']);
