@@ -284,7 +284,7 @@ class SalesController extends Controller
     public function markAsPaid($id)
     {
         $order = Order::findOrFail($id);
-        $order->update(['status' => 'paid']);
+        $order->update(['status' => 'paid','updated_at' => now()]);
 
         activity()
             ->causedBy(auth()->user())

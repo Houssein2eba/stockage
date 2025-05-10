@@ -28,6 +28,7 @@ const editForm = useForm({
     price: props.product.price,
     quantity: props.product.quantity,
     min_quantity: props.product.min_quantity,
+    cost:props.product.cost,
     category: props.product.categories,
     image: null
 });
@@ -178,6 +179,7 @@ const updateProduct = () => {
                 </div>
             </div>
 
+            <div class="grid grid-cols-2 gap-4">
             <div>
                 <InputLabel for="edit-min_quantity" value="Min Quantity" class="mb-1.5" />
                 <TextInput
@@ -192,6 +194,20 @@ const updateProduct = () => {
                 />
                 <InputError class="mt-1.5" :message="editForm.errors.min_quantity" />
             </div>
+            <div>
+              <InputLabel for="cost" value="Cost" class="mb-1.5" />
+              <TextInput
+                id="cost"
+                type="number"
+                step="1"
+                min="1"
+                class="w-full"
+                v-model="editForm.cost"
+                placeholder="1"
+              />
+              <InputError class="mt-1.5" :message="editForm.errors.cost" />
+            </div>
+        </div>
 
             <div>
                 <InputLabel for="edit-category" value="Category" class="mb-1.5" />

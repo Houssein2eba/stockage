@@ -47,6 +47,7 @@ class ClientExport implements FromCollection, WithHeadings, WithEvents
                 'products' => $productNames,
                 'date' => $order->created_at->format('d/m/Y'),
                 'amount' => $amount,
+                'paid at' => $order->updated_at ? $order->updated_at->format('d/m/Y') : '',
                 'status' => $order->status,
                 'paid_amount' => $order->status === 'paid' ? $amount : 0,
                 'unpaid_amount' => $order->status !== 'paid' ? $amount : 0,
@@ -60,6 +61,7 @@ class ClientExport implements FromCollection, WithHeadings, WithEvents
             'products' => 'Total',
             'date' => '',
             'amount' => $total,
+            'paid at' => '',
             'status' => '',
             'paid_amount' => $totalPaid,
             'unpaid_amount' => $totalDebts,
@@ -75,6 +77,7 @@ class ClientExport implements FromCollection, WithHeadings, WithEvents
             'Products',
             'Date',
             'Amount',
+            'Paid At',
             'Status',
             'Paid Amount',
             'Unpaid Amount'

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -11,3 +12,10 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         ]);
     });
 });
+
+Route::get('/clients',function(){
+    $clients=Client::with('orders')->get()->toResourceCollection();
+    return response()->json([
+        'clients' => $clients
+    ]);
+})->name('clients');

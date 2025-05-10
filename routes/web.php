@@ -65,7 +65,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/create', [SalesController::class, 'create'])->name('create');
         Route::post('/', [SalesController::class, 'store'])->name('store');
         Route::get('/sale/{id}', [SalesController::class, 'show'])->name('show');
-        Route::post('/sale/{id}/markAsPaid', [SalesController::class, 'markAsPaid'])->name('markAsPaid');
+        Route::put('/sale/{id}/markAsPaid', [SalesController::class, 'markAsPaid'])->name('markAsPaid');
         Route::get('/{id}/edit', [SalesController::class, 'edit'])->name('edit');
         Route::put('/{id}', [SalesController::class, 'update'])->name('update');
         Route::delete('/{id}', [SalesController::class, 'destroy'])->name('destroy');
