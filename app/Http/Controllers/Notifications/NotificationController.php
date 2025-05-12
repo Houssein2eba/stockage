@@ -14,11 +14,17 @@ class NotificationController extends Controller
         return inertia('Notifications/Index', compact('notifications'));
     }
 
-    public function markAsRead($id)
+    public function markAsRead(Request $request,$id)
     {
         $notification = auth()->user()->notifications()->find($id);
         if ($notification) {
             $notification->markAsRead();
+        }
+        if($request->wantsJson()){
+            return response()->json([
+                'message' => 'Notification marked as read',
+                'notification' => $notification,
+            ]);
         }
         return redirect()->back();
     }

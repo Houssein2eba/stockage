@@ -14,7 +14,7 @@
         "inertiajs/inertia-laravel": "^2.0",
         "kirschbaum-development/eloquent-power-joins": "^4.2",
         "laravel/framework": "^12.8",
-        "laravel/sanctum": "^4.0",
+        "laravel/sanctum": "^4.1",
         "laravel/tinker": "^2.10.1",
         "maatwebsite/excel": "^3.1",
         "spatie/laravel-activitylog": "^4.10",

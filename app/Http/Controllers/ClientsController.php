@@ -15,6 +15,12 @@ use Maatwebsite\Excel\Excel;
 
 class ClientsController extends Controller
 {
+    public function deleteJson($id){
+        $client=Client::findOrFail( $id );
+        $client->delete();
+        return response()->json(200);
+
+    }
     public function index(Request $request)
     {
 
@@ -57,7 +63,7 @@ class ClientsController extends Controller
             'filters' => $request->only(['search', 'sort', 'direction', 'page']),
             'clients_count' => DB::table('clients')->count(),
         ]);
-            
+
     }
     public function show($id)
 {
@@ -88,11 +94,13 @@ $orders = $client->orders()
     }
     public function store(ClientRequest $request)
     {
-        DB::transaction(function () use ($request) {
+
+        $client=DB::transaction(function () use ($request) {
             $client = Client::create([
                 'name' => $request->name,
                 'number' => $request->number,
             ]);
+
             $attributes = $client->toArray();
             unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
             activity()
@@ -100,9 +108,21 @@ $orders = $client->orders()
                 ->causedBy(auth()->user())
                 ->withProperties(['attributes' => $attributes])
                 ->log('Client Created');
-        });
 
-        return back();
+                return $client;
+        });
+        
+        if($request->wantsJson()){
+            return response()->json([
+                'client' => new ClientResource($client),
+                'message' => 'Client Created',
+                'status' => 200
+            ]);
+        }else{
+            return back()->with('success', 'Client Created');
+        }
+
+
     }
 
     public function edit($id)
