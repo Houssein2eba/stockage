@@ -281,11 +281,18 @@ class SalesController extends Controller
 
         return back();
     }
-    public function markAsPaid($id)
+    public function markAsPaid(Request $request,Order $id)
     {
-        $order = Order::findOrFail($id);
+         $order=Order::findOrFail($id->id);
         $order->update(['status' => 'paid','updated_at' => now()]);
 
+         if($request->wantsJson()){
+            return response()->json([
+                'order' => new OrderResource($order),
+                'message' => 'Order Marked as Paid',
+                'status' => 200
+            ]);
+         }
         activity()
             ->causedBy(auth()->user())
             ->performedOn($order)

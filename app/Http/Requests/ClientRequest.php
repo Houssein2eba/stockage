@@ -30,7 +30,7 @@ class ClientRequest extends FormRequest
                 'required',
                 'string',
                 'regex:/^[2-4][0-9]{7}$/',
-                Rule::unique('clients', 'number')->ignore($id)
+                'unique:clients,number,' . $id
             ],
         ];
     }

@@ -65,19 +65,24 @@ class ClientsController extends Controller
         ]);
 
     }
-    public function show($id)
+    public function show(Request $request,$id)
 {
     $client = Client::with('orders')->findOrFail($id);
 
-$orders = $client->orders()
-    ->with(['products', 'payment']) // Eager load relationships per order
+     $orders = $client->orders()
+    ->with(['products','payment','client'])
     ->latest()
     ->paginate(PAGINATION)
     ->withQueryString();
 
 
 
+    if($request->wantsJson()){
+        return response()->json([
+            'orders' => OrderResource::collection($orders),
 
+        ]);
+    }
 
 
 
@@ -111,7 +116,7 @@ $orders = $client->orders()
 
                 return $client;
         });
-        
+
         if($request->wantsJson()){
             return response()->json([
                 'client' => new ClientResource($client),
@@ -133,15 +138,22 @@ $orders = $client->orders()
         ]);
     }
 
-    public function update(ClientRequest $request, $id)
+    public function update(Request $request, $id)
     {
-        DB::transaction(function () use ($request, $id) {
+        
+        $validated = $request->validate([
+            'name' => 'required|string',
+            'number' => 'required|string|unique:clients,number,' . $id,
+        ]);
+        $client=DB::transaction(function () use ($validated, $id) {
             $client = Client::findOrFail($id);
             $old = $client->toArray();
             $client->update([
-                'name' => $request->name,
-                'number' => $request->number,
+                'name' => $validated['name'],
+                'number' => $validated['number'],
             ]);
+            
+            
             $attributes = $client->toArray();
             unset($old['id'], $old['created_at'], $old['updated_at']);
             unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
@@ -150,7 +162,16 @@ $orders = $client->orders()
                 ->causedBy(auth()->user())
                 ->withProperties(['old' => $old, 'attributes' => $attributes])
                 ->log('Client Updated');
+
+                return $client;
         });
+        if($request->wantsJson()){
+            return response()->json([
+                'client' => new ClientResource($client),
+                'message' => 'Client Updated',
+                'status' => 200
+            ]);
+        }
 
         return back();
     }

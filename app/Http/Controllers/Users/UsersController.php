@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Users;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRequest;
 use App\Http\Resources\RolesResource;
+use App\Http\Resources\UserApiResource;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
@@ -21,7 +23,7 @@ class UsersController extends Controller
     {
         return Excel::download(new UsersExport(), 'users.xlsx');
     }
-    public function index(Request $request): Response
+    public function index(Request $request)
     {
         $users = User::with('roles')
             ->when($request->search, fn($query) =>
@@ -29,6 +31,14 @@ class UsersController extends Controller
             )
             ->paginate(PAGINATION)
             ->withQueryString();
+
+            if($request->wantsJson()){
+                $usersApi=User::with('roles')->get();
+                Log::info($usersApi);
+                return response()->json([
+                   'users'=>UserApiResource::collection($usersApi) 
+                ]);
+            }
 
         return Inertia::render('Users/Index', [
             'users' => UserResource::collection($users),
@@ -112,12 +122,19 @@ class UsersController extends Controller
         return redirect()->route('users.index');
     }
 
-    public function delete($id): RedirectResponse
+    public function delete(Request $request,$id): RedirectResponse
     {
         $user = User::findOrFail($id);
+        
+        Log::info($user);
         $userName = $user->name;
-
+        
         $user->delete();
+        if($request->wantsJson()){
+            return response()->json([
+                'message' => 'User deleted successfully.'
+            ]);
+        }
 
         activity()
             ->causedBy(auth()->user())

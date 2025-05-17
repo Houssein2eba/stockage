@@ -28,4 +28,18 @@ class NotificationController extends Controller
         }
         return redirect()->back();
     }
+
+    public function destroy(Request $request,$id){
+        $notification = auth()->user()->notifications()->find($id);
+        if ($notification) {
+            $notification->delete();
+        }
+        if($request->wantsJson()){
+            return response()->json([
+                'message' => 'Notification deleted',
+                'notification' => $notification,
+            ]);
+        }
+        return redirect()->back();
+    }
 }
