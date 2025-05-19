@@ -16,6 +16,9 @@ use App\Exports\ProductsExport;
 
 class ProductsController extends Controller
 {
+    public function __construct(){
+        $this->middleware('permission:view_products')->only('index');
+    }
     public function index(Request $request)
     {
         $request->validate([

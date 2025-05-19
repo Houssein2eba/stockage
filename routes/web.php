@@ -48,28 +48,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Clients
     Route::prefix('clients')->name('clients.')->group(function () {
-        Route::get('/', [ClientsController::class, 'index'])->name('index');
-        Route::get('/create', [ClientsController::class, 'create'])->name('create');
-        Route::post('/', [ClientsController::class, 'store'])->name('store');
-        Route::get('/export', [ClientsController::class, 'export'])->name('export');
-        Route::get('/exportclient/{id}', [ClientsController::class, 'exportclient'])->name('exportclient');
-        Route::get('/{id}/show', [ClientsController::class, 'show'])->name('show');
-        Route::get('/{id}/edit', [ClientsController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [ClientsController::class, 'update'])->name('update');
-        Route::delete('/{id}', [ClientsController::class, 'destroy'])->name('destroy');
+        Route::get('/', [ClientsController::class, 'index'])->name('index')->middleware('permission:view_clients');
+        Route::get('/create', [ClientsController::class, 'create'])->name('create')->middleware('permission:create_clients');
+        Route::post('/', [ClientsController::class, 'store'])->name('store')->middleware('permission:create_clients');
+        Route::get('/export', [ClientsController::class, 'export'])->name('export')->middleware('permission:export_clients');
+        Route::get('/exportclient/{id}', [ClientsController::class, 'exportclient'])->name('exportclient')->middleware('permission:export_clients');
+        Route::get('/{id}/show', [ClientsController::class, 'show'])->name('show')->middleware('permission:view_clients');
+        Route::get('/{id}/edit', [ClientsController::class, 'edit'])->name('edit')->middleware('permission:update_clients');
+        Route::put('/{id}', [ClientsController::class, 'update'])->name('update')->middleware('permission:update_clients');
+        Route::delete('/{id}', [ClientsController::class, 'destroy'])->name('destroy')->middleware('permission:delete_clients');
     });
 
     // Sales
     Route::prefix('sales')->name('sales.')->group(function () {
-        Route::get('/', [SalesController::class, 'index'])->name('index');
-        Route::get('/create', [SalesController::class, 'create'])->name('create');
-        Route::post('/', [SalesController::class, 'store'])->name('store');
-        Route::get('/sale/{id}', [SalesController::class, 'show'])->name('show');
-        Route::put('/sale/{id}/markAsPaid', [SalesController::class, 'markAsPaid'])->name('markAsPaid');
-        Route::get('/{id}/edit', [SalesController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [SalesController::class, 'update'])->name('update');
-        Route::delete('/{id}', [SalesController::class, 'destroy'])->name('destroy');
-        Route::get('/{id}/invoice', [FactureController::class, 'generatePdf'])->name('invoice');
+        Route::get('/', [SalesController::class, 'index'])->name('index')->middleware('permission:view_sales');
+        Route::get('/create', [SalesController::class, 'create'])->name('create')->middleware('permission:create_sales');
+        Route::post('/', [SalesController::class, 'store'])->name('store')->middleware('permission:create_sales');
+        Route::get('/sale/{id}', [SalesController::class, 'show'])->name('show')->middleware('permission:view_sales');
+        Route::put('/sale/{id}/markAsPaid', [SalesController::class, 'markAsPaid'])->name('markAsPaid')->middleware('permission:mark_as_paid');
+        Route::get('/{id}/edit', [SalesController::class, 'edit'])->name('edit')->middleware('permission:update_sales');
+        Route::put('/{id}', [SalesController::class, 'update'])->name('update')->middleware('permission:update_sales');
+        Route::delete('/{id}', [SalesController::class, 'destroy'])->name('destroy')->middleware('permission:delete_sales');
+        Route::get('/{id}/invoice', [FactureController::class, 'generatePdf'])->name('invoice')->middleware('permission:generate_invoice');
     });
 
     // Admin-only Routes
@@ -116,20 +116,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
     });
 
-    // Categories (accessible to verified users)
+    // Categories
     Route::prefix('categories')->name('categories.')->group(function () {
-        Route::get('/', [CategoriesController::class, 'index'])->name('index');
-        Route::get('/create', [CategoriesController::class, 'create'])->name('create');
-        Route::post('/', [CategoriesController::class, 'store'])->name('store');
-        Route::put('/{id}', [CategoriesController::class, 'update'])->name('update');
-        Route::delete('/{id}', [CategoriesController::class, 'destroy'])->name('destroy');
+        Route::get('/', [CategoriesController::class, 'index'])->name('index')->middleware('permission:view_categories');
+        Route::get('/create', [CategoriesController::class, 'create'])->name('create')->middleware('permission:create_categories');
+        Route::post('/', [CategoriesController::class, 'store'])->name('store')->middleware('permission:create_categories');
+        Route::put('/{id}', [CategoriesController::class, 'update'])->name('update')->middleware('permission:update_categories');
+        Route::delete('/{id}', [CategoriesController::class, 'destroy'])->name('destroy')->middleware('permission:delete_categories');
     });
 
     // Payment Methods
     Route::prefix('payment')->name('payment.')->group(function () {
-        Route::get('/', [PaymentMethodController::class, 'index'])->name('index');
-        Route::post('/', [PaymentMethodController::class, 'store'])->name('store');
-        Route::delete('/{payment}', [PaymentMethodController::class, 'destroy'])->name('destroy');
+        Route::get('/', [PaymentMethodController::class, 'index'])->name('index')->middleware('permission:view_payment_methods');
+        Route::post('/', [PaymentMethodController::class, 'store'])->name('store')->middleware('permission:create_payment_methods');
+        Route::delete('/{payment}', [PaymentMethodController::class, 'destroy'])->name('destroy')->middleware('permission:delete_payment_methods');
     });
 
     // Notifications
@@ -143,7 +143,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $order = Order::findOrFail($id);
         $order->update(['status' => $request->status]);
         return redirect()->back()->with('success', 'Order status updated successfully.');
-    })->name('orders.status');
+    })->name('orders.status')->middleware('permission:update_sales');
 });
 
 // Fallback Route

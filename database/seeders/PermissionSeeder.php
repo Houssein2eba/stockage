@@ -12,69 +12,53 @@ class PermissionSeeder extends Seeder
     {
         // Create permissions grouped by module
         $permissions = [
-            // Product Permissions
-            'view_products',
-            'create_products',
-            'edit_products',
-            'delete_products',
-            'export_products',
+    // Clients
+    'view_clients',
+    'create_clients',
+    'export_clients',
+    'update_clients',
+    'delete_clients',
 
-            // Category Permissions
-            'view_categories',
-            'create_categories',
-            'edit_categories',
-            'delete_categories',
+    // Sales
+    'view_sales',
+    'create_sales',
+    'mark_as_paid',
+    'update_sales',
+    'delete_sales',
+    'generate_invoice',
 
-            // Order/Sales Permissions
-            'view_sales',
-            'create_sales',
-            'edit_sales',
-            'delete_sales',
-            'export_sales',
-            'change_order_status',
+    // Categories
+    'view_categories',
+    'create_categories',
+    'update_categories',
+    'delete_categories',
 
-            // Client Permissions
-            'view_clients',
-            'create_clients',
-            'edit_clients',
-            'delete_clients',
-            'export_clients',
+    // Payment Methods
+    'view_payment_methods',
+    'create_payment_methods',
+    'delete_payment_methods',
 
-            // User Management
-            'view_users',
-            'create_users',
-            'edit_users',
-            'delete_users',
-            'export_users',
+    // Products
+    'view_products',
+    'create_products',
+    'update_products',
+    'delete_products',
 
-            // Role & Permission Management
-            'view_roles',
-            'create_roles',
-            'edit_roles',
-            'delete_roles',
+    // Users
+    'view_users',
+    'create_users',
+    'update_users',
+    'delete_users',
 
-            // Activity Log
-            'view_activity_log',
+    // Roles
+    'view_roles',
+    'create_roles',
+    'update_roles',
+    'delete_roles',
+    //Activity Log
+    'view_activity_log',
+];
 
-            // Payment Methods
-            'view_payment_methods',
-            'create_payment_methods',
-            'edit_payment_methods',
-            'delete_payment_methods',
-
-            // Dashboard & Reports
-            'view_dashboard',
-            'view_reports',
-            'export_reports',
-
-            // Notifications
-            'view_notifications',
-            'manage_notifications',
-
-            // Stock Management
-            'manage_stock',
-            'view_low_stock',
-        ];
 
         // Create permissions
         foreach ($permissions as $permission) {
@@ -88,16 +72,10 @@ class PermissionSeeder extends Seeder
         // Create manager role with limited permissions
         $managerRole = Role::create(['name' => 'manager']);
         $managerRole->givePermissionTo([
-            'view_products', 'create_products', 'edit_products',
-            'view_categories',
-            'view_sales', 'create_sales', 'edit_sales', 'export_sales',
-            'view_clients', 'create_clients', 'edit_clients',
-            'view_users',
-            'view_dashboard',
-            'view_reports',
-            'view_notifications',
-            'manage_stock',
-            'view_low_stock',
+            'view_products',
+            'view_sales', 'create_sales',
+            'view_clients', 'create_clients',
+            
         ]);
 
         // Create cashier role with basic permissions
@@ -106,7 +84,7 @@ class PermissionSeeder extends Seeder
             'view_products',
             'view_sales', 'create_sales',
             'view_clients', 'create_clients',
-            'view_notifications',
+            
         ]);
     }
 }
