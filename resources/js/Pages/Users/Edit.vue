@@ -67,7 +67,7 @@ const submit = () => {
             v-model="form.name"
 
             required
-            autofocus
+            
             autocomplete="name"
           />
 

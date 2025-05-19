@@ -74,7 +74,7 @@ const submit = () => {
                             type="text"
                             class="mt-1 block w-full"
                             required
-                            autofocus
+                            
                             :class="{ 'ring-1 ring-red-500  mt-2': form.errors.name }"
                         />
                         <InputError :message="form.errors.name" class="mt-2" />

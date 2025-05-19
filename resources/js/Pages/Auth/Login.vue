@@ -84,7 +84,7 @@ const submit = () => {
                             class="block w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                             v-model="form.login"
                             required
-                            autofocus
+                            
                             autocomplete="username"
                             :class="{ 'border-red-500 ring-red-500': form.errors.login }"
                         />

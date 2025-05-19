@@ -23,12 +23,12 @@ const form = useForm({
   number:"",
   password_confirmation: "",
   role: "",
-  
+
 });
 
 const submit = () => {
   form.post(route("users.store"), {
-    
+
     onSuccess: () =>{
       toast.success('User created successfully');
 
@@ -40,9 +40,9 @@ const submit = () => {
 <template>
   <AuthLayout>
     <Head title="Create user" />
-   
+
     <div class="max-w-7xl mx-auto mt-4">
-       
+
       <div class="flex justify-between">
         <Link
           :href="route('users.index')"
@@ -62,7 +62,7 @@ const submit = () => {
             class="mt-1 block w-full"
             v-model="form.name"
             required
-            autofocus
+            
             autocomplete="name"
           />
 
@@ -143,9 +143,9 @@ const submit = () => {
               class="w-full"
             />
             <InputError class="mt-2" :message="form.errors.role" />
-          
+
           </div>
-          
+
 
         <div class="flex items-center justify-end mt-4">
           <PrimaryButton

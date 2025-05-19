@@ -403,7 +403,7 @@ const handlePageChange = (url) => {
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 v-model="editForm.name"
                                 required
-                                autofocus
+                            
                                 :class="{ 'border-red-500': editForm.errors.name }"
                             />
                             <InputError class="mt-2" :message="editForm.errors.name" />
