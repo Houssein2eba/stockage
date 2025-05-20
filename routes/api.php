@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ClientsController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Notifications\NotificationController;
 use App\Http\Controllers\Pdf\FactureController;
 use App\Http\Controllers\Sales\SalesController;
@@ -183,6 +184,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         })->name('delete');
 
     });
+    Route::get('/dashboard',[DashboardController::class,'index'])->name('dashboard');
 
 
 

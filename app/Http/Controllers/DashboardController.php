@@ -14,10 +14,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use App\Http\Resources\OrderResource;
+use Maatwebsite\Excel\Concerns\ToArray;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
 
 
@@ -53,10 +54,16 @@ class DashboardController extends Controller
 
         $stats['dueAmount']=$stats['totalRevenue']-$stats['paidAmount'];
 
+
         $recentSales = OrderResource::collection(Order::with('client')
             ->latest()
             ->take(5)
             ->get());
+
+            if($request->wantsJson()){
+            $stats['clientCount'] = Client::count();
+            return response()->json($stats);
+          }
 
         // Monthly sales data for chart using SQLite date functions
         $chartData = OrderDetail::selectRaw("strftime('%Y-%m', created_at) as month, COUNT(*) as count, SUM(total_amount) as total")

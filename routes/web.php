@@ -19,7 +19,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-define('PAGINATION', 10);
+define('PAGINATION', 4);
 
 // Public Routes
 Route::get('/', function () {
