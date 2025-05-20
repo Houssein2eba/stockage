@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
@@ -36,7 +37,7 @@ class UsersController extends Controller
                 $usersApi=User::with('roles')->get();
                 Log::info($usersApi);
                 return response()->json([
-                   'users'=>UserApiResource::collection($usersApi) 
+                   'users'=>UserApiResource::collection($usersApi)
                 ]);
             }
 
@@ -52,6 +53,12 @@ class UsersController extends Controller
 
         return Inertia::render('Users/Create', [
             'roles' => $roles,
+        ]);
+    }
+    public function getUser($id){
+        $user=User::findOrFail($id);
+        return response()->json([
+            'user'=>new UserApiResource($user)
         ]);
     }
 
@@ -121,14 +128,30 @@ class UsersController extends Controller
 
         return redirect()->route('users.index');
     }
+    public function updateJson(Request $request,$id){
+        $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|email|unique:users,email,'.$id,
+            'number'=>['required','regex:/^([2-4][0-9]{7})$/',Rule::unique('users','number')->ignore($id)],
+            'role_id'=>'exists:roles,id',
+        ]);
+
+        $user = User::findOrFail($id);
+        $user->update($request->all());
+        $role=Role::find($request->input('role_id'));
+        $user->syncRoles([$role]);
+        return response()->json([
+            'user'=>new UserApiResource($user)
+        ]);
+    }
 
     public function delete(Request $request,$id): RedirectResponse
     {
         $user = User::findOrFail($id);
-        
+
         Log::info($user);
         $userName = $user->name;
-        
+
         $user->delete();
         if($request->wantsJson()){
             return response()->json([

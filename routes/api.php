@@ -5,6 +5,7 @@ use App\Http\Controllers\Notifications\NotificationController;
 use App\Http\Controllers\Pdf\FactureController;
 use App\Http\Controllers\Sales\SalesController;
 use App\Http\Controllers\Users\UsersController;
+use App\Http\Resources\RolesResource;
 use App\Http\Resources\UserApiResource;
 use App\Http\Resources\UserResource;
 use App\Models\Client;
@@ -31,7 +32,7 @@ use Spatie\Permission\Models\Role;
 // Public routes (no authentication required)
 
     Route::middleware('throttle:5,1')->post('/login', function (Request $request) {
-        
+
         $request->validate([
             'credential' => 'required|string',
             'password' => 'required|string'
@@ -45,7 +46,7 @@ use Spatie\Permission\Models\Role;
 
         if(Auth::attempt([$field=> $login['credential'],'password'=>$login['password']])){
             $user=Auth::user()->load('roles');
-            
+
         }
 
         if (!$user) {
@@ -54,8 +55,8 @@ use Spatie\Permission\Models\Role;
             ], 401);
         }else{
           $token = $user->createToken('auth_token')->plainTextToken;
-        
-        
+
+
         return response()->json([
             'token' => $token,
             'user' => new UserApiResource($user),
@@ -63,7 +64,7 @@ use Spatie\Permission\Models\Role;
         ]);
         }
 
-        
+
     })->name('login');
 
 
@@ -139,13 +140,14 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
    Route::prefix('roles')->group(function () {
        Route::get('/',function(){
            return response()->json([
-               'roles'=>Role::get()
+               'roles'=>RolesResource::collection(Role::all())
            ]);
        })->name('roles.index');
    });
 
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/',[UsersController::class,'index'])->name('index');
+        Route::get('/getUser/{id}',[UsersController::class,'getUser'])->name('show');
         Route::post('/', function(Request $request){
           $validated=$request->validate([
              'name' => 'required|string',
@@ -161,11 +163,12 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
           $user->assignRole($role);
           return $user;
           });
-          
+
           return response()->json([
               'user'=>$user
           ]);
         })->name('store');
+        Route::put('/{id}',[UsersController::class,'updateJson'])->name('update');
         Route::delete('/{id}',function($id){
             if(Auth::user()->id==$id){
                 return response()->json([
@@ -177,8 +180,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
             return response()->json([
                 'message' => 'User deleted successfully'
             ]);
-        })->name('delete');  
-        
+        })->name('delete');
+
     });
 
 
