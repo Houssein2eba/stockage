@@ -11,6 +11,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\Sales\SalesController;
 
+use App\Http\Controllers\Stock\StockController;
 use App\Http\Controllers\Users\UsersController;
 use App\Http\Controllers\Notifications\NotificationController;
 use App\Models\Order;
@@ -19,7 +20,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-define('PAGINATION', 4);
+define('PAGINATION', 10);
 
 // Public Routes
 Route::get('/', function () {
@@ -70,6 +71,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/{id}', [SalesController::class, 'update'])->name('update')->middleware('permission:update_sales');
         Route::delete('/{id}', [SalesController::class, 'destroy'])->name('destroy')->middleware('permission:delete_sales');
         Route::get('/{id}/invoice', [FactureController::class, 'generatePdf'])->name('invoice')->middleware('permission:generate_invoice');
+    });
+    Route::prefix('stocks')->name('stocks.')->group(function () {
+        Route::get('/',[StockController::class,'index'])->name('index');
+        Route::get('/create', [StockController::class, 'create'])->name('create');
+        Route::post('/', [StockController::class, 'store'])->name('store');
+        Route::get('/{id}/show', [StockController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [StockController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [StockController::class, 'update'])->name('update');
+        Route::delete('/{id}', [StockController::class, 'destroy'])->name('destroy');
     });
 
 

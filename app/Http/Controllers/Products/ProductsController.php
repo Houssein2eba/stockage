@@ -33,7 +33,7 @@ class ProductsController extends Controller
 
 
         $products = Product::query()
-            ->with(['categories', 'orders'])
+            ->with(['categories', 'orders','stocks'])
             ->when($request->search, function ($query) use ($request) {
                 $query->where(function($q) use ($request) {
                     $q->where('name', 'like', "%{$request->search}%")
@@ -47,9 +47,6 @@ class ProductsController extends Controller
             })
             ->when($request->sort && $request->direction, function ($query) use ($request) {
                 $query->orderBy($request->sort, $request->direction);
-            })
-            ->when($request->filter, function ($query): void {
-                $query->whereRaw('quantity <= min_quantity');
             })
             ->latest()
             ->paginate(PAGINATION)
@@ -92,10 +89,10 @@ class ProductsController extends Controller
                 'name' => $request->name,
                 'description' => $request->description,
                 'price' => $request->price,
-                'quantity' => $request->quantity,
+
                 'cost' => $request->cost,
                 'image' => $url,
-                'min_quantity' => $request->min_quantity,
+
             ]);
             $product->categories()->attach(collect($request->category)->pluck('id'));
             $attributes = $product->toArray();
@@ -131,9 +128,9 @@ class ProductsController extends Controller
                     'name' => $request->name,
                     'description' => $request->description,
                     'price' => $request->price,
-                    'quantity' => $request->quantity,
+
                     'image' => $url,
-                    'min_quantity' => $request->min_quantity,
+
                     'cost'=> $request->cost,
                 ]);
             } else {
@@ -141,8 +138,8 @@ class ProductsController extends Controller
                     'name' => $request->name,
                     'description' => $request->description,
                     'price' => $request->price,
-                    'quantity' => $request->quantity,
-                    'min_quantity' => $request->min_quantity,
+
+
                     'cost'=> $request->cost,
 
                 ]);

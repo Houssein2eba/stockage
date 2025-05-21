@@ -18,6 +18,7 @@ import * as directives from 'vuetify/directives'
 import PrimeVue from "primevue/config";
 import Aura from "@primeuix/themes/aura";
 import { formatPrice } from './utils/format';
+import { formatDate } from './utils/formatDate';
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const vuetify = createVuetify({
     components,
@@ -40,6 +41,7 @@ createInertiaApp({
                     preset: Aura,
                 },
             })
+            .component('formatDate', formatDate)
             .component('formatPrice', formatPrice)
             .component('H1', H1)
             .component('P', P)

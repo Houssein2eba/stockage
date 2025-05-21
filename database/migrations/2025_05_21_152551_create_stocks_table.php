@@ -12,7 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('stocks', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->string('name');
+            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->string('location')->nullable();
             $table->timestamps();
         });
     }

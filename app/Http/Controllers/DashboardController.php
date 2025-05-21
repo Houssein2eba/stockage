@@ -35,7 +35,7 @@ class DashboardController extends Controller
 
         $stats = [
             'totalProducts' => Product::count(),
-            'lowStockCount' => Product::whereRaw('quantity <= min_quantity')->count(),
+            'lowStockCount' => 0,
             'totalSales' => Order::where('status', '!=','cancelled')->count(),
             'totalCategories' => Category::count(),
             'totalRevenue' => $totalAmount = DB::table('order_details')

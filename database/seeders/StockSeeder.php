@@ -1,109 +1,67 @@
 <?php
-
 namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\Client;
 use App\Models\Product;
+use App\Models\Stock;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 class StockSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create Categories
-        $categories = [
-            [
-                'name' => 'Electronics',
-                'description' => 'Electronic devices and accessories'
-            ],
-            [
-                'name' => 'Clothing',
-                'description' => 'Fashion and apparel'
-            ],
-            [
-                'name' => 'Books',
-                'description' => 'Books and publications'
-            ],
-            [
-                'name' => 'Home & Kitchen',
-                'description' => 'Home appliances and kitchenware'
-            ]
+        // 1. Create Categories
+        $categoryData = [
+            ['name' => 'Electronics', 'description' => 'Electronic devices and accessories'],
+            ['name' => 'Clothing', 'description' => 'Fashion and apparel'],
+            ['name' => 'Books', 'description' => 'Books and publications'],
+            ['name' => 'Home & Kitchen', 'description' => 'Home appliances and kitchenware'],
         ];
 
-        foreach ($categories as $category) {
-            Category::create($category);
+        $categories = collect();
+        foreach ($categoryData as $data) {
+            $categories->push(Category::create($data));
         }
 
-        // Create Clients
+        // 2. Create Clients
         $clients = [
-            [
-                'name' => 'John Doe',
-                'number' => '23456789'
-            ],
-            [
-                'name' => 'Jane Smith',
-                'number' => '24567890'
-            ],
-            [
-                'name' => 'Robert Johnson',
-                'number' => '25678901'
-            ]
+            ['name' => 'John Doe', 'number' => '23456789'],
+            ['name' => 'Jane Smith', 'number' => '24567890'],
+            ['name' => 'Robert Johnson', 'number' => '25678901'],
         ];
 
         foreach ($clients as $client) {
             Client::create($client);
         }
 
-        // Create Products
-        $products = [
-            [
-                'name' => 'Laptop Pro',
-                'description' => 'High-performance laptop',
-                'price' => 1000,
-                'quantity' => 50,
-                'min_quantity' => 10,
-                'cost' => 800,
-                'image' => 'products/laptop.jpg',
-                'categories' => ['Electronics']
-            ],
-            [
-                'name' => 'Cotton T-Shirt',
-                'description' => 'Comfortable cotton t-shirt',
-                'price' => 20,
-                'quantity' => 100,
-                'min_quantity' => 20,
-                'cost' => 10,
-                'image' => 'products/tshirt.jpg',
-                'categories' => ['Clothing']
-            ],
-            [
-                'name' => 'Coffee Maker',
-                'description' => 'Automatic coffee maker',
-                'price' => 80,
-                'quantity' => 30,
-                'min_quantity' => 5,
-                'cost' => 60,
-                'image' => 'products/coffee-maker.jpg',
-                'categories' => ['Home & Kitchen', 'Electronics']
-            ]
-        ];
+        // 3. Create Stocks
+        $stocks = Stock::factory()->count(10)->create();
 
-        // Create sample product images
+        // 4. Create Products
+        $products = Product::factory()->count(50)->create();
+
+        foreach ($products as $product) {
+            // Attach Stocks
+            $assignedStocks = $stocks->random(rand(1, 3));
+            foreach ($assignedStocks as $stock) {
+                $product->stocks()->attach($stock->id, [
+                    'quantity' => rand(1, 100),
+                    'expiry_date' => Carbon::now()->addDays(rand(30, 365)),
+                ]);
+            }
+
+            // Attach Categories (1 to 2 random categories)
+            $categoryIds = $categories->random(rand(1, 2))->pluck('id');
+            $product->categories()->attach($categoryIds);
+        }
+
+        // 5. Create product image folder
         if (!Storage::disk('public')->exists('products')) {
             Storage::disk('public')->makeDirectory('products');
         }
-
-        foreach ($products as $productData) {
-            $categories = $productData['categories'];
-            unset($productData['categories']);
-
-            $product = Product::create($productData);
-
-            // Attach categories
-            $categoryIds = Category::whereIn('name', $categories)->pluck('id');
-            $product->categories()->attach($categoryIds);
-        }
     }
 }
+?>

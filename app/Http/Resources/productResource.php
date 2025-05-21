@@ -27,8 +27,17 @@ class productResource extends JsonResource
                 $totalCost = $this->orders->count() * $this->cost;
                 return $totalAmount - $totalCost;
             }),
-            'quantity'=>$this->quantity,
-            'min_quantity'=>$this->min_quantity,
+            'quantity' => $this->whenLoaded('stocks', function () {
+                return $this->stocks->sum(function ($stock) {
+                    return $stock->pivot->quantity;
+                });
+                }),
+            'quantities_by_expiration' => $this->whenLoaded('stocks', function () {
+                return $this->stocks->groupBy('pivot.expiration_date')->map(function ($group) {
+                    return $group->sum('pivot.quantity');
+                });
+                 }),
+
             'image'=>$this->image,
             'pivot'=>$this->whenLoaded('pivot', fn () => $this->pivot),
             'categories'=>$this->whenLoaded('categories', fn () => $this->categories),
@@ -40,7 +49,7 @@ class productResource extends JsonResource
                     return $order->pivot->quantity;
                 });
             }),
-            
+
 
         ];
     }

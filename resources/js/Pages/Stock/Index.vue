@@ -53,7 +53,7 @@
       <!-- Stock Cards Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Demo Stock Cards -->
-        <div v-for="stock in demoStocks" :key="stock.id" class="bg-white rounded-lg shadow overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
+        <div v-for="stock in props.stocks.data" :key="stock.id" class="bg-white rounded-lg shadow overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center">
@@ -75,31 +75,29 @@
             <div class="grid grid-cols-2 gap-4 mt-6">
               <div>
                 <p class="text-sm text-gray-500">Products</p>
-                <p class="text-lg font-semibold">{{ stock.productCount }}</p>
+                <p class="text-lg font-semibold">{{ stock.productsCount }}</p>
               </div>
               <div>
                 <p class="text-sm text-gray-500">Total Value</p>
                 <p class="text-lg font-semibold">{{ formatPrice(stock.totalValue) }}</p>
               </div>
-              <div>
+              <!-- <div>
                 <p class="text-sm text-gray-500">Capacity</p>
                 <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
                   <div class="bg-blue-600 h-2 rounded-full" :style="{ width: stock.capacityPercentage + '%' }"></div>
                 </div>
                 <p class="text-xs text-gray-500 mt-1">{{ stock.usedSpace }} / {{ stock.totalSpace }}</p>
-              </div>
+              </div> -->
               <div>
                 <p class="text-sm text-gray-500">Last Updated</p>
-                <p class="text-sm">{{ stock.lastUpdated }}</p>
+                <p class="text-sm">{{ formatDate( stock.updated_at) }}</p>
               </div>
             </div>
           </div>
 
           <div class="bg-gray-50 px-6 py-4 flex justify-between items-center">
             <div class="flex space-x-2">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" :class="getCategoryColor(stock.category)">
-                {{ stock.category }}
-              </span>
+
             </div>
             <Link
               :href="route('stocks.show', stock.id)"
@@ -116,126 +114,54 @@
 
       <!-- Pagination -->
       <div class="mt-8 flex items-center justify-between">
-        <div class="text-sm text-gray-500">
-          Showing <span class="font-medium">1</span> to <span class="font-medium">6</span> of <span class="font-medium">24</span> stocks
-        </div>
-        <div class="flex space-x-2">
-          <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-            Previous
-          </button>
-          <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
-            1
-          </button>
-          <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-            2
-          </button>
-          <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-            3
-          </button>
-          <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-            Next
-          </button>
-        </div>
+        <div class="px-6 py-4 border-t border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-700" v-if="stocks.meta.total > 0">
+                            Showing <span class="font-medium">{{ stocks.meta.from }}</span> to
+                            <span class="font-medium">{{ stocks.meta.to }}</span> of
+                            <span class="font-medium">{{ stocks.meta.total }}</span> results
+                        </div>
+                        <Pagination v-if="stocks.meta.links" :links="stocks.meta.links" @change="handlePageChange" />
+                    </div>
+                </div>
       </div>
     </div>
   </AuthLayout>
 </template>
 
 <script setup>
+
+import Pagination from '@/Components/Pagination.vue'
 import { Head, Link } from '@inertiajs/vue3'
 import AuthLayout from '@/layouts/AuthLayout.vue'
 import { formatPrice } from '@/utils/format.js'
-
-const demoStocks = [
-  {
-    id: 1,
-    name: 'Main Warehouse',
-    location: 'Building A, Floor 2',
-    status: 'Active',
-    productCount: 142,
-    totalValue: 28450.75,
-    capacityPercentage: 75,
-    usedSpace: '750 sqm',
-    totalSpace: '1000 sqm',
-    lastUpdated: '2 hours ago',
-    category: 'General'
-  },
-  {
-    id: 2,
-    name: 'Electronics Storage',
-    location: 'Building B, Floor 1',
-    status: 'Active',
-    productCount: 87,
-    totalValue: 58720.30,
-    capacityPercentage: 62,
-    usedSpace: '310 sqm',
-    totalSpace: '500 sqm',
-    lastUpdated: '1 day ago',
-    category: 'Electronics'
-  },
-  {
-    id: 3,
-    name: 'Cold Storage',
-    location: 'Building C',
-    status: 'Maintenance',
-    productCount: 35,
-    totalValue: 12450.90,
-    capacityPercentage: 45,
-    usedSpace: '225 sqm',
-    totalSpace: '500 sqm',
-    lastUpdated: '3 days ago',
-    category: 'Food'
-  },
-  {
-    id: 4,
-    name: 'Clothing Warehouse',
-    location: 'Building A, Floor 1',
-    status: 'Active',
-    productCount: 210,
-    totalValue: 35680.20,
-    capacityPercentage: 82,
-    usedSpace: '410 sqm',
-    totalSpace: '500 sqm',
-    lastUpdated: '5 hours ago',
-    category: 'Clothing'
-  },
-  {
-    id: 5,
-    name: 'Raw Materials',
-    location: 'Building D',
-    status: 'Active',
-    productCount: 68,
-    totalValue: 9870.50,
-    capacityPercentage: 34,
-    usedSpace: '170 sqm',
-    totalSpace: '500 sqm',
-    lastUpdated: 'Yesterday',
-    category: 'Materials'
-  },
-  {
-    id: 6,
-    name: 'Fragile Items',
-    location: 'Building A, Floor 3',
-    status: 'Active',
-    productCount: 53,
-    totalValue: 42360.75,
-    capacityPercentage: 53,
-    usedSpace: '265 sqm',
-    totalSpace: '500 sqm',
-    lastUpdated: '1 hour ago',
-    category: 'Glassware'
+import { formatDate } from '@/utils/formatDate.js'
+const props = defineProps({
+  stocks: {
+    type: Array,
+    required: true
   }
-]
+})
 
-const getCategoryColor = (category) => {
-  const colors = {
-    'General': 'bg-gray-100 text-gray-800',
-    'Electronics': 'bg-blue-100 text-blue-800',
-    'Food': 'bg-green-100 text-green-800',
-    'Clothing': 'bg-purple-100 text-purple-800',
-    'Materials': 'bg-yellow-100 text-yellow-800',
-    'Glassware': 'bg-red-100 text-red-800'
-  }
-  return colors[category] || 'bg-gray-100 text-gray-800'
-}
+const handlePageChange = (url) => {
+    if (!url) return;
+
+    const urlObj = new URL(url);
+    const pageParam = urlObj.searchParams.get('page');
+
+    if (pageParam) {
+        page.value = parseInt(pageParam);
+        router.get(route('sales.index'), {
+            search: search.value,
+            status: statusFilter.value,
+            date: dateFilter.value,
+            sort: sort.value.field,
+            direction: sort.value.direction,
+            page: page.value
+        }, {
+            preserveState: true,
+            preserveScroll: true
+        });
+    }
+};
 </script>

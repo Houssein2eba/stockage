@@ -8,11 +8,13 @@ use App\Http\Resources\OrderResource;
 
 use App\Http\Resources\ProductResource;
 use App\Http\Requests\OrderRequest;
+use App\Http\Resources\StockResource;
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderDetail;
 
 use App\Models\Product;
+use App\Models\Stock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -86,101 +88,101 @@ class SalesController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $clients = Client::all();
-        $products = Product::where('quantity', '>', 0)->get();
+        $stocks=Stock::with('products')->get();
+
 
 
         return inertia('Sales/Create', [
             'clients' => ClientResource::collection($clients),
-            'products' => ProductResource::collection($products),
+            'stocks' => StockResource::collection($stocks),
 
         ]);
     }
 
-    public function store(OrderRequest $request)
-    {
+public function store(OrderRequest $request)
+{
+    $data = $request->validated();
 
+    $id = DB::transaction(function () use ($data) {
+        // 1. Create the order
+        $order = Order::create([
+            'reference' => Order::generateReference(),
+            'client_id' => $data['client']['id'] ?? null,
+            'status' => $data['paid'] ? 'paid' : 'pending',
+        ]);
 
-        $id = DB::transaction(function () use ($request) {
-            // 1. Create the order
-            if($request->client){
-                $order = Order::create([
-                    'reference' => Order::generateReference(),
+        $productData = [];
+        $orderTotal = 0;
 
-                    'client_id' => $request->client['id'],
+        foreach ($data['items'] as $item) {
+            $stockId = $item['stock']['id'];
 
-                    // 'notes' => $request->notes,
-                    'status' => $request->paid ? 'paid' : 'pending'
-                ]);
-            }else{
-                $order = Order::create([
-                    'reference' => Order::generateReference(),
-                    'client_id' => null,
+            foreach ($item['products'] as $productItem) {
+                $productId = $productItem['product']['id'];
+                $quantity = (int) $productItem['quantity'];
 
-                    // 'notes' => $request->notes,
-                    'status' => 'paid'
-                ]);
-            }
+                // 2. Get the pivot row from product_stocks
+                $pivot = DB::table('product_stocks')
+                    ->where('product_id', $productId)
+                    ->where('stock_id', $stockId)
+                    ->first();
 
-            // 2. Load all products in one query
-            $productIds = collect($request->items)->pluck('product.id');
-            $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
-
-            // 3. Prepare order-product pivot data and calculate order total
-            $productData = [];
-            $orderTotal = 0;
-
-            foreach ($request->items as $item) {
-                $productId = $item['product']['id']; // Fixed: Access 'product' array
-                $product = $products[$productId] ?? null;
-
-                if (!$product) {
-                    throw new \Exception("Product not found: ID {$productId}");
+                if (!$pivot) {
+                    throw new \Exception("Product not available in selected stock.");
                 }
 
-                $quantity = (int)$item['quantity'];
-                if ($quantity <= 0) {
-                    throw new \Exception("Invalid quantity for product: {$product->name}");
+                if ($pivot->quantity < $quantity) {
+                    throw new \Exception("Insufficient stock for product ID {$productId} in stock ID {$stockId}");
                 }
 
-                if ($product->quantity < $quantity) {
-                    throw new \Exception("Insufficient stock for {$product->name}. Available: {$product->quantity}");
-                }
+                // 3. Update pivot table: decrement quantity
+                DB::table('product_stocks')
+                    ->where('product_id', $productId)
+                    ->where('stock_id', $stockId)
+                    ->decrement('quantity', $quantity);
 
-
-
+                // 4. Get product price
+                $product = Product::findOrFail($productId);
                 $itemTotal = $quantity * $product->price;
                 $orderTotal += $itemTotal;
 
-                $productData[$productId] = [
-                    'quantity' => $quantity,
-                    'unit_price' => $product->price,
-                    'total_amount' => $itemTotal,
-                ];
-
-                $product->decrement('quantity', $quantity);
+                // Prepare order-product pivot data
+                if (isset($productData[$productId])) {
+                    $productData[$productId]['quantity'] += $quantity;
+                    $productData[$productId]['total_amount'] += $itemTotal;
+                } else {
+                    $productData[$productId] = [
+                        'quantity' => $quantity,
+                        'unit_price' => $product->price,
+                        'total_amount' => $itemTotal,
+                    ];
+                }
             }
+        }
 
-            // 4. Update order total and attach products
-            $order->update(['total_amount' => $orderTotal]);
-            $order->products()->sync($productData);
+        // 5. Update total and attach products to the order
+        $order->update(['total_amount' => $orderTotal]);
+        $order->products()->sync($productData);
 
-            // 5. Log activity
-            activity()
-                ->causedBy(auth()->user())
-                ->performedOn($order)
-                ->withProperties([
-                    'attributes' => $order->only(['reference', 'client_id',  'status', 'total_amount'])
-                ])
-                ->log('Order Created');
+        // 6. Log activity
+        activity()
+            ->causedBy(auth()->user())
+            ->performedOn($order)
+            ->withProperties([
+                'attributes' => $order->only(['reference', 'client_id', 'status', 'total_amount']),
+            ])
+            ->log('Order Created');
 
-            return $order->id;
-        });
+        return $order->id;
+    });
 
-        return to_route('sales.show', $id);
-    }
+    return to_route('sales.show', $id);
+}
+
+
 
 
 
@@ -270,7 +272,7 @@ class SalesController extends Controller
             $order = Order::findOrFail($id);
             $old = $order->toArray();
             $order->update(['status' => 'cancelled']);
-            
+
 
             unset($old['id'], $old['created_at'], $old['updated_at']);
 
