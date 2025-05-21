@@ -10,13 +10,20 @@ use Illuminate\Support\Facades\Storage;
 class Product extends Model
 {
     use HasUuids;
-    
+
     protected $guarded = ['id','created_at','updated_at'];
 
     public function categories(){
         return $this->
         belongsToMany(Category::class)
         ->using(CategoryProduct::class)
+        ->withTimestamps();
+    }
+
+    public function stocks(){
+        return $this->belongsToMany(Stock::class,'product_stocks')
+        ->using(ProductStock::class)
+        ->withPivot(['quantity','expiry_date'])
         ->withTimestamps();
     }
 
