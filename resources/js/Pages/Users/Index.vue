@@ -88,7 +88,7 @@ const handleSort = (field) => {
     sort.value.field = field;
     sort.value.direction = 'asc';
   }
-  
+
   // Keep the current page when sorting
   router.get('/users', {
     search: search.value,
@@ -104,14 +104,14 @@ const handleSort = (field) => {
 // Handle pagination link clicks
 const handlePageChange = (url) => {
   if (!url) return;
-  
+
   // Extract page number from URL
   const urlObj = new URL(url);
   const pageParam = urlObj.searchParams.get('page');
-  
+
   if (pageParam) {
     page.value = parseInt(pageParam);
-    
+
     router.get('/users', {
       search: search.value,
       sort: sort.value.field,
@@ -137,7 +137,7 @@ const getSortIcon = (field) => {
     <div class="flex justify-between items-center mb-6">
       <div>
         <H1>Employees</H1>
-        <P>class="text-gray-600 mt-1">Manage your system users</P>
+        <P>Manage your system users</P>
       </div>
       <Link
         :href="route('users.create')"
@@ -258,13 +258,13 @@ const getSortIcon = (field) => {
             </TableRow>
           </template>
         </Table>
-        
+
         <!-- Pagination -->
         <div class="px-6 py-4 border-t border-gray-200">
           <div class="flex items-center justify-between">
             <div class="text-sm text-gray-700" v-if="props.users.meta && props.users.meta.total > 0">
-              Showing <span class="font-medium">{{ props.users.meta.from }}</span> to 
-              <span class="font-medium">{{ props.users.meta.to }}</span> of 
+              Showing <span class="font-medium">{{ props.users.meta.from }}</span> to
+              <span class="font-medium">{{ props.users.meta.to }}</span> of
               <span class="font-medium">{{ props.users.meta.total }}</span> results
             </div>
             <Pagination v-if="props.users.meta && props.users.meta.links" :links="props.users.meta.links" @change="handlePageChange" />

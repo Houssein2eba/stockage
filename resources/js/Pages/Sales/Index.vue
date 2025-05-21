@@ -386,13 +386,14 @@ const markAsPaid = (sale) => {
                                             View
                                         </Link>
                                         <button
+                                            v-if="sale.status !== 'cancelled'"
                                             @click="confirmDelete(sale.id)"
                                             class="text-red-600 hover:text-red-900 transition-colors flex items-center gap-1 text-sm"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
-                                            Delete
+                                            Cancel
                                         </button>
                                     </div>
                                 </TableDataCell>
@@ -443,9 +444,9 @@ const markAsPaid = (sale) => {
                                     </svg>
                                 </div>
                                 <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                    <h3 class="text-lg leading-6 font-medium text-gray-900">Delete Sale</h3>
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900">Cancel Sale</h3>
                                     <div class="mt-2">
-                                        <p class="text-sm text-gray-500">Are you sure you want to delete this sale? This action cannot be undone.</p>
+                                        <p class="text-sm text-gray-500">Are you sure you want to cancel this sale? This action cannot be undone.</p>
                                     </div>
                                 </div>
                             </div>
@@ -455,13 +456,13 @@ const markAsPaid = (sale) => {
                                 @click="deleteSale"
                                 class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
                             >
-                                Delete
+                                confirm
                             </PrimaryButton>
                             <button
                                 @click="closeDeleteModal"
                                 class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                             >
-                                Cancel
+                                back
                             </button>
                         </div>
                     </div>

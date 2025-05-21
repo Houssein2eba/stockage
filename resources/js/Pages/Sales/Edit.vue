@@ -174,7 +174,7 @@ const toast = useToast()
 
 const form = useForm({
     client: props.sale.client || null,
-    
+    paid: props.sale.status==='paid' ? 1 : 0,
     items: props.sale.products.map(product => ({
         product: {
             id: product.id,

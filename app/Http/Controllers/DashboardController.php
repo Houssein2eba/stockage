@@ -36,14 +36,23 @@ class DashboardController extends Controller
         $stats = [
             'totalProducts' => Product::count(),
             'lowStockCount' => Product::whereRaw('quantity <= min_quantity')->count(),
-            'totalSales' => Order::count(),
+            'totalSales' => Order::where('status', '!=','cancelled')->count(),
             'totalCategories' => Category::count(),
-            'totalRevenue' => OrderDetail::sum('total_amount'),
+            'totalRevenue' => $totalAmount = DB::table('order_details')
+                            ->join('orders', 'order_details.order_id', '=', 'orders.id')
+                            ->where('orders.status', '!=', 'cancelled')
+                            ->sum('order_details.total_amount'),
             'totalProfit' => DB::table('order_details')
+            ->join('orders', 'order_details.order_id', '=', 'orders.id')
+            ->where('orders.status', '!=', 'cancelled')
                 ->join('products', 'products.id', '=', 'order_details.product_id')
                 ->sum(DB::raw('(products.price - products.cost) * order_details.quantity')),
-            'todaySales' => OrderDetail::whereDate('created_at', Carbon::today())->count(),
-            'todayRevenue' => OrderDetail::whereDate('created_at', Carbon::today())->sum('total_amount'),
+            'todaySales' => Order::where('status', '!=','cancelled')->whereDate('created_at', Carbon::today())->count(),
+            'todayRevenue' => DB::table('order_details')
+                ->join('orders', 'order_details.order_id', '=', 'orders.id')
+                ->where('orders.status', '!=', 'cancelled')
+                ->whereDate('orders.created_at', Carbon::today())
+                ->sum('order_details.total_amount'),
             'paidAmount' =>DB::table('orders')
                 ->where('status', 'paid')
                 ->join('order_details', 'orders.id', '=', 'order_details.order_id')
@@ -51,6 +60,7 @@ class DashboardController extends Controller
             'popular_products' => $popular,
 
         ];
+
 
         $stats['dueAmount']=$stats['totalRevenue']-$stats['paidAmount'];
 

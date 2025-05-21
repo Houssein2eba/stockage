@@ -101,7 +101,7 @@ class SalesController extends Controller
 
     public function store(OrderRequest $request)
     {
-    
+
 
         $id = DB::transaction(function () use ($request) {
             // 1. Create the order
@@ -269,15 +269,16 @@ class SalesController extends Controller
         DB::transaction(function () use ($id) {
             $order = Order::findOrFail($id);
             $old = $order->toArray();
-            $order->delete();
+            $order->update(['status' => 'cancelled']);
+            
 
             unset($old['id'], $old['created_at'], $old['updated_at']);
 
             activity()
                 ->causedBy(auth()->user())
                 ->performedOn($order)
-                ->withProperties(['old' => $old])
-                ->log('Order Deleted');
+                ->withProperties(['old' => $old,'attributes' => $order->toArray()])
+                ->log('Order Cancelled');
         });
 
         return back();
