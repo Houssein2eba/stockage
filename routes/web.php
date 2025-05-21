@@ -71,12 +71,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/{id}', [SalesController::class, 'destroy'])->name('destroy')->middleware('permission:delete_sales');
         Route::get('/{id}/invoice', [FactureController::class, 'generatePdf'])->name('invoice')->middleware('permission:generate_invoice');
     });
-    //Stock
-    Route::get('/stock',function(){
-         inertia('Stock/Index',[
-           'k'=>'k'
-         ]);
-    })->name('stock.index');
+
 
     // Admin-only Routes
     Route::middleware(['role:admin'])->group(function () {

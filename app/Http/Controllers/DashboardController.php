@@ -54,14 +54,14 @@ class DashboardController extends Controller
 
         $stats['dueAmount']=$stats['totalRevenue']-$stats['paidAmount'];
 
-
+$stats['clientCount'] = Client::count();
         $recentSales = OrderResource::collection(Order::with('client')
             ->latest()
             ->take(5)
             ->get());
 
             if($request->wantsJson()){
-            $stats['clientCount'] = Client::count();
+
             return response()->json($stats);
           }
 
