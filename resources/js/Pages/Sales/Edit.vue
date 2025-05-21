@@ -28,19 +28,7 @@
                             <InputError class="mt-1" :message="form.errors.client_id" />
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
-                            <VueMultiselect
-                                v-model="form.payment"
-                                :options="payments"
-                                :searchable="true"
-                                :allow-empty="true"
-                                placeholder="Select payment method"
-                                label="name"
-                                track-by="id"
-                            />
-                            <InputError class="mt-1" :message="form.errors.payment_id" />
-                        </div>
+
                     </div>
                 </div>
 
@@ -179,14 +167,14 @@ const props = defineProps({
     sale: Object,
     clients: Array,
     products: Array,
-    payments: Array
+
 })
 
 const toast = useToast()
 
 const form = useForm({
     client: props.sale.client || null,
-    payment: props.sale.payment || null,
+    
     items: props.sale.products.map(product => ({
         product: {
             id: product.id,

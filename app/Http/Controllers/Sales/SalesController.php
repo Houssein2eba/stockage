@@ -5,13 +5,13 @@ namespace App\Http\Controllers\Sales;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ClientResource;
 use App\Http\Resources\OrderResource;
-use App\Http\Resources\PaymentResource;
+
 use App\Http\Resources\ProductResource;
 use App\Http\Requests\OrderRequest;
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderDetail;
-use App\Models\Payment;
+
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +32,7 @@ class SalesController extends Controller
             'sort' => 'nullable|in:id,reference,client,total_amount,status,created_at'
         ]);
 
-        $orders = Order::with(['client', 'products', 'payment'])
+        $orders = Order::with(['client', 'products'])
             ->withSum('products as total_amount', 'order_details.total_amount')
             ->when($request->search, function ($query, $search) {
                 $query->where('reference', 'LIKE', "%{$search}%")
@@ -67,7 +67,7 @@ class SalesController extends Controller
             'totalRevenue' => OrderDetail::sum('total_amount'),
             'totalSales' => Order::count(),
             'todaySales' => Order::whereDate('created_at', today())->count(),
-            'pendingPayments' => Order::whereNull('payment_id')->count()
+            'pendingPayments' => Order::where('status', 'pending')->count()
         ];
 
         return inertia('Sales/Index', [
@@ -79,7 +79,7 @@ class SalesController extends Controller
 
     public function show($id)
     {
-        $order = Order::with(['client', 'products', 'payment'])->findOrFail($id);
+        $order = Order::with(['client', 'products'])->findOrFail($id);
 
         return inertia('Sales/Show', [
             'sale' => new OrderResource($order)
@@ -90,17 +90,18 @@ class SalesController extends Controller
     {
         $clients = Client::all();
         $products = Product::where('quantity', '>', 0)->get();
-        $payments = Payment::all();
+
 
         return inertia('Sales/Create', [
             'clients' => ClientResource::collection($clients),
             'products' => ProductResource::collection($products),
-            'payments' => PaymentResource::collection($payments)
+
         ]);
     }
 
     public function store(OrderRequest $request)
     {
+    
 
         $id = DB::transaction(function () use ($request) {
             // 1. Create the order
@@ -109,15 +110,15 @@ class SalesController extends Controller
                     'reference' => Order::generateReference(),
 
                     'client_id' => $request->client['id'],
-                    'payment_id' => $request->payment ? $request->payment['id'] : null,
+
                     // 'notes' => $request->notes,
-                    'status' => $request->payment ? 'paid' : 'pending'
+                    'status' => $request->paid ? 'paid' : 'pending'
                 ]);
             }else{
                 $order = Order::create([
                     'reference' => Order::generateReference(),
                     'client_id' => null,
-                    'payment_id' =>  $request->payment['id'],
+
                     // 'notes' => $request->notes,
                     'status' => 'paid'
                 ]);
@@ -171,7 +172,7 @@ class SalesController extends Controller
                 ->causedBy(auth()->user())
                 ->performedOn($order)
                 ->withProperties([
-                    'attributes' => $order->only(['reference', 'client_id', 'payment_id', 'status', 'total_amount'])
+                    'attributes' => $order->only(['reference', 'client_id',  'status', 'total_amount'])
                 ])
                 ->log('Order Created');
 
@@ -185,18 +186,18 @@ class SalesController extends Controller
 
     public function edit($id)
     {
-        $order = Order::with(['client', 'products', 'payment'])->findOrFail($id);
+        $order = Order::with(['client', 'products'])->findOrFail($id);
         $clients = Client::all();
         $products = Product::where('quantity', '>', 0)
             ->orWhereIn('id', $order->products->pluck('id'))
             ->get();
-        $payments = Payment::all();
+
 
         return inertia('Sales/Edit', [
             'sale' => new OrderResource($order),
             'clients' => ClientResource::collection($clients),
             'products' => ProductResource::collection($products),
-            'payments' => PaymentResource::collection($payments)
+
         ]);
     }
 
@@ -221,9 +222,9 @@ class SalesController extends Controller
             // Update order main info
             $order->update([
                 'client_id' => $request->client ? $request->client['id'] : null,
-                'payment_id' => $request->payment ? $request->payment['id'] : null,
+
                 'total_amount' => $totalAmount,
-                'status' => $request->status ?? ($request->payment && $request->payment['id'] ? 'paid' : 'pending')
+                'status' => $request->status ?? ($request->paid ? 'paid' : 'pending')
             ]);
 
             // Sync new products with order details

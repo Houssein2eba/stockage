@@ -98,33 +98,18 @@
                         </div>
                     </div>
 
-                    <!-- Payment Method -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
-
-                        <VueMultiselect
-                            v-model="form.payment"
-                            :options="payments"
-                            :custom-label="payment => payment.name"
-                            placeholder="Select payment method"
-                            label="name"
-                            track-by="id"
-                            :class="{ 'ring-2 ring-red-500': form.errors['payment.id'] }"
+                    <!-- Paid Checkbox -->
+                    <div class="w-24">
+                        <label for="paid-checkbox" class="block text-sm font-medium text-gray-700 mb-2">Paid</label>
+                        <input
+                            id="paid-checkbox"
+                            type="checkbox"
+                            v-model="form.paid"
+                            true-value="1"
+                            false-value="0"
+                            class="form-checkbox ring-2 h-5 w-5 text-blue-600 transition duration-150 ease-in-out"
                         />
-
-                        <InputError class="mt-1.5" :message="form.errors['payment.id']" />
-                    </div>
-
-                    <!-- Notes -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-                        <textarea
-                            v-model="form.notes"
-                            rows="3"
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            placeholder="Add any notes about this sale..."
-                            :class="{ 'border-red-500': form.errors.notes }"
-                        ></textarea>
+                        <InputError class="mt-1.5" :message="form.errors.paid" />
                     </div>
 
                     <!-- Total -->
@@ -160,7 +145,7 @@
 </template>
 
 <script setup>
-import {formatPrice} from '@/utils/format.js'
+import { formatPrice } from '@/utils/format.js'
 import { computed } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { useToast } from 'vue-toastification'
@@ -169,7 +154,7 @@ import TextInput from '@/Components/TextInput.vue'
 import InputError from '@/Components/InputError.vue'
 import VueMultiselect from 'vue-multiselect'
 import 'vue-multiselect/dist/vue-multiselect.css'
-import SelectPayment from '@/Components/SelectPayment.vue'
+
 const toast = useToast()
 
 const props = defineProps({
@@ -181,17 +166,12 @@ const props = defineProps({
         type: Array,
         default: () => []
     },
-    payments: {
-        type: Array,
-        default: () => []
-    },
 })
 
 const form = useForm({
     client: null,
-    items: [{ product: null, quantity: 0 }],
-    payment: null,
-    notes: ''
+    items: [{ product: null, quantity: 1 }],
+    paid: 0
 })
 
 const addItem = () => {
@@ -205,7 +185,6 @@ const removeItem = (index) => {
 }
 
 const calculateItemTotal = (item) => {
-
     if (!item.product || !item.quantity) return 0
     const productId = item.product?.id || item.product;
 
@@ -216,7 +195,6 @@ const calculateItemTotal = (item) => {
         return 0
     }
 
-    // Ensure quantity is treated as a number
     const quantity = Number(item.quantity) || 0
     const price = Number(product.price) || 0
 
@@ -227,14 +205,7 @@ const calculateTotal = computed(() => {
     return form.items.reduce((total, item) => total + calculateItemTotal(item), 0)
 })
 
-
-
-
-
 const submitForm = () => {
-    // Validate required fields
-
-
     form.post(route('sales.store'), {
         onSuccess: () => {
             toast.success('Sale created successfully')

@@ -3,7 +3,7 @@
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\ClientsController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\PaymentMethodController;
+
 use App\Http\Controllers\Pdf\FactureController;
 use App\Http\Controllers\Products\CategoriesController;
 use App\Http\Controllers\Products\ProductsController;
@@ -71,6 +71,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/{id}', [SalesController::class, 'destroy'])->name('destroy')->middleware('permission:delete_sales');
         Route::get('/{id}/invoice', [FactureController::class, 'generatePdf'])->name('invoice')->middleware('permission:generate_invoice');
     });
+    //Stock
+    Route::get('/stock',function(){
+         inertia('Stock/Index',[
+           'k'=>'k'
+         ]);
+    })->name('stock.index');
 
     // Admin-only Routes
     Route::middleware(['role:admin'])->group(function () {
@@ -125,12 +131,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/{id}', [CategoriesController::class, 'destroy'])->name('destroy')->middleware('permission:delete_categories');
     });
 
-    // Payment Methods
-    Route::prefix('payment')->name('payment.')->group(function () {
-        Route::get('/', [PaymentMethodController::class, 'index'])->name('index')->middleware('permission:view_payment_methods');
-        Route::post('/', [PaymentMethodController::class, 'store'])->name('store')->middleware('permission:create_payment_methods');
-        Route::delete('/{payment}', [PaymentMethodController::class, 'destroy'])->name('destroy')->middleware('permission:delete_payment_methods');
-    });
+
 
     // Notifications
     Route::prefix('notifications')->name('notifications.')->group(function () {

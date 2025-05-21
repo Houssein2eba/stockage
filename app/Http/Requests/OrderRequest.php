@@ -31,7 +31,7 @@ class OrderRequest extends FormRequest
 
         return [
             'client.id' => ['nullable', 'exists:clients,id'],
-            'payment.id' => $isClient ? ['nullable', 'exists:payments,id'] : ['required', 'exists:payments,id'],
+
             'items' => ['required', 'array', 'min:1'],
             'items.*.product.id' => ['required', 'exists:products,id'],
             'items.*.quantity' => [
@@ -40,6 +40,7 @@ class OrderRequest extends FormRequest
                 'min:1',
                 'max:1000',
             ],
+            'paid' => ['nullable', 'boolean'],
             'notes' => ['nullable', 'string', 'max:1000']
         ];
 
@@ -65,6 +66,6 @@ class OrderRequest extends FormRequest
      *
      * @return array<string, string>
      */
-    
+
 }
 

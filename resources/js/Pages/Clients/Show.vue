@@ -96,9 +96,7 @@ const exportExcel=() => {
                             <p class="text-gray-500 text-sm">Created: {{ formatDate(order.created_at) }}</p>
                             <p class="text-gray-500 text-sm">Paid at: {{ formatDate(order.updated_at) }}</p>
                         </div>
-                        <div>
-                            <span >{{ order.payment?.name || 'N/A' }}</span>
-                        </div>
+
                         <div>
                             <span
                                 :class="{
