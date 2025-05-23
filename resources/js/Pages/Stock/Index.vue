@@ -33,16 +33,12 @@
             type="text"
             class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             placeholder="Search stocks..."
+            v-model="searchQuery"
           />
         </div>
         <div class="flex items-center space-x-4">
-          <select class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-            <option>All Categories</option>
-            <option>Electronics</option>
-            <option>Clothing</option>
-            <option>Food</option>
-          </select>
-          <button class="text-gray-500 hover:text-gray-700">
+
+          <button @click="clearFilters" class="text-gray-500 hover:text-gray-700">
             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
@@ -132,36 +128,58 @@
 <script setup>
 
 import Pagination from '@/Components/Pagination.vue'
-import { Head, Link } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue3'
 import AuthLayout from '@/layouts/AuthLayout.vue'
 import { formatPrice } from '@/utils/format.js'
 import { formatDate } from '@/utils/formatDate.js'
+import { ref, watch } from 'vue'
+import { debounce } from 'lodash';
+
 const props = defineProps({
   stocks: {
-    type: Array,
+    type: Object,
     required: true
+  },
+  filters: {
+    type: Object,
+    default: () => ({})
   }
 })
 
+const searchQuery = ref(props.filters.search || '')
+
 const handlePageChange = (url) => {
-    if (!url) return;
+  if (!url) return;
 
-    const urlObj = new URL(url);
-    const pageParam = urlObj.searchParams.get('page');
+  const urlObj = new URL(url);
+  const pageParam = urlObj.searchParams.get('page');
 
-    if (pageParam) {
-        page.value = parseInt(pageParam);
-        router.get(route('sales.index'), {
-            search: search.value,
-            status: statusFilter.value,
-            date: dateFilter.value,
-            sort: sort.value.field,
-            direction: sort.value.direction,
-            page: page.value
-        }, {
-            preserveState: true,
-            preserveScroll: true
-        });
-    }
+  if (pageParam) {
+    router.get(route('stocks.index'), {
+      search: searchQuery.value,
+      page: pageParam
+    }, {
+      preserveState: true,
+      preserveScroll: true
+    });
+  }
 };
+
+watch(searchQuery, debounce((value) => {
+  router.get(route('stocks.index'), {
+    search: value,
+    page: 1 // Reset to first page when searching
+  }, {
+    preserveState: true,
+    preserveScroll: true
+  });
+}, 300))
+
+const clearFilters = () => {
+  searchQuery.value = ''
+  router.get(route('stocks.index'), {}, {
+    preserveState: true,
+    preserveScroll: true
+  })
+}
 </script>

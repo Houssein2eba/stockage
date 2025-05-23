@@ -21,11 +21,9 @@ const props = defineProps({
         type: Object,
         default: () => ({})
     },
-    categories: {
-        type: Array,
-        default: () => []
-    }
+
 });
+console.log(props.stocks);
 
 const globalSearchQuery = ref(props.filters.search || '');
 const stockSearchQueries = ref({});
@@ -41,14 +39,14 @@ const tableHeaders = computed(() => [
     { label: 'Product', field: 'name', sortable: true },
     { label: 'Category', field: null, sortable: false },
     { label: 'Price', field: 'price', sortable: true },
-    { label: 'Quantity', field: 'pivot.quantity', sortable: true },
-    {label:'Expiry Date','field':'pivot.expiry_date','sortable':true},
+    { label: 'Quantity', field: 'low_products.quantity', sortable: true },
+    {label:'Expiry Date','field':'low_products.expiry_date','sortable':true},
     { label: 'Total Value', field: null, sortable: false }
 ]);
 
 // Handle global search
 watch(globalSearchQuery, debounce(() => {
-    router.get(route('products.index'), {
+    router.get(route('products.lowStocks'), {
         search: globalSearchQuery.value,
         stock_search: stockSearchQueries.value,
         sort: sortField.value,
@@ -62,7 +60,7 @@ watch(globalSearchQuery, debounce(() => {
 
 // Handle stock-specific search
 const handleStockSearch = debounce((stockId) => {
-    router.get(route('products.index'), {
+    router.get(route('products.lowStocks'), {
         search: globalSearchQuery.value,
         stock_search: {
             ...stockSearchQueries.value,
@@ -86,7 +84,7 @@ const handleSort = (field) => {
         sortDirection.value = 'asc';
     }
 
-    router.get(route('products.index'), {
+    router.get(route('products.lowStocks'), {
         search: globalSearchQuery.value,
         stock_search: stockSearchQueries.value,
         sort: sortField.value,
@@ -104,7 +102,7 @@ const exportExcel = (stockId) => {
 
 const calculateTotalValue = (products) => {
     return products?.reduce((total, product) => {
-        return total + (product.price * product.pivot.quantity);
+        return total + (product.price * product.low_products.quantity);
     }, 0) || 0;
 };
 
@@ -214,13 +212,14 @@ const handleStockPageChange = (url) => {
               </div>
               <div class="flex items-center gap-3">
                 <span class="px-2 py-1 text-xs font-semibold rounded-full"
-                      :class="{
+      :class="{
         'bg-green-100 text-green-800': stock.status === 'good',
         'bg-yellow-100 text-yellow-800': stock.status === 'low',
         'bg-red-100 text-red-800': stock.status === 'empty'
       }">
-                  {{ stock.status }}
-                </span>
+  {{ stock.status }}
+</span>
+
 
                 <Link
                   :href="route('stocks.edit', stock.id)"
@@ -254,12 +253,7 @@ const handleStockPageChange = (url) => {
                   Status
                 </dt>
                 <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  <span class="capitalize"
-                  :class="{
-        'bg-green-100 text-green-800': stock.status === 'good',
-        'bg-yellow-100 text-yellow-800': stock.status === 'low',
-        'bg-red-100 text-red-800': stock.status === 'empty'
-      }">{{ stock.status }}</span>
+                  <span class="capitalize">{{ stock.status }}</span>
                 </dd>
               </div>
               <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -321,7 +315,7 @@ const handleStockPageChange = (url) => {
               </template>
 
               <template #body>
-                <TableRow v-for="product in stock.paginated_products?.data" :key="product.id">
+                <TableRow v-for="product in stock.paginated_lows?.data" :key="product.id">
                   <TableDataCell>
                     <div class="flex items-center">
                       <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -346,27 +340,27 @@ const handleStockPageChange = (url) => {
                     {{ formatPrice(product.price) }}
                   </TableDataCell>
                   <TableDataCell>
-                    {{ product.pivot.quantity }}
+                    {{ product.low_products.quantity }}
                   </TableDataCell>
                   <TableDataCell>
-                    {{ product.pivot.expiry_date ? formatDate(product.pivot.expiry_date) : 'N/A' }}
+                    {{ product.low_products.expiry_date ? formatDate(product.low_products.expiry_date) : 'N/A' }}
                   </TableDataCell>
                   <TableDataCell>
-                    {{ formatPrice(product.price * product.pivot.quantity) }}
+                    {{ formatPrice(product.price * product.low_products.quantity) }}
                   </TableDataCell>
                 </TableRow>
-                <TableRow v-if="!stock.paginated_products?.data?.length">
+                <TableRow v-if="!stock.paginated_lows?.data?.length">
                   <TableDataCell colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
                     No products found in this stock location
                   </TableDataCell>
                 </TableRow>
 
-                <TableRow v-if="stock.paginated_products?.data?.length > 0">
+                <TableRow v-if="stock.paginated_lows?.data?.length > 0">
                   <TableDataCell colspan="4" class="px-6 py-3 text-right text-sm font-medium text-gray-500">
                     Total Inventory Value:
                   </TableDataCell>
                   <TableDataCell class="px-6 py-3 text-sm font-bold text-gray-900">
-                    {{ formatPrice(calculateTotalValue(stock.paginated_products.data)) }}
+                    {{ formatPrice(calculateTotalValue(stock.paginated_lows.data)) }}
                   </TableDataCell>
                 </TableRow>
               </template>
@@ -374,13 +368,13 @@ const handleStockPageChange = (url) => {
           </div>
 
           <!-- Products Pagination - Independent for each stock -->
-          <div v-if="stock.paginated_products?.meta" class="px-6 py-4 border-t border-gray-200">
+          <div v-if="stock.paginated_lows?.meta" class="px-6 py-4 border-t border-gray-200">
             <div class="flex items-center justify-between">
               <div class="text-sm text-gray-700">
-                Showing {{ stock.paginated_products.meta.from || 0 }} to {{ stock.paginated_products.meta.to || 0 }} of {{ stock.paginated_products.meta.total }} results
+                Showing {{ stock.paginated_lows.meta.from || 0 }} to {{ stock.paginated_lows.meta.to || 0 }} of {{ stock.paginated_lows.meta.total }} results
               </div>
               <Pagination
-                :links="stock.paginated_products.meta.links"
+                :links="stock.paginated_lows.meta.links"
                 @change="(url) => handleProductPageChange(url, stock.id)"
               />
             </div>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Sales;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ClearStockResource;
 use App\Http\Resources\ClientResource;
 use App\Http\Resources\OrderResource;
 
@@ -14,7 +15,9 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 
 use App\Models\Product;
+use App\Models\ProductStock;
 use App\Models\Stock;
+use App\Observers\ProductStockObserver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -97,8 +100,7 @@ class SalesController extends Controller
 
         return inertia('Sales/Create', [
             'clients' => ClientResource::collection($clients),
-            'stocks' => StockResource::collection($stocks),
-
+            'stocks' => ClearStockResource::collection($stocks),
         ]);
     }
 
@@ -124,25 +126,21 @@ public function store(OrderRequest $request)
                 $productId = $productItem['product']['id'];
                 $quantity = (int) $productItem['quantity'];
 
-                // 2. Get the pivot row from product_stocks
-                $pivot = DB::table('product_stocks')
-                    ->where('product_id', $productId)
+                // 2. Get the ProductStock model instance
+                $productStock = ProductStock::where('product_id', $productId)
                     ->where('stock_id', $stockId)
                     ->first();
 
-                if (!$pivot) {
-                    throw new \Exception("Product not available in selected stock.");
+                if (!$productStock) {
+                    return back()->with('error', "Product ID {$productId} not found in stock ID {$stockId}");
                 }
 
-                if ($pivot->quantity < $quantity) {
-                    throw new \Exception("Insufficient stock for product ID {$productId} in stock ID {$stockId}");
+                if ($productStock->quantity < $quantity) {
+                    back()->with('error', "Insufficient quantity for product ID {$productId} in stock ID {$stockId}");
                 }
 
-                // 3. Update pivot table: decrement quantity
-                DB::table('product_stocks')
-                    ->where('product_id', $productId)
-                    ->where('stock_id', $stockId)
-                    ->decrement('quantity', $quantity);
+                // 3. Decrement using Eloquent (this will trigger the observer)
+                $productStock->decrement('quantity', $quantity);
 
                 // 4. Get product price
                 $product = Product::findOrFail($productId);

@@ -110,34 +110,11 @@
                 <InputError class="mt-1.5" :message="form.errors.price" />
               </div>
 
-              <div>
-                <InputLabel for="quantity" value="Quantity" class="mb-1.5" />
-                <TextInput
-                  id="quantity"
-                  type="number"
-                  min="0"
-                  class="w-full"
-                  v-model="form.quantity"
-                  placeholder="0"
-                />
-                <InputError class="mt-1.5" :message="form.errors.quantity" />
-              </div>
+
             </div>
 
             <div class="grid grid-cols-2 gap-4">
-                <div>
-              <InputLabel for="min_quantity" value="Min Quantity" class="mb-1.5" />
-              <TextInput
-                id="min_quantity"
-                type="number"
-                step="1"
-                min="1"
-                class="w-full"
-                v-model="form.min_quantity"
-                placeholder="1"
-              />
-              <InputError class="mt-1.5" :message="form.errors.min_quantity" />
-            </div>
+
             <div>
               <InputLabel for="cost" value="Cost" class="mb-1.5" />
               <TextInput
@@ -151,8 +128,66 @@
               />
               <InputError class="mt-1.5" :message="form.errors.cost" />
             </div>
+            <div >
+              <InputLabel for="date" value="Date of Expiry" class="mb-1.5" />
+              <DatePicker class="w-full" v-model="form.expiry_date" />
+              </div>
             </div>
+                 <!-- Stocs section -->
+                  <div class="space-y-4">
+      <InputLabel value="Stock Quantities" class="mb-1.5" />
 
+      <div v-for="(stockItem, index) in form.stockQuantities" :key="index" class="p-3 border rounded-lg bg-gray-50">
+        <div class="grid grid-cols-3 gap-4 items-center">
+          <!-- Stock Selection -->
+          <div>
+            <VueMultiselect
+              v-model="stockItem.stock"
+              :options="availableStocks(index)"
+              placeholder="Select stock"
+              label="name"
+              track-by="id"
+              :class="{ 'border-red-500': form.errors[`stockQuantities.${index}.stock`] }"
+            />
+          </div>
+
+          <!-- Quantity Input -->
+          <div>
+            <TextInput
+              type="number"
+              min="0"
+              class="w-full"
+              v-model.number="stockItem.quantity"
+              placeholder="Quantity"
+              :class="{ 'border-red-500': form.errors[`stockQuantities.${index}.quantity`] }"
+            />
+          </div>
+
+          <!-- Remove Button -->
+          <div class="flex justify-end">
+            <button
+              type="button"
+              @click="removeStockItem(index)"
+              class="text-red-500 hover:text-red-700"
+              v-if="form.stockQuantities.length > 1"
+            >
+              Remove
+            </button>
+          </div>
+        </div>
+        <InputError class="mt-1.5" :message="form.errors[`stockQuantities.${index}.stock`]" />
+        <InputError class="mt-1.5" :message="form.errors[`stockQuantities.${index}.quantity`]" />
+      </div>
+
+      <button
+        type="button"
+        @click="addStockItem"
+        class="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200"
+      >
+        + Add Stock Location
+      </button>
+    </div>
+                  <!-- Stocs section -->
             <div>
               <InputLabel for="category" value="Category" class="mb-1.5" />
               <VueMultiselect
@@ -199,7 +234,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref,computed } from 'vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import InputError from '@/Components/InputError.vue';
@@ -208,9 +243,10 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { useToast } from 'vue-toastification';
 import VueMultiselect from 'vue-multiselect';
-
+import DatePicker from 'primevue/datepicker';
 const props = defineProps({
-  categories: Array
+  categories: Array,
+  stocks: Array
 });
 
 const toast = useToast();
@@ -220,12 +256,43 @@ const form = useForm({
   name: '',
   description: '',
   price: '',
-  quantity: '',
-  min_quantity: '',
+
+
   cost:'',
   category: null,
+  expiry_date: null,
+  stockQuantities: [{ stock: null, quantity: 0 }],
   image: null
 });
+
+// Computed property to get total quantity across all stocks
+const totalQuantity = computed(() => {
+  return form.stockQuantities.reduce((total, item) => {
+    return total + (parseInt(item.quantity) || 0);
+  }, 0);
+});
+
+// Get available stocks that haven't been selected yet
+const availableStocks = (currentIndex) => {
+  return props.stocks.filter(stock => {
+    return !form.stockQuantities.some((item, index) =>
+      index !== currentIndex && item.stock && item.stock.id === stock.id
+    );
+  });
+};
+
+// Add new stock quantity item
+const addStockItem = () => {
+  form.stockQuantities.push({
+    stock: null,
+    quantity: 0
+  });
+};
+
+// Remove stock quantity item
+const removeStockItem = (index) => {
+  form.stockQuantities.splice(index, 1);
+};
 
 const handleImageChange = (e) => {
   const file = e.target.files[0];

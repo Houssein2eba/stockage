@@ -11,4 +11,11 @@ class ProductStock extends Pivot
     use HasUuids;
     protected $table = 'product_stocks';
     protected $guarded = ['id'];
+
+    public function product(){
+        return $this->belongsTo(Product::class);
+    }
+    public function stock(){
+        return $this->belongsTo(Stock::class);
+    }
 }

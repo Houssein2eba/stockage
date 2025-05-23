@@ -75,7 +75,7 @@ const props = defineProps({
                             <Link
 
                             class="text-sm font-medium text-red-600 hover:text-red-500"
-                            :href="route('products.index', { filter: 'low-stock' })"
+                            :href="route('products.lowStock', { filter: 'low_stock' })"
                             >  View Low Stock</Link>
                         </div>
                     </div>

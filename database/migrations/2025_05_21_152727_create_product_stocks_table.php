@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignUuid('product_id')->constrained('products')->onDelete('cascade');
             $table->foreignUuid('stock_id')->constrained('stocks')->onDelete('cascade');
             $table->integer('quantity');
-            $table->date('expiry_date');
+            $table->date('expiry_date')->nullable();
             $table->timestamps();
         });
     }

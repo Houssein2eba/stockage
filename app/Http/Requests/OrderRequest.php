@@ -31,9 +31,9 @@ class OrderRequest extends FormRequest
 
         return [
              // client data
-        'client.id' => ['required', 'uuid', 'exists:clients,id'],
-        'client.name' => ['required', 'string'],
-        'client.number' => ['required', 'string'],
+        'client.id' => ['nullable', 'uuid', 'exists:clients,id'],
+        'client.name' => ['nullable', 'string'],
+        'client.number' => ['nullable', 'string'],
 
         // paid field
         'paid' => $isClient ? ['nullable', 'boolean'] : ['required', 'boolean'],
@@ -54,12 +54,12 @@ class OrderRequest extends FormRequest
     {
         return [
  // Client validation
-        'client.id.required' => 'Client ID is required.',
+
         'client.id.uuid' => 'Client ID must be a valid UUID.',
         'client.id.exists' => 'The selected client does not exist.',
-        'client.name.required' => 'Client name is required.',
+        
         'client.name.string' => 'Client name must be a string.',
-        'client.number.required' => 'Client number is required.',
+
         'client.number.string' => 'Client number must be a string.',
 
         // Paid field

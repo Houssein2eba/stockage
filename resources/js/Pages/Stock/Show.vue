@@ -19,6 +19,7 @@
             </svg>
             Back to Stocks
           </Link>
+
           <Link
             :href="route('stocks.edit', stock.id)"
             class="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
@@ -39,8 +40,10 @@
             <h3 class="text-lg leading-6 font-medium text-white">
               {{ stock.name }} - {{ stock.location }}
             </h3>
-            <span class="px-2 py-1 text-xs font-semibold rounded-full"
-                  :class="stock.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+            <span
+              class="px-2 py-1 text-xs font-semibold rounded-full"
+              :class="stock.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+            >
               {{ stock.status }}
             </span>
           </div>
@@ -50,44 +53,26 @@
         <div class="border-t border-gray-200 px-4 py-5 sm:p-0">
           <dl class="sm:divide-y sm:divide-gray-200">
             <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt class="text-sm font-medium text-gray-500">
-                Stock ID
-              </dt>
-              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                {{ stock.id }}
-              </dd>
+              <dt class="text-sm font-medium text-gray-500">Stock ID</dt>
+              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ stock.id }}</dd>
             </div>
             <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt class="text-sm font-medium text-gray-500">
-                Location
-              </dt>
-              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                {{ stock.location }}
-              </dd>
+              <dt class="text-sm font-medium text-gray-500">Location</dt>
+              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ stock.location }}</dd>
             </div>
             <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt class="text-sm font-medium text-gray-500">
-                Status
-              </dt>
+              <dt class="text-sm font-medium text-gray-500">Status</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                 <span class="capitalize">{{ stock.status }}</span>
               </dd>
             </div>
             <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt class="text-sm font-medium text-gray-500">
-                Created At
-              </dt>
-              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                {{ formatDate(stock.created_at) }}
-              </dd>
+              <dt class="text-sm font-medium text-gray-500">Created At</dt>
+              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ formatDate(stock.created_at) }}</dd>
             </div>
             <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt class="text-sm font-medium text-gray-500">
-                Last Updated
-              </dt>
-              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                {{ formatDate(stock.updated_at) }}
-              </dd>
+              <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ formatDate(stock.updated_at) }}</dd>
             </div>
           </dl>
         </div>
@@ -118,70 +103,98 @@
 
         <div class="bg-white overflow-hidden">
           <div class="overflow-x-auto">
-              <Table>
-
+            <Table>
               <template #header>
                 <TableRow>
-                  <TableHeaderCell>Product</TableHeaderCell>
-                  <TableHeaderCell>Category</TableHeaderCell>
-                  <TableHeaderCell>Price</TableHeaderCell>
-                  <TableHeaderCell>Quantity</TableHeaderCell>
-                  <TableHeaderCell>Total Value</TableHeaderCell>
+                  <TableHeaderCell @click="handleSort('name')" class="cursor-pointer select-none">
+                    Product
+                    <span v-if="sortField === 'name'">
+                      {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                  </TableHeaderCell>
+                  <TableHeaderCell @click="handleSort('category')" class="cursor-pointer select-none">
+                    Category
+                    <span v-if="sortField === 'category'">
+                      {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                  </TableHeaderCell>
+                  <TableHeaderCell @click="handleSort('price')" class="cursor-pointer select-none">
+                    Price
+                    <span v-if="sortField === 'price'">
+                      {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                  </TableHeaderCell>
+                  <TableHeaderCell @click="handleSort('quantity')" class="cursor-pointer select-none">
+                    Quantity
+                    <span v-if="sortField === 'quantity'">
+                      {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                  </TableHeaderCell>
+                  <TableHeaderCell @click="handleSort('total_value')" class="cursor-pointer select-none">
+                    Total Value
+                    <span v-if="sortField === 'total_value'">
+                      {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                  </TableHeaderCell>
                 </TableRow>
               </template>
 
               <template #body>
-                <TableRow v-for="product in props.products.data" :key="product.id">
+                <TableRow v-for="product in products.data" :key="product.id">
                   <TableDataCell>
                     <div class="flex items-center">
                       <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        <svg
+                          class="h-6 w-6 text-blue-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="1.5"
+                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                          />
                         </svg>
                       </div>
                       <div class="ml-4">
-                        <div class="text-sm font-medium text-gray-900">
-                          {{ product.name }}
-                        </div>
-
+                        <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
                       </div>
                     </div>
                   </TableDataCell>
                   <TableDataCell>
-                    <div v-for="category in product.categories" :key="category.id"
-                         class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 mb-1">
+                    <div
+                      v-for="category in product.categories"
+                      :key="category.id"
+                      class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 mb-1"
+                    >
                       {{ category.name || 'Uncategorized' }}
                     </div>
                   </TableDataCell>
-                  <TableDataCell>
-                    {{ formatPrice(product.price) }}
-                  </TableDataCell>
-                  <TableDataCell>
-                    {{ product.pivot.quantity }}
-                  </TableDataCell>
-                  <TableDataCell>
-                    {{ formatPrice(product.price * product.pivot.quantity) }}
-                  </TableDataCell>
+                  <TableDataCell>{{ formatPrice(product.price) }}</TableDataCell>
+                  <TableDataCell>{{ product.pivot.quantity }}</TableDataCell>
+                  <TableDataCell>{{ formatPrice(product.price * product.pivot.quantity) }}</TableDataCell>
                 </TableRow>
+
                 <TableRow v-if="products.data.length === 0">
                   <TableDataCell colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
                     No products found in this stock location
                   </TableDataCell>
                 </TableRow>
 
-
                 <TableRow v-if="products.data.length > 0">
                   <TableDataCell colspan="4" class="px-6 py-3 text-right text-sm font-medium text-gray-500">
                     Total Inventory Value:
                   </TableDataCell>
                   <TableDataCell class="px-6 py-3 text-sm font-bold text-gray-900">
-                    {{ formatPrice(calculateTotalValue) }}
+                    {{ formatPrice(stock.totalValue) }}
                   </TableDataCell>
                 </TableRow>
               </template>
-            </ Table>
-
+            </Table>
           </div>
+
           <div class="px-6 py-4 border-t border-gray-200">
             <div class="flex items-center justify-between">
               <div class="text-sm text-gray-700" v-if="products.meta.total > 0">
@@ -216,62 +229,83 @@ import { Head, Link } from '@inertiajs/vue3'
 import AuthLayout from '@/layouts/AuthLayout.vue'
 import { formatPrice } from '@/utils/format.js'
 import { formatDate } from '@/utils/formatDate.js'
-import {computed} from "vue";
+
 const props = defineProps({
   stock: {
     type: Object,
     required: true,
-    default: () => ({
-      id: null,
-      name: '',
-      location: '',
-      status: '',
-      created_at: null,
-      updated_at: null,
-    })
   },
   products: {
-    type: Array,
+    type: Object,
     required: true,
-
   },
   filters: {
     type: Object,
-    default: () => ({})
-  }
+    default: () => ({}),
+  },
 })
 
+// Reactive search and sorting state initialized from props.filters
 const searchQuery = ref(props.filters.search || '')
-
-const calculateTotalValue = computed(() => {
-  return props.stock.products.reduce((total, product) => {
-    return total + (product.price * product.pivot.quantity)
-  }, 0)
-})
+const sortField = ref(props.filters.sort || 'name')
+const sortDirection = ref(props.filters.direction || 'asc')
 
 const handleSearch = debounce(() => {
-  router.get(route('stocks.show', props.stock.id),
-  { search: searchQuery.value },
-  {
-    preserveState: true,
-    preserveScroll: true,
-    replace: true
-  })
+  router.get(
+    route('stocks.show', props.stock.id),
+    {
+      search: searchQuery.value,
+      sort: sortField.value,
+      direction: sortDirection.value,
+    },
+    {
+      preserveState: true,
+      preserveScroll: true,
+      replace: true,
+    }
+  )
 }, 300)
+
+const handleSort = (field) => {
+  if (sortField.value === field) {
+    // toggle direction
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortField.value = field
+    sortDirection.value = 'asc'
+  }
+
+  router.get(
+    route('stocks.show', props.stock.id),
+    {
+      search: searchQuery.value,
+      sort: sortField.value,
+      direction: sortDirection.value,
+    },
+    {
+      preserveState: true,
+      preserveScroll: true,
+      replace: true,
+    }
+  )
+}
 
 const handlePageChange = (url) => {
   if (!url) return
   router.visit(url, {
     preserveState: true,
-    preserveScroll: true
+    preserveScroll: true,
   })
 }
 
+// Watch searchQuery to trigger search after debounce
 watch(searchQuery, () => {
   handleSearch()
 })
 </script>
 
 <style scoped>
-/* Add any custom styles here */
+.cursor-pointer {
+  user-select: none;
+}
 </style>

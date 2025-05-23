@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Order;
 use App\Models\Category;
 use App\Models\Payment;
+use App\Models\Stock;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -35,7 +36,7 @@ class DashboardController extends Controller
 
         $stats = [
             'totalProducts' => Product::count(),
-            'lowStockCount' => 0,
+            'lowStockCount' =>Stock::withCount('lows')->count(),
             'totalSales' => Order::where('status', '!=','cancelled')->count(),
             'totalCategories' => Category::count(),
             'totalRevenue' => $totalAmount = DB::table('order_details')

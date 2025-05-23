@@ -20,7 +20,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-define('PAGINATION', 10);
+define('PAGINATION', 5);
 
 // Public Routes
 Route::get('/', function () {
@@ -120,6 +120,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/create', [ProductsController::class, 'create'])->name('create');
             Route::post('/', [ProductsController::class, 'store'])->name('store');
             Route::get('/export', [ProductsController::class, 'export'])->name('export');
+            Route::get('lowStock', [ProductsController::class, 'lowStock'])->name('lowStock');
             Route::get('/{id}/show', [ProductsController::class, 'show'])->name('show');
             Route::get('/{id}/edit', [ProductsController::class, 'edit'])->name('edit');
             Route::put('/{id}', [ProductsController::class, 'update'])->name('update');

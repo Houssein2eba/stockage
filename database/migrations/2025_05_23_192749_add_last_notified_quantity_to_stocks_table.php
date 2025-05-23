@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('stocks', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->string('name');
-            $table->enum('status', ['good', 'low','empty'])->default('empty');
-            $table->string('location')->nullable();
-            $table->timestamps();
+        Schema::table('stocks', function (Blueprint $table) {
+            $table->integer('last_notified_quantity')->nullable();
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('stocks');
+        Schema::table('stocks', function (Blueprint $table) {
+            //
+        });
     }
 };

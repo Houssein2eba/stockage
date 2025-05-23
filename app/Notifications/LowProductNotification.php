@@ -7,16 +7,16 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class LowStockNotification extends Notification
+class LowProductNotification extends Notification
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(protected $stock)
+    public function __construct()
     {
-        $this->stock = $stock;
+        //
     }
 
     /**
@@ -26,7 +26,7 @@ class LowStockNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['mail'];
     }
 
     /**
@@ -47,9 +47,8 @@ class LowStockNotification extends Notification
      */
     public function toArray(object $notifiable): array
     {
-        
         return [
-            'message' =>  "The stock for {$this->stock->name} is low ({$this->stock->products()->where('quantity', '>', '0')->count()} products left).",
+            //
         ];
     }
 }
