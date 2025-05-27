@@ -32,7 +32,7 @@ class DashboardController extends Controller
             ->get();
         // Return as collection using ProductResource
 
-
+        
 
         $stats = [
             'totalProducts' => Product::count(),
@@ -59,6 +59,8 @@ class DashboardController extends Controller
                 ->join('order_details', 'orders.id', '=', 'order_details.order_id')
                 ->sum('order_details.total_amount'),
             'popular_products' => $popular,
+            'stocksCount' =>Stock::count(),
+
 
         ];
 

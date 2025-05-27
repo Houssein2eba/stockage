@@ -8,6 +8,7 @@ use App\Http\Resources\ClientResource;
 use App\Http\Requests\ClientRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Client;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -67,6 +68,22 @@ class ClientsController extends Controller
     }
     public function show(Request $request,$id)
 {
+
+    if($request->wantsJson()){
+        $orders=Order::with(['products','client'])
+        ->where('client_id', $id)
+
+        ->cursorPaginate(3, ['*'], 'cursor', $request->cursor ?? null)
+        ->withQueryString();
+        return response()->json([
+            'orders' => OrderResource::collection($orders),
+            'meta'=>[
+                'next_cursor' => $orders->nextCursor()?->encode(),
+                'per_page' => $orders->perPage(),
+                'has_more' => $orders->hasMorePages(),
+            ]
+        ]);
+    }
     $client = Client::with('orders')->findOrFail($id);
 
      $orders = $client->orders()
@@ -77,12 +94,7 @@ class ClientsController extends Controller
 
 
 
-    if($request->wantsJson()){
-        return response()->json([
-            'orders' => OrderResource::collection($orders),
 
-        ]);
-    }
 
 
 
@@ -140,7 +152,7 @@ class ClientsController extends Controller
 
     public function update(Request $request, $id)
     {
-        
+
         $validated = $request->validate([
             'name' => 'required|string',
             'number' => 'required|string|unique:clients,number,' . $id,
@@ -152,8 +164,8 @@ class ClientsController extends Controller
                 'name' => $validated['name'],
                 'number' => $validated['number'],
             ]);
-            
-            
+
+
             $attributes = $client->toArray();
             unset($old['id'], $old['created_at'], $old['updated_at']);
             unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);

@@ -35,7 +35,7 @@ class UsersController extends Controller
 
             if($request->wantsJson()){
                 $usersApi=User::with('roles')->get();
-                Log::info($usersApi);
+
                 return response()->json([
                    'users'=>UserApiResource::collection($usersApi)
                 ]);
@@ -149,7 +149,7 @@ class UsersController extends Controller
     {
         $user = User::findOrFail($id);
 
-        Log::info($user);
+        
         $userName = $user->name;
 
         $user->delete();

@@ -74,6 +74,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     // Notification routes
     Route::prefix('notifications')->group(function () {
         Route::get('/', function (Request $request) {
+
+            
             return response()->json([
                 'notifications' => $request->user()
                     ->notifications()
@@ -106,7 +108,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     });
 
     // Client routes
-    Route::prefix('clients')->group(function () {
+Route::prefix('clients')->group(function () {
         Route::get('/', function () {
             $clients = Client::with(['orders' => function($query) {
                 $query->with('products'); // Eager load products with orders
@@ -185,7 +187,11 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
     });
     Route::get('/dashboard',[DashboardController::class,'index'])->name('dashboard');
-
+    
+    //Stock routes
+    Route::prefix('stocks')->name('stocks.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Stock\StockController::class, 'index'])->name('index');
+        });
 
 
     // Logout

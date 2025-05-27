@@ -11,6 +11,7 @@ class NotificationController extends Controller
     {
         $notifications = auth()->user()->notifications;
         $notifications = $notifications->sortByDesc('created_at');
+    
         return inertia('Notifications/Index', compact('notifications'));
     }
 

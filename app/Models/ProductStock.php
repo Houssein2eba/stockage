@@ -18,4 +18,8 @@ class ProductStock extends Pivot
     public function stock(){
         return $this->belongsTo(Stock::class);
     }
+    public function getbenefitsAttribute():float
+    {
+        return $this->product->price - $this->product->cost;
+    }
 }

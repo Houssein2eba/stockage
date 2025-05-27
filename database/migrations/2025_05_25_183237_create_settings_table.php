@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('stocks', function (Blueprint $table) {
-            //
+        Schema::create('settings', function (Blueprint $table) {
+            $table->id();
+            $table->integer('low_stock')->default(10);
+            $table->integer('low_product')->default(50);
+            $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('stocks', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('settings');
     }
 };

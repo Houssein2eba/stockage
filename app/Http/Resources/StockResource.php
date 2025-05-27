@@ -21,12 +21,12 @@ class StockResource extends JsonResource
             'status' => $this->status,
             'location' => $this->location,
             'totalValue' => $this->products()->sum(DB::raw('price * quantity')),
-
+             'totalProducts'=>$this->products()->sum('quantity'),
             'productsCount' => $this->products()->where('quantity', '>', '0')->count() ,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'products' => productResource::collection($this->whenLoaded('products')),
-            'paginated_products' => $this->whenLoaded('products', function () {
+            'paginated_products' => $request->wantsJson() ? null : $this->whenLoaded('products', function () {
     return [
         'data' => ProductResource::collection($this->products),
         'links' => [
@@ -45,7 +45,7 @@ class StockResource extends JsonResource
         ],
     ];
 }),
-'paginated_lows' => $this->whenLoaded('lows', function () {
+'paginated_lows' =>$request->wantsJson() ? null : $this->whenLoaded('lows', function () {
     return [
         'data' => ProductResource::collection($this->products),
         'links' => [

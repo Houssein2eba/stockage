@@ -129,7 +129,7 @@
             <div class="invoice-info">
                 <div class="invoice-number">#{{ $order->reference }}</div>
                 <div>Date: {{ $order->created_at->format('d/m/Y') }}</div>
-                <div>Payment Method: {{ $order->payment?->name ?? 'Cash' }}</div>
+                
                 <div class="status-container">
                     <span>Status:
                         {{ ucfirst($order->status) }}
@@ -176,21 +176,7 @@
             </tbody>
         </table>
 
-        <!-- Payment Info -->
-        <div class="payment-info">
-            <div style="width: 48%; float: left;">
-                <strong>Payment Terms:</strong>
-                <ul style="padding-left: 20px; margin-top: 10px;">
-                    <li>Payment is due within 30 days</li>
-                    <li>Please include the invoice number in your payment</li>
-                </ul>
-            </div>
-            <div style="width: 48%; float: right;">
-                <strong>Notes:</strong>
-                <p style="margin-top: 10px;">{{ $order->notes ?? 'No notes' }}</p>
-            </div>
-            <div class="clear"></div>
-        </div>
+        
 
         <!-- Footer -->
         <div class="footer">

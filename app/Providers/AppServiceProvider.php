@@ -44,8 +44,8 @@ class AppServiceProvider extends ServiceProvider
 
        Model::automaticallyEagerLoadRelationships();
 
-       Product::observe(ProductObserver::class);
-       ProductStock::observe(ProductStockObserver::class);
+    //    Product::observe(ProductObserver::class);
+    //    ProductStock::observe(ProductStockObserver::class);
 
 
 

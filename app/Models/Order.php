@@ -43,15 +43,16 @@ class Order extends Model
             ->withPivot(['quantity','total_amount'])
             ->withTimestamps();
     }
+
+
+
+
     public function order_details()
 {
-    return $this->hasMany(OrderDetail::class); 
+    return $this->hasMany(OrderDetail::class);
 }
 
-    public function payment()
-    {
-        return $this->belongsTo(Payment::class);
-    }
+    
 
     public function getTotalAmountAttribute()
     {

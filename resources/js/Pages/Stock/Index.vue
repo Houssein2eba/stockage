@@ -69,9 +69,13 @@
             </div>
 
             <div class="grid grid-cols-2 gap-4 mt-6">
+            <div>
+                <p class="text-sm text-gray-500">Products Types</p>
+                <p  class="text-lg font-semibold">{{ stock.productsCount }}  </p>
+              </div>
               <div>
-                <p class="text-sm text-gray-500">Products</p>
-                <p class="text-lg font-semibold">{{ stock.productsCount }}</p>
+                <p class="text-sm text-gray-500">Products Count</p>
+                <p  class="text-lg font-semibold">{{ stock.totalProducts }}  </p>
               </div>
               <div>
                 <p class="text-sm text-gray-500">Total Value</p>
@@ -145,6 +149,7 @@ const props = defineProps({
     default: () => ({})
   }
 })
+
 
 const searchQuery = ref(props.filters.search || '')
 

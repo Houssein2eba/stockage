@@ -13,10 +13,25 @@ class StockController extends Controller
 {
 public function index(Request $request)
 {
+    if($request ->wantsJson()){
+        $stocks=Stock::with('products')
+        ->cursorPaginate(PAGINATION, ['*'], 'cursor', $request->cursor ?? null)
+        ->withQueryString()
+        ;
+        return response()->json([
+             'stocks' => StockResource::collection($stocks),
+             'meta'=> [
+             'next_cursor' => $stocks->nextCursor()?->encode(),
+             'per_page' => $stocks->perPage(),
+             'has_more' => $stocks->hasMorePages(), 
+             ]
+        ]);
+    }
     $stocks = Stock::query()
         ->when($request->search, function ($query, $search) {
             $query->where('name', 'LIKE', "%{$search}%");
         })
+        ->latest()
         ->paginate(PAGINATION)
         ->withQueryString();
 
@@ -27,7 +42,7 @@ public function index(Request $request)
 
         if ($request->input('stock_id') == $stock->id) {
             $paginatedProducts = $stock->products()
-            
+
                 ->with('categories')
                 ->paginate(PAGINATION, ['*'], $pageKey, $productPage)
                 ->withQueryString();
@@ -55,6 +70,7 @@ public function index(Request $request)
 
         return $stock;
     });
+    
 
     return Inertia::render('Stock/Index', [
         'stocks' => [
@@ -129,5 +145,22 @@ public function index(Request $request)
         'productPage' => $productPage,
     ]);
 }
+public function create()
+{
+    return Inertia::render('Stock/Create');
 
+}
+
+public function store(Request $request)
+{
+
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'location' => 'required|string|max:255',
+    ]);
+
+    $stock = Stock::create($request->only('name', 'location'));
+
+    return back();
+}
 }
