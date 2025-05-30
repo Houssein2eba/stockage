@@ -20,7 +20,7 @@ class ClearStockResource extends JsonResource
             'name' => $this->name,
             'status' => $this->status,
             'location' => $this->location,
-            'totalValue' => $this->products()->sum(DB::raw('price * quantity')),
+            'totalValue' => $this->products()->sum('price * quantity'),
 
             'productsCount' => $this->products()->count() ,
             'created_at' => $this->created_at,

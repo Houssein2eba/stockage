@@ -2,15 +2,22 @@
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import { Head, Link } from "@inertiajs/vue3";
 import { ref, watch, computed } from 'vue';
+import { useForm } from '@inertiajs/vue3';
 import { debounce } from 'lodash';
 import { router } from '@inertiajs/vue3';
+import { useToast } from 'vue-toastification';
 import Table from "@/Components/Table.vue";
 import TableRow from "@/Components/TableRow.vue";
 import TableHeaderCell from "@/Components/TableHeaderCell.vue";
 import TableDataCell from "@/Components/TableDataCell.vue";
 import Pagination from "@/Components/Pagination.vue";
+import Modal from '@/Components/Modal.vue';
+import DangerButton from '@/Components/DangerButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
 import { formatPrice } from "@/utils/format.js";
 import { formatDate } from '@/utils/formatDate.js';
+
+const toast = useToast();
 
 const props = defineProps({
     stocks: {
@@ -27,10 +34,16 @@ const props = defineProps({
     }
 });
 
+// Search and sort state
 const globalSearchQuery = ref(props.filters.search || '');
 const stockSearchQueries = ref({});
 const sortField = ref(props.filters.sort || '');
 const sortDirection = ref(props.filters.direction || '');
+
+// Delete modal state
+const showDeleteModal = ref(false);
+const productToDelete = ref(null);
+const deleteForm = useForm({});
 
 // Initialize stock search queries
 props.stocks.data.forEach(stock => {
@@ -41,12 +54,39 @@ const tableHeaders = computed(() => [
     { label: 'Product', field: 'name', sortable: true },
     { label: 'Category', field: null, sortable: false },
     { label: 'Price', field: 'price', sortable: true },
-    { label: 'Quantity', field: 'pivot.quantity', sortable: true },
-    {label:'Expiry Date','field':'pivot.expiry_date','sortable':true},
-    { label: 'Total Value', field: null, sortable: false }
+    { label: 'Quantity', field: 'quantity', sortable: true },
+    { label: 'Total Value', field: null, sortable: false },
+    { label: 'Edit', field: null, sortable: false },
+    { label: 'Delete', field: null, sortable: false }
 ]);
 
-// Handle global search
+// Modal functions
+const openDeleteModal = (product) => {
+    productToDelete.value = product;
+    showDeleteModal.value = true;
+};
+
+const closeDeleteModal = () => {
+    showDeleteModal.value = false;
+    productToDelete.value = null;
+};
+
+const deleteProduct = () => {
+    if (!productToDelete.value) return;
+
+    deleteForm.delete(route('products.destroy', productToDelete.value.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            closeDeleteModal();
+            toast.success('Product deleted successfully');
+        },
+        onError: () => {
+            toast.error('Failed to delete product');
+        }
+    });
+};
+
+// Search handlers
 watch(globalSearchQuery, debounce(() => {
     router.get(route('products.index'), {
         search: globalSearchQuery.value,
@@ -60,7 +100,6 @@ watch(globalSearchQuery, debounce(() => {
     });
 }, 300));
 
-// Handle stock-specific search
 const handleStockSearch = debounce((stockId) => {
     router.get(route('products.index'), {
         search: globalSearchQuery.value,
@@ -77,7 +116,7 @@ const handleStockSearch = debounce((stockId) => {
     });
 }, 300);
 
-// Handle sorting
+// Sort handler
 const handleSort = (field) => {
     if (sortField.value === field) {
         sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
@@ -98,17 +137,23 @@ const handleSort = (field) => {
     });
 };
 
-const exportExcel = (stockId) => {
-    window.location.href = route('products.export', stockId);
+// Export functions
+const exportExcel = () => {
+    window.location.href = route('products.export');
 };
 
+const exportSingleExcel = (stockId) => {
+    window.location.href = route('products.single_export', { id: stockId });
+};
+
+// Helper functions
 const calculateTotalValue = (products) => {
     return products?.reduce((total, product) => {
-        return total + (product.price * product.pivot.quantity);
+        return total + (product.price * product.quantity);
     }, 0) || 0;
 };
 
-// Handle pagination changes for products within a stock
+// Pagination handlers
 const handleProductPageChange = (url, stockId) => {
     if (!url) return;
 
@@ -124,7 +169,6 @@ const handleProductPageChange = (url, stockId) => {
     });
 };
 
-// Handle pagination changes for stocks
 const handleStockPageChange = (url) => {
     if (!url) return;
 
@@ -145,6 +189,40 @@ const handleStockPageChange = (url) => {
   <AuthLayout>
     <Head title="Stock Management" />
 
+    <!-- Delete Confirmation Modal -->
+    <Modal :show="showDeleteModal" @close="closeDeleteModal" maxWidth="md">
+      <div class="p-6">
+        <h2 class="text-lg font-medium text-gray-900">
+          Confirm Product Deletion
+        </h2>
+
+        <p class="mt-1 text-sm text-gray-600">
+          Are you sure you want to delete "{{ productToDelete?.name }}"? This action cannot be undone.
+        </p>
+
+        <div class="mt-6 flex justify-end">
+          <SecondaryButton @click="closeDeleteModal">
+            Cancel
+          </SecondaryButton>
+
+          <DangerButton
+            class="ml-3"
+            @click="deleteProduct"
+            :disabled="deleteForm.processing"
+          >
+            <span v-if="!deleteForm.processing">Delete Product</span>
+            <span v-else class="flex items-center">
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Deleting...
+            </span>
+          </DangerButton>
+        </div>
+      </div>
+    </Modal>
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Header -->
       <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
@@ -162,15 +240,15 @@ const handleStockPageChange = (url) => {
             </svg>
             Add New Product
           </Link>
-                          <button
-                  @click="exportExcel(stock.id)"
-                  class="inline-flex items-center py-2 px-4 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Export
-                </button>
+          <button
+            @click="exportExcel()"
+            class="inline-flex items-center py-2 px-4 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export All
+          </button>
         </div>
       </div>
 
@@ -215,13 +293,21 @@ const handleStockPageChange = (url) => {
               <div class="flex items-center gap-3">
                 <span class="px-2 py-1 text-xs font-semibold rounded-full"
                       :class="{
-        'bg-green-100 text-green-800': stock.status === 'good',
-        'bg-yellow-100 text-yellow-800': stock.status === 'low',
-        'bg-red-100 text-red-800': stock.status === 'empty'
-      }">
+                        'bg-green-100 text-green-800': stock.status === 'good',
+                        'bg-yellow-100 text-yellow-800': stock.status === 'low',
+                        'bg-red-100 text-red-800': stock.status === 'empty'
+                      }">
                   {{ stock.status }}
                 </span>
-
+                <button
+                  @click="exportSingleExcel(stock.id)"
+                  class="inline-flex items-center py-2 px-4 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Export
+                </button>
                 <Link
                   :href="route('stocks.edit', stock.id)"
                   class="inline-flex items-center px-3 py-1 bg-white hover:bg-gray-100 text-blue-600 text-xs font-medium rounded-md shadow-sm transition-colors"
@@ -239,9 +325,6 @@ const handleStockPageChange = (url) => {
           <div class="border-t border-gray-200 px-4 py-5 sm:p-0">
             <dl class="sm:divide-y sm:divide-gray-200">
               <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-
-              </div>
-              <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt class="text-sm font-medium text-gray-500">
                   Location
                 </dt>
@@ -254,12 +337,14 @@ const handleStockPageChange = (url) => {
                   Status
                 </dt>
                 <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  <span class="capitalize"
-                  :class="{
-        'bg-green-100 text-green-800': stock.status === 'good',
-        'bg-yellow-100 text-yellow-800': stock.status === 'low',
-        'bg-red-100 text-red-800': stock.status === 'empty'
-      }">{{ stock.status }}</span>
+                  <span class="capitalize px-2 py-1 rounded-full text-xs font-medium"
+                    :class="{
+                      'bg-green-100 text-green-800': stock.status === 'good',
+                      'bg-yellow-100 text-yellow-800': stock.status === 'low',
+                      'bg-red-100 text-red-800': stock.status === 'empty'
+                    }">
+                    {{ stock.status }}
+                  </span>
                 </dd>
               </div>
               <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -289,12 +374,18 @@ const handleStockPageChange = (url) => {
                 <p class="mt-1 text-sm text-gray-500">Inventory items currently available in this location</p>
               </div>
               <div class="relative">
-
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
+                <input
+                  type="text"
+                  v-model="stockSearchQueries[stock.id]"
+                  @input="handleStockSearch(stock.id)"
+                  class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Search products in this stock..."
+                />
               </div>
             </div>
           </div>
@@ -331,7 +422,12 @@ const handleStockPageChange = (url) => {
                       </div>
                       <div class="ml-4">
                         <div class="text-sm font-medium text-gray-900">
-                          {{ product.name }}
+                          <Link :href="route('products.show', product.id)" class="hover:underline">
+                            {{ product.name }}
+                          </Link>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                          SKU: {{ product.sku || 'N/A' }}
                         </div>
                       </div>
                     </div>
@@ -346,17 +442,40 @@ const handleStockPageChange = (url) => {
                     {{ formatPrice(product.price) }}
                   </TableDataCell>
                   <TableDataCell>
-                    {{ product.pivot.quantity }}
+                    <span :class="{
+                      'text-green-600 font-medium': product.quantity > 10,
+                      'text-yellow-600 font-medium': product.quantity > 0 && product.quantity <= 10,
+                      'text-red-600 font-medium': product.quantity === 0
+                    }">
+                      {{ product.quantity }}
+                    </span>
                   </TableDataCell>
                   <TableDataCell>
-                    {{ product.pivot.expiry_date ? formatDate(product.pivot.expiry_date) : 'N/A' }}
+                    {{ formatPrice(product.price * product.quantity) }}
                   </TableDataCell>
                   <TableDataCell>
-                    {{ formatPrice(product.price * product.pivot.quantity) }}
+                    <Link :href="route('products.edit', product.id)"
+                          class="text-blue-600 hover:text-blue-900 inline-flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Edit
+                    </Link>
+                  </TableDataCell>
+                  <TableDataCell>
+                    <button
+                      @click="openDeleteModal(product)"
+                      class="text-red-600 hover:text-red-900 inline-flex items-center"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Delete
+                    </button>
                   </TableDataCell>
                 </TableRow>
                 <TableRow v-if="!stock.paginated_products?.data?.length">
-                  <TableDataCell colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                  <TableDataCell colspan="7" class="px-6 py-4 text-center text-sm text-gray-500">
                     No products found in this stock location
                   </TableDataCell>
                 </TableRow>
@@ -368,12 +487,13 @@ const handleStockPageChange = (url) => {
                   <TableDataCell class="px-6 py-3 text-sm font-bold text-gray-900">
                     {{ formatPrice(calculateTotalValue(stock.paginated_products.data)) }}
                   </TableDataCell>
+                  <TableDataCell colspan="2"></TableDataCell>
                 </TableRow>
               </template>
             </Table>
           </div>
 
-          <!-- Products Pagination - Independent for each stock -->
+          <!-- Products Pagination -->
           <div v-if="stock.paginated_products?.meta" class="px-6 py-4 border-t border-gray-200">
             <div class="flex items-center justify-between">
               <div class="text-sm text-gray-700">
@@ -388,7 +508,7 @@ const handleStockPageChange = (url) => {
         </div>
       </div>
 
-      <!-- Stocks Pagination - Independent from products pagination -->
+      <!-- Stocks Pagination -->
       <div v-if="stocks.meta" class="mt-6 bg-white rounded-lg border border-gray-200 shadow-xs p-4">
         <div class="flex items-center justify-between">
           <div class="text-sm text-gray-700">

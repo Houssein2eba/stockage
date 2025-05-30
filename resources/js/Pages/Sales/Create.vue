@@ -40,111 +40,80 @@
 
                     <!-- Stock Selection -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Stock Locations</label>
-                        <div class="space-y-4">
-                            <div v-for="(stockItem, stockIndex) in form.items" :key="stockIndex" class="p-4 border rounded-lg">
-                                <div class="flex justify-between items-center mb-3">
-                                    <h3 class="font-medium">Stock Location {{ stockIndex + 1 }}</h3>
-                                    <button
-                                        type="button"
-                                        @click="removeStock(stockIndex)"
-                                        class="text-red-500 hover:text-red-700"
-                                        v-if="form.items.length > 1"
-                                    >
-                                        Remove Stock
-                                    </button>
-                                </div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Stock Location</label>
+                        <div class="p-4 border rounded-lg">
+                            <VueMultiselect
+                                v-model="form.stock"
+                                :options="stocks"
+                                :custom-label="stock => `${stock.name} (${stock.location})`"
+                                placeholder="Select stock location"
+                                label="name"
+                                track-by="id"
+                                @input="updateAvailableProducts"
+                                :class="{ 'border-red-500': form.errors.stock }"
+                            />
+                            <InputError class="mt-1.5" :message="form.errors.stock" />
+                        </div>
+                    </div>
 
-                                <!-- Stock Selection -->
-                                <div class="mb-4">
-                                    <VueMultiselect
-                                        v-model="stockItem.stock"
-                                        :options="stocks"
-                                        :custom-label="stock => `${stock.name} (${stock.location})`"
-                                        placeholder="Select stock location"
-                                        label="name"
-                                        track-by="id"
-                                        @input="updateAvailableProducts(stockIndex)"
-                                        :class="{ 'border-red-500': form.errors[`items.${stockIndex}.stock`] }"
-                                    />
-                                    <InputError class="mt-1.5" :message="form.errors[`items.${stockIndex}.stock`]" />
-                                </div>
-
-                                <!-- Products in this Stock -->
-                                <div class="space-y-3">
-                                    <div v-for="(product, productIndex) in stockItem.products" :key="productIndex" class="flex items-start gap-4 p-3 bg-gray-50 rounded">
-                                        <!-- Product Selection -->
-                                        <div class="flex-1">
-                                            <VueMultiselect
-                                                v-model="product.product"
-                                                :options="getAvailableProducts(stockItem.stock?.id)"
-                                                :custom-label="prod => {
-    const stockId = stockItem.stock?.id
-    const productId = prod.id
-
-    const stock = stocks.find(s => s.id === stockId)
-    const stockProduct = stock?.products.find(p => p.id === productId)
-    const quantity = stockProduct?.pivot?.quantity || 0
-
-    return `${prod.name} - ${formatPrice(prod.price)} (Available: ${quantity})`
-}"
-                                                placeholder="Select product"
-                                                label="name"
-                                                track-by="id"
-                                                :class="{ 'border-red-500': form.errors[`items.${stockIndex}.products.${productIndex}.product`] }"
-                                            />
-                                            <InputError class="mt-1.5" :message="form.errors[`items.${stockIndex}.products.${productIndex}.product`]" />
-                                        </div>
-
-                                        <!-- Quantity -->
-                                        <div class="w-24">
-                                            <TextInput
-                                                type="number"
-                                                min="1"
-                                                :max="getAvailableQuantity(stockItem.stock?.id, product.product?.id)"
-                                                v-model.number="product.quantity"
-                                                class="w-full"
-                                                placeholder="Qty"
-                                                :class="{ 'border-red-500': form.errors[`items.${stockIndex}.products.${productIndex}.quantity`] }"
-                                            />
-                                            <InputError class="mt-1.5" :message="form.errors[`items.${stockIndex}.products.${productIndex}.quantity`]" />
-                                        </div>
-
-                                        <!-- Total -->
-                                        <div class="w-32 flex items-center justify-end">
-                                            <span class="font-medium">{{ formatPrice(calculateProductTotal(product)) }}</span>
-                                        </div>
-
-                                        <!-- Remove button -->
-                                        <button
-                                            type="button"
-                                            @click="removeProduct(stockIndex, productIndex)"
-                                            class="text-red-500 hover:text-red-700"
-                                            v-if="stockItem.products.length > 1"
-                                        >
-                                            Remove
-                                        </button>
-                                    </div>
-
-                                    <button
-                                        type="button"
-                                        @click="addProduct(stockIndex)"
-                                        class="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200"
-                                        :disabled="!stockItem.stock"
-                                    >
-                                        + Add Product
-                                    </button>
-                                </div>
+                    <!-- Products in Selected Stock -->
+                    <div class="space-y-3" v-if="form.stock">
+                        <div v-for="(product, index) in form.products" :key="index" class="flex items-start gap-4 p-3 bg-gray-50 rounded">
+                            <!-- Product Selection -->
+                            <div class="flex-1">
+                                <VueMultiselect
+                                    v-model="product.product"
+                                    :options="getAvailableProducts(form.stock)"
+                                    :custom-label="prod => {
+                                        const quantity = getAvailableQuantity(form.stock, prod);
+                                        return `${prod.name} - ${formatPrice(prod.price)} (Available: ${quantity})`;
+                                    }"
+                                    placeholder="Select product"
+                                    label="name"
+                                    track-by="id"
+                                    :class="{ 'border-red-500': form.errors[`products.${index}.product`] }"
+                                />
+                                <InputError class="mt-1.5" :message="form.errors[`products.${index}.product`]" />
                             </div>
 
+                            <!-- Quantity -->
+                            <div class="w-24">
+                                <TextInput
+                                    type="number"
+                                    min="1"
+                                    :max="getAvailableQuantity(form.stock, product.product)"
+                                    v-model.number="product.quantity"
+                                    class="w-full"
+                                    placeholder="Qty"
+                                    :class="{ 'border-red-500': form.errors[`products.${index}.quantity`] }"
+                                />
+                                <InputError class="mt-1.5" :message="form.errors[`products.${index}.quantity`]" />
+                            </div>
+
+                            <!-- Total -->
+                            <div class="w-32 flex items-center justify-end">
+                                <span class="font-medium">{{ formatPrice(calculateProductTotal(product)) }}</span>
+                            </div>
+
+                            <!-- Remove button -->
                             <button
                                 type="button"
-                                @click="addStock"
-                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                @click="removeProduct(index)"
+                                class="text-red-500 hover:text-red-700"
+                                v-if="form.products.length > 1"
                             >
-                                + Add Stock Location
+                                Remove
                             </button>
                         </div>
+
+                        <button
+                            type="button"
+                            @click="addProduct"
+                            class="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200"
+                            :disabled="!form.stock"
+                        >
+                            + Add Product
+                        </button>
                     </div>
 
                     <!-- Paid Checkbox -->
@@ -195,7 +164,7 @@
 
 <script setup>
 import { formatPrice } from '@/utils/format.js'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { useToast } from 'vue-toastification'
 import AuthLayout from '@/layouts/AuthLayout.vue'
@@ -223,36 +192,39 @@ const props = defineProps({
 
 const form = useForm({
     client: null,
-    items: [{
-        stock: null,
-        products: [{
-            product: null,
-            quantity: 1
-        }]
+    stock: null,
+    products: [{
+        product: null,
+        quantity: 1
     }],
     paid: 0
 })
 
-// Get available products for a specific stock
-const getAvailableProducts = (stockId) => {
-    if (!stockId) return []
-    const stock = props.stocks.find(s => s.id === stockId)
-    return stock?.products || []
+// Get available products for the selected stock
+const getAvailableProducts = (stock, currentIndex = -1) => {
+    if (!stock || !stock.products) return []
+
+    // Get all selected product IDs except the one in the current row
+    const selectedIds = form.products
+        .map((p, i) => i !== currentIndex && p.product?.id)
+        .filter(Boolean)
+
+    // Return products not already selected
+    return stock.products.filter(p => !selectedIds.includes(p.id))
 }
 
-// Get available quantity for a product in a specific stock
-const getAvailableQuantity = (stockId, productId) => {
-    if (!stockId || !productId) return 0
-    const stock = props.stocks.find(s => s.id === stockId)
-    if (!stock) return 0
 
-    const product = stock.products.find(p => p.id === productId)
-    return product?.pivot?.quantity || 0
+// Get available quantity for a product in the selected stock
+const getAvailableQuantity = (stock, product) => {
+    if (!stock || !product || !stock.products) return 0
+
+    const stockProduct = stock.products.find(p => p.id === product.id)
+    return stockProduct?.quantity || 0
 }
 
 // Update available products when stock changes
-const updateAvailableProducts = (stockIndex) => {
-    form.items[stockIndex].products = [{
+const updateAvailableProducts = () => {
+    form.products = [{
         product: null,
         quantity: 1
     }]
@@ -264,50 +236,41 @@ const calculateProductTotal = (product) => {
     return product.product.price * product.quantity
 }
 
-// Calculate total for all products in all stocks
+// Calculate total for all products
 const calculateTotal = computed(() => {
-    return form.items.reduce((total, stockItem) => {
-        return total + stockItem.products.reduce((stockTotal, product) => {
-            return stockTotal + calculateProductTotal(product)
-        }, 0)
+    return form.products.reduce((total, product) => {
+        return total + calculateProductTotal(product)
     }, 0)
 })
 
-// Add new stock location
-const addStock = () => {
-    form.items.push({
-        stock: null,
-        products: [{
-            product: null,
-            quantity: 1
-        }]
-    })
-}
-
-// Remove stock location
-const removeStock = (index) => {
-    if (form.items.length > 1) {
-        form.items.splice(index, 1)
-    }
-}
-
-// Add product to a stock location
-const addProduct = (stockIndex) => {
-    form.items[stockIndex].products.push({
+// Add product
+const addProduct = () => {
+    form.products.push({
         product: null,
         quantity: 1
     })
 }
 
-// Remove product from a stock location
-const removeProduct = (stockIndex, productIndex) => {
-    if (form.items[stockIndex].products.length > 1) {
-        form.items[stockIndex].products.splice(productIndex, 1)
+// Remove product
+const removeProduct = (index) => {
+    if (form.products.length > 1) {
+        form.products.splice(index, 1)
     }
 }
 
 const submitForm = () => {
+    const submissionData = {
+        client_id: form.client?.id,
+        stock_id: form.stock?.id,
+        products: form.products.map(product => ({
+            product_id: product.product?.id,
+            quantity: product.quantity
+        })),
+        paid: form.paid
+    }
+
     form.post(route('sales.store'), {
+        data: submissionData,
         onSuccess: () => {
             toast.success('Sale created successfully')
             form.reset()

@@ -33,13 +33,12 @@ public function index(Request $request)
         'direction' => 'nullable|string|in:asc,desc',
         'stock_search' => 'nullable|array',
         'expiry_date' => 'nullable|date',
-        'page' => 'nullable|integer', // For stocks pagination
+        'page' => 'nullable|integer',
     ]);
 
     // First, get all stocks that have at least one product matching the search criteria
     $stocksQuery = Stock::query()
         ->withCount('products')
-
         ->when($request->stock, function ($query) use ($request) {
             $query->where('id', $request->stock);
         });
@@ -150,13 +149,9 @@ public function index(Request $request)
 }
 
 //export excel
-public function export(Request $request)
+public function export()
 {
-    $request->validate([
-        'search' => 'nullable|string',
-        'stock' => 'nullable|exists:stocks,id',
-        'stock_search' => 'nullable|array',
-    ]);
+
 
     // Create a new spreadsheet
     $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
@@ -170,6 +165,7 @@ public function export(Request $request)
     $sheet->setCellValue('D1', 'Product Price');
     $sheet->setCellValue('E1', 'Product Quantity');
     $sheet->setCellValue('F1', 'Categories');
+    $sheet->setCellValue('G1', 'Total Price');
 
     // Style the header row
     $headerStyle = [
@@ -183,34 +179,16 @@ public function export(Request $request)
             ],
         ],
     ];
-    $sheet->getStyle('A1:F1')->applyFromArray($headerStyle);
+    $sheet->getStyle('A1:G1')->applyFromArray($headerStyle);
 
     // First, get all stocks that have at least one product matching the search criteria
-    $stocksQuery = Stock::query()
-        ->when($request->stock, function ($query) use ($request) {
-            $query->where('id', $request->stock);
-        });
+    $stocksQuery = Stock::query()->with(['products']);
+
 
     // Filter stocks to only include those with matching products
-    if ($request->search) {
-        $stocksQuery->whereHas('products', function ($query) use ($request) {
-            $query->where('name', 'like', "%{$request->search}%");
-        });
-    } elseif ($request->stock_search) {
-        // Handle stock-specific searches
-        $stocksQuery->where(function ($query) use ($request) {
-            foreach ($request->stock_search as $stockId => $search) {
-                if (!empty($search)) {
-                    $query->orWhere(function ($q) use ($stockId, $search) {
-                        $q->where('id', $stockId)
-                          ->whereHas('products', function ($productQuery) use ($search) {
-                              $productQuery->where('name', 'like', "%{$search}%");
-                          });
-                    });
-                }
-            }
-        });
-    }
+
+
+
 
     $stocks = $stocksQuery->get();
 
@@ -219,45 +197,65 @@ public function export(Request $request)
 
     // For each stock, get ONLY its products that match the search criteria
     foreach ($stocks as $stock) {
-        // Get stock-specific search query if it exists
-        $stockSearch = $request->stock_search[$stock->id] ?? null;
+    $stockSearch = $request->stock_search[$stock->id] ?? null;
 
-        $productsQuery = $stock->products()
-            ->with('categories')
-            ->when($stockSearch, function ($query) use ($stockSearch) {
-                // Use stock-specific search if available
-                $query->where('name', 'like', "%{$stockSearch}%");
-            })
-            ->when(!$stockSearch && $request->search, function ($query) use ($request) {
-                // Fall back to global search if no stock-specific search
-                $query->where('name', 'like', "%{$request->search}%");
-            });
+    $productsQuery = $stock->products()
+        ->with('categories')
+        ->when($stockSearch, function ($query) use ($stockSearch) {
+            $query->where('name', 'like', "%{$stockSearch}%");
+        });
 
-        $products = $productsQuery->get();
+    $products = $productsQuery->get();
 
-        foreach ($products as $product) {
-            // Stock information
-            $sheet->setCellValue('A' . $row, $stock->name);
-            $sheet->setCellValue('B' . $row, $stock->location);
+    // Initialize totals
+    $stockTotalQuantity = 0;
+    $stockTotalPrice = 0;
 
-            // Product information
-            $sheet->setCellValue('C' . $row, $product->name);
-            $sheet->setCellValue('D' . $row, $product->price);
+    foreach ($products as $product) {
+        $sheet->setCellValue('A' . $row, $stock->name);
+        $sheet->setCellValue('B' . $row, $stock->location);
+        $sheet->setCellValue('C' . $row, $product->name);
+        $sheet->setCellValue('D' . $row, $product->price);
+        $sheet->getStyle('D' . $row)->getNumberFormat()->setFormatCode('#,##0.0');
 
-            // Get quantity from pivot table
-            $quantity = $product->pivot->quantity ?? 0;
-            $sheet->setCellValue('E' . $row, $quantity);
+        $quantity = $product->quantity ?? 0;
+        $sheet->setCellValue('E' . $row, $quantity);
 
-            // Categories as comma-separated list
-            $categories = $product->categories->pluck('name')->implode(', ');
-            $sheet->setCellValue('F' . $row, $categories);
+        $categories = $product->categories->pluck('name')->implode(', ');
+        $sheet->setCellValue('F' . $row, $categories);
 
-            $row++;
-        }
+        $totalPrice = $quantity * $product->price;
+        $sheet->setCellValue('G' . $row, $totalPrice);
+        $sheet->getStyle('G' . $row)->getNumberFormat()->setFormatCode('#,##0.0');
+
+        // Add to totals
+        $stockTotalQuantity += $quantity;
+        $stockTotalPrice += $totalPrice;
+
+        $row++;
     }
 
+    // Insert total row after all products of this stock
+    $sheet->setCellValue('C' . $row, 'TOTAL:');
+    $sheet->setCellValue('E' . $row, $stockTotalQuantity);
+    $sheet->setCellValue('G' . $row, $stockTotalPrice);
+    $sheet->getStyle('G' . $row)->getNumberFormat()->setFormatCode('#,##0.0');
+
+    // Optional: style the total row
+    $sheet->getStyle("C{$row}:G{$row}")->applyFromArray([
+        'font' => ['bold' => true],
+        'fill' => [
+            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+            'startColor' => ['rgb' => 'FFFFCC'],
+        ],
+    ]);
+
+    $row++; // Move to next row after total
+}
+
+
     // Auto-size columns
-    foreach (range('A', 'F') as $column) {
+    foreach (range('A', 'G') as $column) {
         $sheet->getColumnDimension($column)->setAutoSize(true);
     }
 
@@ -279,6 +277,96 @@ public function export(Request $request)
         'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     ])->deleteFileAfterSend(true);
 }
+public function exportSingle($stockId)
+{
+    // Get the stock by ID with its products and categories
+    $stock = Stock::with('products.categories')->findOrFail($stockId);
+
+    // Create a new spreadsheet
+    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setTitle('Stock Export');
+
+    // Set headers
+    $sheet->setCellValue('A1', 'Stock Name');
+    $sheet->setCellValue('B1', 'Stock Location');
+    $sheet->setCellValue('C1', 'Product Name');
+    $sheet->setCellValue('D1', 'Product Price');
+    $sheet->setCellValue('E1', 'Product Quantity');
+    $sheet->setCellValue('F1', 'Categories');
+    $sheet->setCellValue('G1', 'Total Price');
+
+    // Style the header row
+    $headerStyle = [
+        'font' => ['bold' => true],
+        'fill' => [
+            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+            'startColor' => ['rgb' => 'E0E0E0'],
+        ],
+    ];
+    $sheet->getStyle('A1:G1')->applyFromArray($headerStyle);
+
+    $row = 2;
+    $stockTotalQuantity = 0;
+    $stockTotalPrice = 0;
+
+    foreach ($stock->products as $product) {
+        $sheet->setCellValue('A' . $row, $stock->name);
+        $sheet->setCellValue('B' . $row, $stock->location);
+        $sheet->setCellValue('C' . $row, $product->name);
+        $sheet->setCellValue('D' . $row, $product->price);
+        $sheet->getStyle('D' . $row)->getNumberFormat()->setFormatCode('#,##0.0');
+
+        $quantity = $product->quantity ?? 0;
+        $sheet->setCellValue('E' . $row, $quantity);
+
+        $categories = $product->categories->pluck('name')->implode(', ');
+        $sheet->setCellValue('F' . $row, $categories);
+
+        $totalPrice = $quantity * $product->price;
+        $sheet->setCellValue('G' . $row, $totalPrice);
+        $sheet->getStyle('G' . $row)->getNumberFormat()->setFormatCode('#,##0.0');
+
+        $stockTotalQuantity += $quantity;
+        $stockTotalPrice += $totalPrice;
+
+        $row++;
+    }
+
+    // Add total row
+    $sheet->setCellValue('C' . $row, 'TOTAL:');
+    $sheet->setCellValue('E' . $row, $stockTotalQuantity);
+    $sheet->setCellValue('G' . $row, $stockTotalPrice);
+    $sheet->getStyle('G' . $row)->getNumberFormat()->setFormatCode('#,##0.0');
+    $sheet->getStyle("C{$row}:G{$row}")->applyFromArray([
+        'font' => ['bold' => true],
+        'fill' => [
+            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+            'startColor' => ['rgb' => 'FFFFCC'],
+        ],
+    ]);
+
+    // Auto-size columns
+    foreach (range('A', 'G') as $col) {
+        $sheet->getColumnDimension($col)->setAutoSize(true);
+    }
+
+    // Save and download
+    $filename = 'stock_' . $stock->id . '_export_' . date('Y-m-d_H-i-s') . '.xlsx';
+    $tempPath = storage_path('app/public/exports/' . $filename);
+
+    if (!file_exists(dirname($tempPath))) {
+        mkdir(dirname($tempPath), 0755, true);
+    }
+
+    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+    $writer->save($tempPath);
+
+    return response()->download($tempPath, $filename, [
+        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ])->deleteFileAfterSend(true);
+}
+
 
 
     public function show($id)
@@ -299,6 +387,7 @@ public function export(Request $request)
 
     public function store(ProductsRequest $request)
 {
+
     DB::transaction(function () use ($request) {
         $url = $request->hasFile('image')
             ? $request->file('image')->store('products', 'public')
@@ -310,6 +399,7 @@ public function export(Request $request)
             'description' => $request->description,
             'price'       => $request->price,
             'cost'        => $request->cost,
+            'quantity'   => $request->quantity,
             'image'       => $url,
         ]);
 
@@ -318,24 +408,16 @@ public function export(Request $request)
             collect($request->category)->pluck('id')
         );
 
-        // Attach stocks with pivot data
-        // $stockData = [];
+        
 
-        foreach ($request->stockQuantities as $stockEntry) {
-        $product->stocks()->attach($stockEntry['stock']['id'], [
-            'quantity'    => $stockEntry['quantity'],
-            'expiry_date'  =>$request['expiry_date'] , // Optional
+        $product->stocks()->attach($request['stock']['id'], [
+            'stock_in_date' =>  Carbon::parse($request->expiry_date),
+            'stock_out_date' => null,
+            'type' => 'in',
+            'quantity' => $request->quantity,
         ]);
 
-            // $stock = $stockEntry['stock'];
-            // $stockId = $stock['id'];
-            // $stockData[$stockId] = [
-            //     'quantity'    => $stockEntry['quantity'],
-            //     'expiry_date'  =>$request['expiry_date'] , // Optional
-            // ];
-        }
 
-        // $product->stocks()->attach($stockData);
 
         // Activity log
         $attributes = $product->toArray();

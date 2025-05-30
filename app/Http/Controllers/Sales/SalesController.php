@@ -115,7 +115,7 @@ public function store(OrderRequest $request)
     $data = $request->validated();
 
     try {
-        $id = DB::transaction(function () use ($data) {
+        $orderId = DB::transaction(function () use ($data) {
             // 1. Create the order
             $order = Order::create([
                 'reference' => Order::generateReference(),
@@ -123,74 +123,41 @@ public function store(OrderRequest $request)
                 'status' => $data['paid'] ? 'paid' : 'pending',
             ]);
 
-            $productData = [];
             $orderTotal = 0;
+            $productData = [];
+            foreach($data['products'] as $products){
 
-            foreach ($data['items'] as $item) {
-                $stockId = $item['stock']['id'];
-
-                // ✅ Aggregate product quantities by product ID
-                $aggregated = [];
-                foreach ($item['products'] as $productItem) {
-                    $productId = $productItem['product']['id'];
-                    $quantity = (int) $productItem['quantity'];
-
-                    if (isset($aggregated[$productId])) {
-                        $aggregated[$productId] += $quantity;
-                    } else {
-                        $aggregated[$productId] = $quantity;
-                    }
+                $product=Product::findOrFail($products['product']['id']);
+                if ($product->quantity < $products['quantity']) {
+                    return back()->with('error', "Insufficient stock for product: {$product->name}");
                 }
+                // 2. Calculate total amount for each product
+                $totalAmount = $product->price * $products['quantity'];
+                $orderTotal += $totalAmount;
+                // 3. Prepare product data for pivot table
+                $productData[$product->id] = [
+                    'quantity' => $products['quantity'],
+                    'total_amount' => $totalAmount
+                ];
 
-                // ✅ Now process each unique product once per stock
-                foreach ($aggregated as $productId => $quantity) {
-                    $productStock = ProductStock::where('product_id', $productId)
-                        ->where('stock_id', $stockId)
-                        ->first();
+                // 4. Update product quantity
+                $product->decrement('quantity', $products['quantity']);
+                // 5 stock pivot
 
-                    if (!$productStock) {
-                        throw new \Exception("Product ID {$productId} not found in stock ID {$stockId}");
-                    }
+                $product->stocks()->updateExistingPivot($data['stock']['id'], [
+                    'quantity' => $products['quantity'],
+                    'stock_out_date' => now(),
+                    'stock_in_date' => null, // Only if you want to explicitly clear it
+                ]);
 
-                    if ($productStock->quantity < $quantity) {
-                        throw new \Exception("Insufficient quantity for product {$productStock->product->name} in stock {$productStock->stock->name}");
-                    }
 
-                    // 2. Decrement the quantity
-                    $productStock->decrement('quantity', $quantity);
-
-                    // 3. Monitor product and stock levels
-                    $this->productMonitorService->checkProductLevel($productId, $stockId);
-                    $this->stockMonitorService->checkStockLevel($stockId);
-
-                    // 4. Get product price
-                    $product = Product::findOrFail($productId);
-                    if (!$product->price || $product->price <= 0) {
-                        throw new \Exception("Invalid price for product {$product->name}");
-                    }
-
-                    $itemTotal = $quantity * $product->price;
-                    $orderTotal += $itemTotal;
-
-                    // 5. Prepare pivot data
-                    if (isset($productData[$productId])) {
-                        $productData[$productId]['quantity'] += $quantity;
-                        $productData[$productId]['total_amount'] += $itemTotal;
-                    } else {
-                        $productData[$productId] = [
-                            'quantity' => $quantity,
-                            'unit_price' => $product->price,
-                            'total_amount' => $itemTotal,
-                        ];
-                    }
-                }
             }
 
-            // 6. Finalize the order
-            $order->update(['total_amount' => $orderTotal]);
-            $order->products()->sync($productData);
 
-            // 7. Log activity
+            // 6. Attach products to order
+            $order->products()->attach($productData);
+
+            // 7. Log
             activity()
                 ->causedBy(auth()->user())
                 ->performedOn($order)
@@ -202,11 +169,13 @@ public function store(OrderRequest $request)
             return $order->id;
         });
 
-        return to_route('sales.show', $id);
+        return to_route('sales.show', $orderId);
+
     } catch (\Exception $e) {
         return back()->with('error', $e->getMessage());
     }
 }
+
 
 
 

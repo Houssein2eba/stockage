@@ -72,6 +72,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/{id}', [SalesController::class, 'destroy'])->name('destroy')->middleware('permission:delete_sales');
         Route::get('/{id}/invoice', [FactureController::class, 'generatePdf'])->name('invoice')->middleware('permission:generate_invoice');
     });
+
+    // Stocks
     Route::prefix('stocks')->name('stocks.')->group(function () {
         Route::get('/',[StockController::class,'index'])->name('index');
         Route::get('/create', [StockController::class, 'create'])->name('create');
@@ -114,20 +116,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/{activity}', [ActivityLogController::class, 'view'])->name('view');
         })->middleware('role:admin');
 
-        // Products
+
+    });
+// Products
         Route::prefix('products')->name('products.')->group(function () {
             Route::get('/', [ProductsController::class, 'index'])->name('index');
             Route::get('/create', [ProductsController::class, 'create'])->name('create');
             Route::post('/', [ProductsController::class, 'store'])->name('store');
             Route::get('/export', [ProductsController::class, 'export'])->name('export');
             Route::get('lowStock', [ProductsController::class, 'lowStock'])->name('lowStock');
+            Route::get('/single-export/{id}', [ProductsController::class, 'exportSingle'])->name('single_export');
             Route::get('/{id}/show', [ProductsController::class, 'show'])->name('show');
             Route::get('/{id}/edit', [ProductsController::class, 'edit'])->name('edit');
             Route::put('/{id}', [ProductsController::class, 'update'])->name('update');
             Route::delete('/{id}', [ProductsController::class, 'destroy'])->name('destroy');
         });
-    });
-
     // Categories
     Route::prefix('categories')->name('categories.')->group(function () {
         Route::get('/', [CategoriesController::class, 'index'])->name('index')->middleware('permission:view_categories');

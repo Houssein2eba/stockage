@@ -5,37 +5,37 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-8 flex items-center justify-between">
         <div>
-          <H1 >Create New Product</H1>
+          <H1>Create New Product</H1>
           <P>Add a new product to your inventory</P>
         </div>
         <div>
-        <Link
-          :href="route('products.index')"
-          class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
-          </svg>
-          Back to Products
-        </Link>
-    </div>
+          <Link
+            :href="route('products.index')"
+            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+            </svg>
+            Back to Products
+          </Link>
+        </div>
       </div>
 
-      <div class="  rounded-lg shadow bg-white max-w-3xl mx-auto">
-        <div class="px-4 py-5 sm:p-6 ">
+      <div class="rounded-lg shadow bg-white max-w-3xl mx-auto">
+        <div class="px-4 py-5 sm:p-6">
           <form @submit.prevent="form.post(route('products.store'), {
             onSuccess: () => {
               toast.success('Product created successfully');
               router.visit(route('products.index'));
             },
             onError: (errors) => {
-            Object.keys(errors).forEach((key) => {
+              Object.keys(errors).forEach((key) => {
                 toast.error(errors[key], {
-                    position: 'top-right',
-                    timeout: 5000,
+                  position: 'top-right',
+                  timeout: 5000,
                 });
-            });
-        },
+              });
+            },
           })" class="space-y-6">
             <div>
               <InputLabel for="name" value="Product Name" class="mb-1.5" />
@@ -109,85 +109,66 @@
                 </div>
                 <InputError class="mt-1.5" :message="form.errors.price" />
               </div>
-
-
+                <div>
+                    <InputLabel for="quantity" value="Quantity" class="mb-1.5" />
+                    <TextInput
+                    id="quantity"
+                    type="number"
+                    min="0"
+                    class="w-full"
+                    v-model.number="form.quantity"
+                    placeholder="0"
+                    />
+                    <InputError class="mt-1.5" :message="form.errors.quantity" />
+                </div>
             </div>
+
 
             <div class="grid grid-cols-2 gap-4">
-
-            <div>
-              <InputLabel for="cost" value="Cost" class="mb-1.5" />
-              <TextInput
-                id="cost"
-                type="number"
-                step="1"
-                min="1"
-                class="w-full"
-                v-model="form.cost"
-                placeholder="1"
-              />
-              <InputError class="mt-1.5" :message="form.errors.cost" />
-            </div>
-            <div >
-              <InputLabel for="date" value="Date of Expiry" class="mb-1.5" />
-              <DatePicker class="w-full" v-model="form.expiry_date" />
+              <div>
+                <InputLabel for="cost" value="Cost" class="mb-1.5" />
+                <TextInput
+                  id="cost"
+                  type="number"
+                  step="1"
+                  min="1"
+                  class="w-full"
+                  v-model="form.cost"
+                  placeholder="1"
+                />
+                <InputError class="mt-1.5" :message="form.errors.cost" />
+              </div>
+              <div>
+                <InputLabel for="date" value="Date of Expiry" class="mb-1.5" />
+                <DatePicker class="w-full" v-model="form.expiry_date" />
               </div>
             </div>
-                 <!-- Stocs section -->
-                  <div class="space-y-4">
-      <InputLabel value="Stock Quantities" class="mb-1.5" />
 
-      <div v-for="(stockItem, index) in form.stockQuantities" :key="index" class="p-3 border rounded-lg bg-gray-50">
-        <div class="grid grid-cols-3 gap-4 items-center">
-          <!-- Stock Selection -->
-          <div>
-            <VueMultiselect
-              v-model="stockItem.stock"
-              :options="availableStocks(index)"
-              placeholder="Select stock"
-              label="name"
-              track-by="id"
-              :class="{ 'border-red-500': form.errors[`stockQuantities.${index}.stock`] }"
-            />
-          </div>
+            <!-- Single Stock Selection -->
+            <div>
+              <InputLabel value="Stock" class="mb-1.5" />
 
-          <!-- Quantity Input -->
-          <div>
-            <TextInput
-              type="number"
-              min="0"
-              class="w-full"
-              v-model.number="stockItem.quantity"
-              placeholder="Quantity"
-              :class="{ 'border-red-500': form.errors[`stockQuantities.${index}.quantity`] }"
-            />
-          </div>
+                <div class="mb-4">
+                  <!-- Stock Selection -->
+                  <div>
+                    <VueMultiselect
+                      v-model="form.stock"
+                      :options="props.stocks"
+                      placeholder="Select stock"
+                      label="name"
+                      track-by="id"
+                      :class="{ 'border-red-500': form.errors.stock }"
+                    />
+                  </div>
 
-          <!-- Remove Button -->
-          <div class="flex justify-end">
-            <button
-              type="button"
-              @click="removeStockItem(index)"
-              class="text-red-500 hover:text-red-700"
-              v-if="form.stockQuantities.length > 1"
-            >
-              Remove
-            </button>
-          </div>
-        </div>
-        <InputError class="mt-1.5" :message="form.errors[`stockQuantities.${index}.stock`]" />
-        <InputError class="mt-1.5" :message="form.errors[`stockQuantities.${index}.quantity`]" />
-      </div>
+                <InputError class="mt-1.5" :message="form.errors.stock" />
 
-      <button
-        type="button"
-        @click="addStockItem"
-        class="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200"
-      >
-        + Add Stock Location
-      </button>
-    </div>
-                  <!-- Stocs section -->
+
+
+              </div>
+            </div>
+            <!-- End Single Stock Selection -->
+
             <div>
               <InputLabel for="category" value="Category" class="mb-1.5" />
               <VueMultiselect
@@ -234,7 +215,7 @@
 </template>
 
 <script setup>
-import { ref,computed } from 'vue';
+import { ref } from 'vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import InputError from '@/Components/InputError.vue';
@@ -244,6 +225,7 @@ import TextInput from '@/Components/TextInput.vue';
 import { useToast } from 'vue-toastification';
 import VueMultiselect from 'vue-multiselect';
 import DatePicker from 'primevue/datepicker';
+
 const props = defineProps({
   categories: Array,
   stocks: Array
@@ -256,43 +238,13 @@ const form = useForm({
   name: '',
   description: '',
   price: '',
-
-
-  cost:'',
+  cost: '',
   category: null,
   expiry_date: null,
-  stockQuantities: [{ stock: null, quantity: 0 }],
+  stock: null,  // Changed from stockQuantities to single stock
+  quantity: 0,  // Single quantity field
   image: null
 });
-
-// Computed property to get total quantity across all stocks
-const totalQuantity = computed(() => {
-  return form.stockQuantities.reduce((total, item) => {
-    return total + (parseInt(item.quantity) || 0);
-  }, 0);
-});
-
-// Get available stocks that haven't been selected yet
-const availableStocks = (currentIndex) => {
-  return props.stocks.filter(stock => {
-    return !form.stockQuantities.some((item, index) =>
-      index !== currentIndex && item.stock && item.stock.id === stock.id
-    );
-  });
-};
-
-// Add new stock quantity item
-const addStockItem = () => {
-  form.stockQuantities.push({
-    stock: null,
-    quantity: 0
-  });
-};
-
-// Remove stock quantity item
-const removeStockItem = (index) => {
-  form.stockQuantities.splice(index, 1);
-};
 
 const handleImageChange = (e) => {
   const file = e.target.files[0];

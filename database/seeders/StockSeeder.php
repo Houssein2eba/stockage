@@ -48,9 +48,10 @@ class StockSeeder extends Seeder
             $assignedStocks = $stocks->random(rand(1, 3));
             foreach ($assignedStocks as $stock) {
                 $product->stocks()->attach($stock->id, [
-                    'quantity' => rand(1, 100),
-                    'expiry_date' => Carbon::now()->addDays(rand(30, 365)),
+                    'stock_in_date' => Carbon::now()->subDays(rand(1, 30)), // Random stock in date within the last 30 days
+                    'stock_out_date' => null, // Initially no stock out date
                 ]);
+
             }
 
             // Attach Categories (1 to 2 random categories)

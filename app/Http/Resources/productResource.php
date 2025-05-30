@@ -27,11 +27,7 @@ class productResource extends JsonResource
                 $totalCost = $this->orders->count() * $this->cost;
                 return $totalAmount - $totalCost;
             }),
-            'quantity' => $this->whenLoaded('stocks', function () {
-                return $this->stocks->sum(function ($stock) {
-                    return $stock->pivot->quantity;
-                });
-                }),
+            'quantity' => $this->quantity,
             'quantities_by_expiration' => $this->whenLoaded('stocks', function () {
                 return $this->stocks->groupBy('pivot.expiration_date')->map(function ($group) {
                     return $group->sum('pivot.quantity');

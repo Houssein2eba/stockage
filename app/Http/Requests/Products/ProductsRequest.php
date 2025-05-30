@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Products;
 
+use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -20,36 +21,63 @@ class ProductsRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+public function rules(): array
 {
-
     $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
-    $productId = $this->route('id');
+    $productId = $this->route('id'); // for PUT/PATCH
+    $productName = $this->input('name');
+    $stockQuantities = $this->input('stockQuantities', []);
 
-    return [
-        'name' => 'required|string|max:255',
+    // Validation rules
+    $rules = [
+        'name' => [
+            'required',
+            'string',
+            'max:255',
+            function ($attribute, $value, $fail) use ($stockQuantities, $productId) {
+                foreach ($stockQuantities as $stockItem) {
+                    $stockId = $stockItem['stock']['id'] ?? null;
+
+                    if (!$stockId) {
+                        continue;
+                    }
+
+                    $query = \DB::table('product_stocks')
+                        ->join('products', 'products.id', '=', 'product_stocks.product_id')
+                        ->where('product_stocks.stock_id', $stockId)
+                        ->where('products.name', $value);
+
+                    // If updating, exclude current product
+                    if ($productId) {
+                        $query->where('products.id', '!=', $productId);
+                    }
+
+                    if ($query->exists()) {
+                        $fail("The product name '{$value}' already exists in stock ID {$stockId}.");
+                        break;
+                    }
+                }
+            }
+        ],
         'description' => 'nullable|string',
-        'price' => 'required|numeric|min:0',
+        'price' => 'required|numeric|min:1|regex:/^-?\d*\.(0|5)$/', 
         'cost' => 'required|numeric|min:0',
         'image' => 'nullable|image|max:2048',
         'expiry_date' => 'nullable|date',
+        'stock.id'=>[
+            'required',
+            'uuid',
+            Rule::exists('stocks', 'id')
+        ],
 
-        // Validate categories (each must have an id)
         'category' => 'required|array|min:1',
         'category.*.id' => 'required|uuid|exists:categories,id',
 
-        // Validate stocks with quantity and expiry_date
-        'stockQuantities' => 'required|array|min:1',
-        'stockQuantities.*.stock.id' => 'required|uuid|exists:stocks,id',
-        'stockQuantities.*.quantity' => 'required|integer|min:0',
-        'stockQuantities.*.expiry_date' => 'nullable|date',
-
-
-
-
-
     ];
+
+    return $rules;
 }
+
 
 public function messages()
 {

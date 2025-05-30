@@ -15,10 +15,10 @@ class LowProductNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct(protected  $product)
+    public function __construct(protected  $message)
     {
-        $this->product = $product;
-        // dd($this->product);
+        $this->message = $message;
+        // dd($this->message);
     }
 
     /**
@@ -50,7 +50,7 @@ class LowProductNotification extends Notification
     public function toDatabase(object $notifiable): array
     {
         return [
-            'message' => $this->product,
+            'message' => $this->message,
         ];
     }
 }
