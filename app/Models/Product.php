@@ -24,9 +24,10 @@ class Product extends Model
     public function stocks(){
         return $this->belongsToMany(Stock::class,'product_stocks')
         ->using(ProductStock::class)
-        ->withPivot(['stock_in_date','stock_out_date','type','quantity'])
+        ->withPivot(['stock_in_date','stock_out_date','type','products_quantity'])
         ->withTimestamps();
     }
+    
 
     public function orders()
     {

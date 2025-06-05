@@ -51,6 +51,11 @@ class StockSeeder extends Seeder
                     'stock_in_date' => Carbon::now()->subDays(rand(1, 30)), // Random stock in date within the last 30 days
                     'stock_out_date' => null, // Initially no stock out date
                 ]);
+                $product->stocks()->updateExistingPivot($stock->id, [
+                    'products_quantity' => $product->quantity,
+                    'stock_out_date' => null,
+                    'stock_in_date' => now(), // Only if you want to explicitly clear it
+                ]);
 
             }
 

@@ -33,9 +33,11 @@ class productResource extends JsonResource
                     return $group->sum('pivot.quantity');
                 });
                  }),
+            'pivot'=>$this->whenLoaded('pivot', fn () => $this->pivot),
 
             'image'=>$this->image,
-            'pivot'=>$this->whenLoaded('pivot', fn () => $this->pivot),
+            'stock'=>$this->whenLoaded('stocks', fn () => $this->stocks->first()->name ?? null),
+            'stock_two'=>$this->whenLoaded('stocks', fn () => $this->stocks->first()?? null),
             'categories'=>$this->whenLoaded('categories', fn () => $this->categories),
             'created_at'=>$this->created_at,
             'cost'=>$this->cost,

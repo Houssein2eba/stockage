@@ -15,25 +15,11 @@ class Stock extends Model
     public function products(){
         return $this->belongsToMany(Product::class,'product_stocks')
         ->using(ProductStock::class)
-        ->withPivot(['stock_in_date','stock_out_date','type','quantity'])
-        
+        ->withPivot(['stock_in_date','stock_out_date','type','products_quantity'])
+
         ->withTimestamps();
     }
-    public function expires(){
-        return $this->belongsToMany(Product::class,'product_stocks')
-        ->using(ProductStock::class)
-        ->withPivot(['quantity','expiry_date'])
-        ->withTimestamps()
-        ->wherPivot(['expiry_date','<',Carbon::now()]);
-    }
-    public function lows(){
-        return $this->belongsToMany(Product::class,'product_stocks')
-        ->using(ProductStock::class)
-        ->withPivot(['quantity','expiry_date'])
-        ->withTimestamps()
-        ->wherePivot('quantity','<=',10)
-        ->wherePivot('quantity','>',0)
-        ->as('low_products');
-    }
+
+    
 
 }

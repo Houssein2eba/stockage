@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Stock;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\MovementResource;
 use App\Http\Resources\productResource;
 use App\Http\Resources\StockResource;
+use App\Models\ProductStock;
 use App\Models\Stock;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -23,7 +25,7 @@ public function index(Request $request)
              'meta'=> [
              'next_cursor' => $stocks->nextCursor()?->encode(),
              'per_page' => $stocks->perPage(),
-             'has_more' => $stocks->hasMorePages(), 
+             'has_more' => $stocks->hasMorePages(),
              ]
         ]);
     }
@@ -70,7 +72,7 @@ public function index(Request $request)
 
         return $stock;
     });
-    
+
 
     return Inertia::render('Stock/Index', [
         'stocks' => [
@@ -100,49 +102,43 @@ public function index(Request $request)
 {
 
     $request->validate([
-        'search' => 'nullable|string',
-        'sort' => 'nullable|string',
-        'direction' => 'nullable|in:asc,desc',
+        'search' => 'nullable|string|max:255',
+        'date' => 'nullable|date',
+        'type' => 'nullable|string|in:in,out',
+        'sort' => 'nullable|string|',
+        'direction' => 'nullable|string|in:asc,desc',
     ]);
-
     $stock = Stock::findOrFail($id);
-    $productPage = $request->input('product_page', 1);
 
-    // Paginate products of the given stock with categories loaded
-    $paginatedProducts = $stock->products()
-        ->with('categories')
+    $movements = ProductStock::with(['product'])
+        ->where('stock_id', $id)
         ->when($request->search, function ($query, $search) {
-            $query->where('name', 'LIKE', "%{$search}%");
-        })
-        ->when($request->sort, function ($query, $sort) use ($request) {
-            $query->orderBy($sort, $request->direction ?? 'asc');
-        })
-        ->paginate(PAGINATION, ['*'], 'product_page', $productPage)
+            $query->whereHas('product', function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%");
+            });
+            })
+         ->when($request->date, function ($query, $date) {
+                $query->whereDate('created_at', $date);
+            })
+            ->when($request->type, function ($query, $type) {
+                $query->where('type', $type);
+            })
+            ->when($request->sort =='quantity', function ($query) use ($request) {
+                $query->orderBy('products_quantity', $request->direction ?? 'asc');
+            })
+            ->when($request->sort, function ($query, $sort) use ($request) {
+                $query->orderBy($sort, $request->direction ?? 'asc');
+            }, function ($query) {
+                $query->latest();
+            })
+
+        ->paginate(10)
         ->withQueryString();
 
-    // Prepare products data with pagination info
-    $productsData = [
-        'data' => ProductResource::collection($paginatedProducts->items()),
-        'links' => [
-            'first' => $paginatedProducts->url(1),
-            'last' => $paginatedProducts->url($paginatedProducts->lastPage()),
-            'prev' => $paginatedProducts->previousPageUrl(),
-            'next' => $paginatedProducts->nextPageUrl(),
-        ],
-        'meta' => [
-            'current_page' => $paginatedProducts->currentPage(),
-            'last_page' => $paginatedProducts->lastPage(),
-            'from' => $paginatedProducts->firstItem(),
-            'to' => $paginatedProducts->lastItem(),
-            'total' => $paginatedProducts->total(),
-            'links' => $paginatedProducts->linkCollection()->toArray(),
-        ],
-    ];
-
     return Inertia::render('Stock/Show', [
-        'stock' => new StockResource($stock),
-        'products' => $productsData,
-        'productPage' => $productPage,
+        'movements' => MovementResource::collection($movements),
+        'stock' => $stock,
+        'filters' => $request->only(['search', 'date'])
     ]);
 }
 public function create()

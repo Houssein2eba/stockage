@@ -24,7 +24,7 @@
                             :key="notification.id"
                             :class="[
                                 'p-4 transition-colors duration-150',
-                                notification.read_at ? 'bg-white' : 'bg-green-50',
+                                notification.read_at ? 'bg-white' : 'bg-green-300',
                                 'hover:bg-gray-50'
                             ]"
                         >

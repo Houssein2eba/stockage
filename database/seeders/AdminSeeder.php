@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Client;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -38,5 +39,7 @@ class AdminSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
         $cashier->assignRole('cashier');
+
+        Client::factory()->count(15)->create();
     }
 }

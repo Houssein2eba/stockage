@@ -75,7 +75,7 @@ const props = defineProps({
                             <Link
 
                             class="text-sm font-medium text-red-600 hover:text-red-500"
-                            :href="route('products.lowStock', { filter: 'low_stock' })"
+                            :href="route('products.lowStock')"
                             >  View Low Stock</Link>
                         </div>
                     </div>
@@ -94,7 +94,10 @@ const props = defineProps({
                             </div>
                         </div>
                         <div class="mt-4">
-                            <a href="/sales" class="text-sm font-medium text-green-600 hover:text-green-500">View all sales</a>
+                            <Link
+                                class="text-sm font-medium text-green-600 hover:text-green-500"
+                                :href="route('sales.index')"
+                            >View all sales</Link>
                         </div>
                     </div>
 
@@ -154,7 +157,7 @@ const props = defineProps({
                 <div class="mb-8 bg-white rounded-lg shadow-md">
                     <div class="flex items-center justify-between px-6 py-4 border-b">
                         <h3 class="text-lg font-semibold text-gray-700">Recent Sales</h3>
-                        <a href="/sales" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">View All</a>
+                        <Link :href="route('sales.index')" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">View All</Link>
                     </div>
                     <div class="p-6">
                         <Table class="w-full">

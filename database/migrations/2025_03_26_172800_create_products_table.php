@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal('price', 8, 2);
             $table->integer('quantity')->default(0);
             $table->string('image')->nullable();
+            $table->date('expiry_date')->nullable();
 
             $table->decimal('cost', 8, 2)->default(0);
 

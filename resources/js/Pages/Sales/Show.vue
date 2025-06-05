@@ -17,7 +17,7 @@
                     <div class="text-right">
                         <div class="text-4xl font-bold text-blue-600">#{{ sale.reference }}</div>
                         <p class="text-sm text-gray-600 mt-1">Date: {{ formatDate(sale.created_at) }}</p>
-                        
+                        <p class="text-sm text-gray-600">Payment Method: {{ sale.payment?.name || 'Cash' }}</p>
                         <p class="text-sm text-gray-600">Status:
                             <span :class="{
                                 'px-2 py-0.5 rounded-full text-xs font-medium': true,
@@ -196,4 +196,3 @@ const formatDate = (date) => {
     letter-spacing: 0.05em;
 }
 </style>
-

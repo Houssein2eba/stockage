@@ -25,54 +25,23 @@ public function rules(): array
 {
     $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
     $productId = $this->route('id'); // for PUT/PATCH
-    $productName = $this->input('name');
-    $stockQuantities = $this->input('stockQuantities', []);
+
+
+    dd($this->all());
 
     // Validation rules
     $rules = [
-        'name' => [
-            'required',
-            'string',
-            'max:255',
-            function ($attribute, $value, $fail) use ($stockQuantities, $productId) {
-                foreach ($stockQuantities as $stockItem) {
-                    $stockId = $stockItem['stock']['id'] ?? null;
-
-                    if (!$stockId) {
-                        continue;
-                    }
-
-                    $query = \DB::table('product_stocks')
-                        ->join('products', 'products.id', '=', 'product_stocks.product_id')
-                        ->where('product_stocks.stock_id', $stockId)
-                        ->where('products.name', $value);
-
-                    // If updating, exclude current product
-                    if ($productId) {
-                        $query->where('products.id', '!=', $productId);
-                    }
-
-                    if ($query->exists()) {
-                        $fail("The product name '{$value}' already exists in stock ID {$stockId}.");
-                        break;
-                    }
-                }
-            }
-        ],
-        'description' => 'nullable|string',
-        'price' => 'required|numeric|min:1|regex:/^-?\d*\.(0|5)$/', 
-        'cost' => 'required|numeric|min:0',
-        'image' => 'nullable|image|max:2048',
-        'expiry_date' => 'nullable|date',
-        'stock.id'=>[
-            'required',
-            'uuid',
-            Rule::exists('stocks', 'id')
-        ],
-
-        'category' => 'required|array|min:1',
-        'category.*.id' => 'required|uuid|exists:categories,id',
-
+        'name' => ['required', 'string', 'max:255'],
+        'description' => ['nullable', 'string'],
+        'price' => ['required', 'numeric', 'min:0'],
+        'quantity' => ['required', 'integer', 'min:0'],
+        'cost' => ['required', 'numeric', 'min:0'],
+        'category' => ['required', 'array', 'min:1'],
+        'category.*.id' => ['required', 'uuid'],
+        'stock' => ['required', 'array', 'min:1'],
+        'stock.*.id' => ['required', 'uuid','exists:stocks,id'],
+        'expiry_date' => ['nullable', 'date'],
+        'image' => ['nullable', 'image', 'max:2048'],
     ];
 
     return $rules;

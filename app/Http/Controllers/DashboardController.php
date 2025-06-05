@@ -32,11 +32,10 @@ class DashboardController extends Controller
             ->get();
         // Return as collection using ProductResource
 
-        
 
         $stats = [
             'totalProducts' => Product::count(),
-            'lowStockCount' =>Stock::withCount('lows')->count(),
+            'lowStockCount' =>Product::where('quantity', '<', 10)->count(),
             'totalSales' => Order::where('status', '!=','cancelled')->count(),
             'totalCategories' => Category::count(),
             'totalRevenue' => $totalAmount = DB::table('order_details')

@@ -145,7 +145,8 @@ public function store(OrderRequest $request)
                 // 5 stock pivot
 
                 $product->stocks()->updateExistingPivot($data['stock']['id'], [
-                    'quantity' => $products['quantity'],
+                    'products_quantity' => $products['quantity'],
+                    'type' => 'out',
                     'stock_out_date' => now(),
                     'stock_in_date' => null, // Only if you want to explicitly clear it
                 ]);

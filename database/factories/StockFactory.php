@@ -21,7 +21,7 @@ class StockFactory extends Factory
         return [
                         'id' => (string) Str::uuid(),
             'name' => 'مخزن ' . $this->faker->unique()->word(),
-            'status' => $this->faker->randomElement(['good', 'low', 'empty']),
+            'status' => $this->faker->randomElement(['good']),
             'location' => $this->faker->city,
         ];
     }

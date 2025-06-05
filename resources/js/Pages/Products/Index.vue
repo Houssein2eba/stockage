@@ -426,9 +426,7 @@ const handleStockPageChange = (url) => {
                             {{ product.name }}
                           </Link>
                         </div>
-                        <div class="text-sm text-gray-500">
-                          SKU: {{ product.sku || 'N/A' }}
-                        </div>
+                        
                       </div>
                     </div>
                   </TableDataCell>

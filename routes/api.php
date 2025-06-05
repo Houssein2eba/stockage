@@ -75,7 +75,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::prefix('notifications')->group(function () {
         Route::get('/', function (Request $request) {
 
-            
+
             return response()->json([
                 'notifications' => $request->user()
                     ->notifications()
@@ -112,7 +112,13 @@ Route::prefix('clients')->group(function () {
         Route::get('/', function () {
             $clients = Client::with(['orders' => function($query) {
                 $query->with('products'); // Eager load products with orders
-            }])->get();
+            }])
+            ->when(request('search'), function ($query, $search) {
+                $query->where('name', 'LIKE', "%{$search}%")
+                      ->orWhere('number', 'LIKE', "%{$search}%");
+            })
+            ->latest()
+            ->get();
 
             return response()->json($clients);
         })->name('clients.index');
@@ -187,7 +193,7 @@ Route::prefix('clients')->group(function () {
 
     });
     Route::get('/dashboard',[DashboardController::class,'index'])->name('dashboard');
-    
+
     //Stock routes
     Route::prefix('stocks')->name('stocks.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Stock\StockController::class, 'index'])->name('index');

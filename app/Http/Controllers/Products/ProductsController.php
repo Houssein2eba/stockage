@@ -26,6 +26,7 @@ class ProductsController extends Controller
 
 public function index(Request $request)
 {
+
     $request->validate([
         'search' => 'nullable|string',
         'stock' => 'nullable|exists:stocks,id',
@@ -41,7 +42,9 @@ public function index(Request $request)
         ->withCount('products')
         ->when($request->stock, function ($query) use ($request) {
             $query->where('id', $request->stock);
-        });
+        })
+
+        ;
 
 
     // Global or stock-specific filtering
@@ -408,13 +411,13 @@ public function exportSingle($stockId)
             collect($request->category)->pluck('id')
         );
 
-        
+
 
         $product->stocks()->attach($request['stock']['id'], [
             'stock_in_date' =>  Carbon::parse($request->expiry_date),
             'stock_out_date' => null,
             'type' => 'in',
-            'quantity' => $request->quantity,
+            'products_quantity' => $request->quantity,
         ]);
 
 
@@ -436,10 +439,11 @@ public function exportSingle($stockId)
 
     public function edit($id)
     {
-        $product = Product::with('categories')->findOrFail($id);
+        $product = Product::with(['categories','stocks'])->findOrFail($id);
         return inertia('Products/Edit', [
             'categories' => CategoryResource::collection(Category::all()),
             'product' => new productResource($product),
+            'stocks' => StockResource::collection(Stock::all()),
         ]);
     }
 
@@ -449,29 +453,28 @@ public function exportSingle($stockId)
         $product = Product::findOrFail($id);
         DB::transaction(function () use ($request, $product) {
             $old = $product->toArray();
-            if ($request->hasFile('image')) {
+
                 $url = $request->file('image')->store('products', 'public');
                 $product->update([
                     'name' => $request->name,
                     'description' => $request->description,
                     'price' => $request->price,
-
-                    'image' => $url,
-
+                    'quantity' => $request->quantity,
+                    'expiry_date' => Carbon::parse($request->expiry_date),
+                    'image' => $url ?? 'products/product.png',
                     'cost'=> $request->cost,
                 ]);
-            } else {
-                $product->update([
-                    'name' => $request->name,
-                    'description' => $request->description,
-                    'price' => $request->price,
 
-
-                    'cost'=> $request->cost,
-
-                ]);
-            }
             $product->categories()->sync(collect($request->category)->pluck('id'));
+
+            $product->stocks()->syncWithoutDetaching([
+                $request['stock']['id'] => [
+                    'stock_in_date' => Carbon::parse($request->expiry_date),
+                    'stock_out_date' => null,
+                    'type' => 'in',
+                    'products_quantity' => $request->quantity,
+                ]
+            ]);
             $product->refresh();
             $attributes = $product->toArray();
             unset($old['id'], $old['created_at'], $old['updated_at']);
@@ -511,97 +514,26 @@ public function exportSingle($stockId)
     }
 
 public  function lowStock(Request $request){
-    $stocksQuery = Stock::query()
-        ->withCount('lows');
+    $request->validate([
+        'search' => 'nullable|string',
+        'sort' => 'nullable|string|in:name,price,quantity,created_at,updated_at',
+        'direction' => 'nullable|string|in:asc,desc',
+    ]);
+    $products=Product::with(['categories','stocks'])
+    ->where('quantity', '<=', 10)
+    ->when($request->search, function ($query, $search) {
+        $query->where('name', 'LIKE', "%{$search}%");
+    })
+    ->when($request->sort && $request->direction, function ($query) use ($request) {
+        $query->orderBy('products.' . $request->sort, $request->direction);
+    })
+    ->paginate(PAGINATION)->withQueryString();
 
-        $stocks = $stocksQuery->paginate(PAGINATION, ['*'], 'page')->withQueryString();
-
-    // Then for each stock, get only its matching products
-    $stocks->getCollection()->transform(function ($stock) use ($request) {
-        $stockSearch = $request->stock_search[$stock->id] ?? null;
-
-        $productsQuery = $stock->lows()
-            ->with('categories')
-
-            ->when($stockSearch, function ($query) use ($stockSearch) {
-                $query->where('products.name', 'like', "%{$stockSearch}%");
-            })
-            ->when(!$stockSearch && $request->search, function ($query) use ($request) {
-                $query->where('products.name', 'like', "%{$request->search}%");
-            })
-            ->when($request->sort && $request->direction, function ($query) use ($request) {
-
-                    $query->orderBy('products.' . $request->sort, $request->direction);
-
-            });
-
-        // Use unique page name for pagination per stock
-        $products = $productsQuery->paginate(
-            PAGINATION,
-            ['*'],
-            'stock_' . $stock->id . '_page'
-        )->withQueryString();
-
-        $stock->paginated_lows = $products;
-
-        return $stock;
-    });
-
-
-    return Inertia::render('Products/Low',[
-        'stocks' => [
-            'data' => $stocks->getCollection()->map(fn ($stock) => [
-                'id' => $stock->id,
-                'name' => $stock->name,
-                'location' => $stock->location,
-                'status' => $stock->status,
-                'created_at' => $stock->created_at,
-                'updated_at' => $stock->updated_at,
-                'products_count' => $stock->products_count,
-                'paginated_lows' => [
-                    'data' => $stock->paginated_lows->items(),
-                    'links' => [
-                        'first' => $stock->paginated_lows->url(1),
-                        'last' => $stock->paginated_lows->url($stock->paginated_lows->lastPage()),
-                        'prev' => $stock->paginated_lows->previousPageUrl(),
-                        'next' => $stock->paginated_lows->nextPageUrl(),
-                    ],
-                    'meta' => [
-                        'current_page' => $stock->paginated_lows->currentPage(),
-                        'last_page' => $stock->paginated_lows->lastPage(),
-                        'from' => $stock->paginated_lows->firstItem(),
-                        'to' => $stock->paginated_lows->lastItem(),
-                        'total' => $stock->paginated_lows->total(),
-                        'links' => $stock->paginated_lows->linkCollection()->toArray(),
-                    ],
-                ],
-            ]),
-            'links' => [
-                'first' => $stocks->url(1),
-                'last' => $stocks->url($stocks->lastPage()),
-                'prev' => $stocks->previousPageUrl(),
-                'next' => $stocks->nextPageUrl(),
-            ],
-            'meta' => [
-                'current_page' => $stocks->currentPage(),
-                'last_page' => $stocks->lastPage(),
-                'from' => $stocks->firstItem(),
-                'to' => $stocks->lastItem(),
-                'total' => $stocks->total(),
-                'links' => $stocks->linkCollection()->toArray(),
-            ],
-        ],
-        'filters'=>[
-            'search'=>request('search'),]
+    return inertia('Products/Low', [
+        'products' => ProductResource::collection($products),
+        'categories' => CategoryResource::collection(Category::all()),
     ]);
 }
 
-    // public function export()
-    // {
-    //     activity()
-    //         ->causedBy(auth()->user())
-    //         ->log('Products Exported');
 
-    //         return Excel::download(new ProductsExport(), 'products.xlsx');
-    // }
 }
