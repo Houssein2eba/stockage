@@ -27,7 +27,6 @@ public function rules(): array
     $productId = $this->route('id'); // for PUT/PATCH
 
 
-    dd($this->all());
 
     // Validation rules
     $rules = [
@@ -39,9 +38,9 @@ public function rules(): array
         'category' => ['required', 'array', 'min:1'],
         'category.*.id' => ['required', 'uuid'],
         'stock' => ['required', 'array', 'min:1'],
-        'stock.*.id' => ['required', 'uuid','exists:stocks,id'],
+        'stock.id' => ['required', 'uuid','exists:stocks,id'],
         'expiry_date' => ['nullable', 'date'],
-        'image' => ['nullable', 'image', 'max:2048'],
+
     ];
 
     return $rules;
@@ -51,34 +50,13 @@ public function rules(): array
 public function messages()
 {
     return [
+        'category.*.id.required' => 'Please select at least one category.',
+        'stock.*.id.required' => 'Please select at least one stock.',
+        'stock.*.id.exists' => 'The selected stock does not exist.',
+        'image.image' => 'The image must be a valid image file.',
+        'image.max' => 'The image must not be larger than 2MB.',
         'name.required' => 'The product name is required.',
         'name.string' => 'The product name must be a string.',
-        'name.max' => 'The product name may not be greater than :max characters.',
-        'description.string' => 'The product description must be a string.',
-        'price.required' => 'The product price is required.',
-        'price.numeric' => 'The product price must be a number.',
-        'price.min' => 'The product price must be at least :min.',
-        'cost.required' => 'The product cost is required.',
-        'cost.numeric' => 'The product cost must be a number.',
-        'cost.min' => 'The product cost must be at least :min.',
-        'image.image' => 'The product image must be an image.',
-        'image.max' => 'The product image may not be greater than :max kilobytes.',
-        'category.required' => 'The product category is required.',
-        'category.array' => 'The product category must be an array.',
-        'category.min' => 'The product must have at least one category.',
-        'category.*.id.required' => 'The category  is required.',
-        'category.*.id.uuid' => 'The category must be a valid .',
-        'category.*.id.exists' => 'The selected category does not exist.',
-        'stockQuantities.required' => 'The stock quantities are required.',
-       'stockQuantities.array' => 'The stock quantities must be an array.',
-       'stockQuantities.min' => 'The product must have at least one stock quantity.',
-      'stockQuantities.*.stock.id.required' => 'The stock ID is required.',
-      'stockQuantities.*.stock.id.uuid' => 'The stock  must be  valid .',
-      'stockQuantities.*.stock.id.exists' => 'The selected stock does not exist.',
-      'stockQuantities.*.quantity.required' => 'The stock quantity is required.',
-     'stockQuantities.*.quantity.integer' => 'The stock quantity must be an integer.',
-     'stockQuantities.*.quantity.min' => 'The stock quantity must be at least :min.',
-     'stockQuantities.*.expiry_date.date' => 'The expiry date must be a valid date.',
     ];
 }
 

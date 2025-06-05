@@ -217,7 +217,7 @@ const clearFilters = () => {
                                     {{ movement.quantity }}
                                 </TableDataCell>
                                 <TableDataCell>
-                                    {{ movement.stock_in_date ? formatDate(movement.stock_in_date) : formatDate(movement.stock_out_date) }}
+                                    {{ movement.stock_date ? formatDate(movement.stock_date) : formatDate(movement.stock_date) }}
                                 </TableDataCell>
 
 

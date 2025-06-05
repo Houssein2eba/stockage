@@ -48,13 +48,12 @@ class StockSeeder extends Seeder
             $assignedStocks = $stocks->random(rand(1, 3));
             foreach ($assignedStocks as $stock) {
                 $product->stocks()->attach($stock->id, [
-                    'stock_in_date' => Carbon::now()->subDays(rand(1, 30)), // Random stock in date within the last 30 days
-                    'stock_out_date' => null, // Initially no stock out date
+                    'stock_date' => Carbon::now()->subDays(rand(1, 30)), // Random stock in date within the last 30 days
                 ]);
                 $product->stocks()->updateExistingPivot($stock->id, [
                     'products_quantity' => $product->quantity,
-                    'stock_out_date' => null,
-                    'stock_in_date' => now(), // Only if you want to explicitly clear it
+
+                    'stock_date' => now(), // Only if you want to explicitly clear it
                 ]);
 
             }

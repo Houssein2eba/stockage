@@ -18,10 +18,7 @@ const props = defineProps({
     stocks: Array, // Added stocks prop
 });
 
-// Get image link function
-const getImageLink = (image) => {
-    return image ? '/storage/' + image : '/images/placeholder-product.png';
-};
+
 
 // Edit product logic
 const editForm = useForm({
@@ -35,18 +32,11 @@ const editForm = useForm({
     category: props.product.categories,
     stock: props.product.stock ? props.product.stock_two : [],
     expiry_date: props.product.expiry_date ? new Date(props.product.expiry_date) : null, // Added expiry date
-    image: null
+
 });
 
-const editPreviewImage = ref(getImageLink(props.product.image));
 
-const handleEditImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        editForm.image = file;
-        editPreviewImage.value = URL.createObjectURL(file);
-    }
-};
+
 
 const updateProduct = () => {
     editForm.put(route('products.update', editForm.id), {
@@ -120,32 +110,7 @@ const updateProduct = () => {
                     <InputError class="mt-1.5" :message="editForm.errors.description" />
                 </div>
 
-                <div>
-                    <InputLabel for="edit-image" value="Product Image" class="mb-1.5" />
-                    <div class="flex items-center gap-4">
-                        <div v-if="editPreviewImage" class="flex-shrink-0">
-                            <img :src="editPreviewImage" alt="Preview" class="h-16 w-16 object-cover rounded-md border border-gray-200">
-                        </div>
-                        <label class="cursor-pointer flex-1">
-                            <input
-                                id="edit-image"
-                                type="file"
-                                accept="image/*"
-                                class="hidden"
-                                @change="handleEditImageChange"
-                                :class="{ 'ring-1 ring-red-500  mt-2': editForm.errors.image }"
-                            >
-                            <div class="flex flex-col items-center justify-center px-6 py-8 border-2 border-dashed border-gray-300 rounded-md hover:border-blue-500 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <span class="mt-2 text-sm text-gray-600">Click to upload</span>
-                                <span class="text-xs text-gray-500">PNG, JPG up to 2MB</span>
-                            </div>
-                        </label>
-                    </div>
-                    <InputError class="mt-1.5" :message="editForm.errors.image" />
-                </div>
+                
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>

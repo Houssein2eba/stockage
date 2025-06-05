@@ -414,8 +414,7 @@ public function exportSingle($stockId)
 
 
         $product->stocks()->attach($request['stock']['id'], [
-            'stock_in_date' =>  Carbon::parse($request->expiry_date),
-            'stock_out_date' => null,
+            'stock_date' =>  Carbon::parse($request->expiry_date),
             'type' => 'in',
             'products_quantity' => $request->quantity,
         ]);
@@ -454,14 +453,13 @@ public function exportSingle($stockId)
         DB::transaction(function () use ($request, $product) {
             $old = $product->toArray();
 
-                $url = $request->file('image')->store('products', 'public');
+
                 $product->update([
                     'name' => $request->name,
                     'description' => $request->description,
                     'price' => $request->price,
                     'quantity' => $request->quantity,
                     'expiry_date' => Carbon::parse($request->expiry_date),
-                    'image' => $url ?? 'products/product.png',
                     'cost'=> $request->cost,
                 ]);
 
@@ -469,8 +467,8 @@ public function exportSingle($stockId)
 
             $product->stocks()->syncWithoutDetaching([
                 $request['stock']['id'] => [
-                    'stock_in_date' => Carbon::parse($request->expiry_date),
-                    'stock_out_date' => null,
+                    'stock_date' => Carbon::parse($request->expiry_date),
+
                     'type' => 'in',
                     'products_quantity' => $request->quantity,
                 ]
