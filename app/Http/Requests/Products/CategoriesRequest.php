@@ -29,4 +29,16 @@ class CategoriesRequest extends FormRequest
             'description'=>'nullable|string|max:255',
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'name.required' => 'The name field is required.',
+            'name.string' => 'The name field must be a string.',
+            'name.max' => 'The name field may not be greater than 255 characters.',
+            'name.unique' => 'The name has already been taken.',
+            'description.string' => 'The description field must be a string.',
+            'description.max' => 'The description field may not be greater than 255 characters.',
+        ];
+    }
 }

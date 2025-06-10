@@ -75,27 +75,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Stocks
     Route::prefix('stocks')->name('stocks.')->group(function () {
-        Route::get('/',[StockController::class,'index'])->name('index');
-        Route::get('/create', [StockController::class, 'create'])->name('create');
-        Route::post('/', [StockController::class, 'store'])->name('store');
-        Route::get('/{id}/show', [StockController::class, 'show'])->name('show');
-        Route::get('/{id}/edit', [StockController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [StockController::class, 'update'])->name('update');
-        Route::delete('/{id}', [StockController::class, 'destroy'])->name('destroy');
+        Route::get('/',[StockController::class,'index'])->name('index')->middleware('permission:view_stocks');
+        Route::get('/create', [StockController::class, 'create'])->name('create')->middleware('permission:create_stocks');
+        Route::post('/', [StockController::class, 'store'])->name('store')->middleware('permission:create_stocks');
+        Route::get('/{id}/show', [StockController::class, 'show'])->name('show')->middleware('permission:view_stocks');
+        Route::get('/{id}/edit', [StockController::class, 'edit'])->name('edit')->middleware('permission:update_stocks');
+        Route::put('/{id}', [StockController::class, 'update'])->name('update')->middleware('permission:update_stocks');
+        Route::delete('/{id}', [StockController::class, 'destroy'])->name('destroy')->middleware('permission:delete_stocks');
     });
 
 
     // Admin-only Routes
-    Route::middleware(['role:admin'])->group(function () {
+
         // Users
         Route::prefix('users')->name('users.')->group(function () {
-            Route::get('/', [UsersController::class, 'index'])->name('index');
-            Route::get('/create', [UsersController::class, 'create'])->name('create');
-            Route::post('/', [UsersController::class, 'store'])->name('store');
-            Route::get('/{id}/edit', [UsersController::class, 'edit'])->name('edit');
-            Route::put('/{id}', [UsersController::class, 'update'])->name('update');
-            Route::delete('/{id}', [UsersController::class, 'delete'])->name('delete');
-            Route::get('/export', [UsersController::class, 'export'])->name('export');
+            Route::get('/', [UsersController::class, 'index'])->name('index')->middleware('permission:view_users');
+            Route::get('/create', [UsersController::class, 'create'])->name('create')->middleware('permission:create_users');
+            Route::post('/', [UsersController::class, 'store'])->name('store')->middleware('permission:create_users');
+            Route::get('/{id}/edit', [UsersController::class, 'edit'])->name('edit')->middleware('permission:update_users');
+            Route::put('/{id}', [UsersController::class, 'update'])->name('update')->middleware('permission:update_users');
+            Route::delete('/{id}', [UsersController::class, 'delete'])->name('delete')->middleware('permission:delete_users');
+            Route::get('/export', [UsersController::class, 'export'])->name('export')->middleware('permission:export_users');
         });
 
         // Roles
@@ -112,24 +112,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Activity Log
         Route::prefix('activity')->name('activity.')->group(function () {
-            Route::get('/', [ActivityLogController::class, 'index'])->name('index');
-            Route::get('/{activity}', [ActivityLogController::class, 'view'])->name('view');
-        })->middleware('role:admin');
+            Route::get('/', [ActivityLogController::class, 'index'])->name('index')->middleware('permission:view_activity_log');
+            Route::get('/{activity}', [ActivityLogController::class, 'view'])->name('view')->middleware('permission:view_activity_log');
+        });
 
 
-    });
+
 // Products
         Route::prefix('products')->name('products.')->group(function () {
-            Route::get('/', [ProductsController::class, 'index'])->name('index');
-            Route::get('/create', [ProductsController::class, 'create'])->name('create');
-            Route::post('/', [ProductsController::class, 'store'])->name('store');
-            Route::get('/export', [ProductsController::class, 'export'])->name('export');
-            Route::get('lowStock', [ProductsController::class, 'lowStock'])->name('lowStock');
-            Route::get('/single-export/{id}', [ProductsController::class, 'exportSingle'])->name('single_export');
-            Route::get('/{id}/show', [ProductsController::class, 'show'])->name('show');
-            Route::get('/{id}/edit', [ProductsController::class, 'edit'])->name('edit');
-            Route::put('/{id}', [ProductsController::class, 'update'])->name('update');
-            Route::delete('/{id}', [ProductsController::class, 'destroy'])->name('destroy');
+            Route::get('/', [ProductsController::class, 'index'])->name('index')->middleware('permission:view_products');
+            Route::get('/create', [ProductsController::class, 'create'])->name('create')->middleware('permission:create_products');
+            Route::post('/', [ProductsController::class, 'store'])->name('store')->middleware('permission:create_products');
+            Route::get('/export', [ProductsController::class, 'export'])->name('export')->middleware('permission:export_products');
+            Route::get('lowStock', [ProductsController::class, 'lowStock'])->name('lowStock')->middleware('permission:export_products');
+            Route::get('/single-export/{id}', [ProductsController::class, 'exportSingle'])->name('single_export')->middleware('permission:export_products');
+            Route::get('/{id}/show', [ProductsController::class, 'show'])->name('show')->middleware('permission:view_products');
+            Route::get('/{id}/edit', [ProductsController::class, 'edit'])->name('edit')->middleware('permission:update_products');
+            Route::put('/{id}', [ProductsController::class, 'update'])->name('update')->middleware('permission:update_products');
+            Route::delete('/{id}', [ProductsController::class, 'destroy'])->name('destroy')->middleware('permission:delete_products');
         });
     // Categories
     Route::prefix('categories')->name('categories.')->group(function () {
@@ -144,8 +144,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Notifications
     Route::prefix('notifications')->name('notifications.')->group(function () {
-        Route::get('/', [NotificationController::class, 'index'])->name('index');
-        Route::post('/mark-as-read/{id}', [NotificationController::class, 'markAsRead'])->name('markAsRead');
+        Route::get('/', [NotificationController::class, 'index'])->name('index')->middleware('permission:view_notifications');
+        Route::post('/mark-as-read/{id}', [NotificationController::class, 'markAsRead'])->name('markAsRead')->middleware('permission:view_notifications');
     });
 
     // Order Status Update

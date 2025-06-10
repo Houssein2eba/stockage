@@ -32,7 +32,7 @@ use Spatie\Permission\Models\Role;
 
 // Public routes (no authentication required)
 
-    Route::middleware('throttle:5,1')->post('/login', function (Request $request) {
+    Route::middleware(['throttle:5,1'])->post('/login', function (Request $request) {
 
         $request->validate([
             'credential' => 'required|string',
@@ -109,19 +109,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
     // Client routes
 Route::prefix('clients')->group(function () {
-        Route::get('/', function () {
-            $clients = Client::with(['orders' => function($query) {
-                $query->with('products'); // Eager load products with orders
-            }])
-            ->when(request('search'), function ($query, $search) {
-                $query->where('name', 'LIKE', "%{$search}%")
-                      ->orWhere('number', 'LIKE', "%{$search}%");
-            })
-            ->latest()
-            ->get();
-
-            return response()->json($clients);
-        })->name('clients.index');
+        Route::get('/', [ClientsController::class,'index'])->name('clients.index');
 
         Route::post('/', [ClientsController::class, 'store'])
             ->name('clients.store');

@@ -2,8 +2,8 @@
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import SidebarLink from '@/Components/SidebarLink.vue';
-import { useRole } from '@/composables/roles';
-import { useAdmin } from '@/composables/admins';
+
+import {usePermission} from "@/composables/permissions";
 import { format } from 'date-fns';
 import { usePage } from '@inertiajs/vue3';
 import { debounce } from 'lodash';
@@ -97,8 +97,11 @@ onUnmounted(() => {
 });
 
 // Composable functions
-const { hasRole } = useRole();
-const { isAdmin } = useAdmin();
+
+const { hasPermission } = usePermission();
+const { hasRole } = usePermission();
+console.log(page.props.auth.permissions);
+console.log(hasPermission('view_users'));
 
 // Notification polling
 let pollInterval;
@@ -121,56 +124,10 @@ onUnmounted(() => {
   <div class="flex h-screen bg-slate-50">
     <!-- Notification Bell -->
     <div class="fixed top-4 right-4 z-50">
-      <button @click="toggleNotifications" class="relative p-2 text-gray-600 hover:text-blue-600 focus:outline-none transition-colors">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-        </svg>
-        <span v-if="unreadNotificationsCount > 0" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
-          {{ unreadNotificationsCount }}
-        </span>
-      </button>
+
 
       <!-- Notifications Dropdown -->
-      <Transition
-        enter-active-class="transition ease-out duration-200"
-        enter-from-class="opacity-0 translate-y-1"
-        enter-to-class="opacity-100 translate-y-0"
-        leave-active-class="transition ease-in duration-150"
-        leave-from-class="opacity-100 translate-y-0"
-        leave-to-class="opacity-0 translate-y-1"
-      >
-        <div v-if="showNotifications" class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl overflow-hidden z-50">
-          <div class="p-4 border-b bg-gray-50">
-            <div class="flex items-center justify-between">
-              <h3 class="text-lg font-semibold text-gray-900">Notifications</h3>
-              <Link :href="route('notifications.index')" class="text-sm text-blue-600 hover:text-blue-800 transition-colors">
-                View All
-              </Link>
-            </div>
-          </div>
-          <div class="max-h-96 overflow-y-auto">
-            <div v-if="notifications.length > 0" class="divide-y">
-              <div v-for="notification in notifications" :key="notification.id"
-                   class="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
-                   @click="markAsRead(notification.id)">
-                <div class="flex items-start">
-                  <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-900 truncate">{{ notification.data.title }}</p>
-                    <p class="text-sm text-gray-600 truncate">{{ notification.data.message }}</p>
-                    <p class="text-xs text-gray-500 mt-1">{{ formatDate(notification.created_at) }}</p>
-                  </div>
-                  <button v-if="!notification.read_at" class="ml-4 text-sm text-blue-600 hover:text-blue-800 transition-colors">
-                    Mark as read
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div v-else class="p-4 text-center text-gray-600">
-              No notifications
-            </div>
-          </div>
-        </div>
-      </Transition>
+
     </div>
 
     <!-- Mobile Backdrop -->
@@ -218,7 +175,7 @@ onUnmounted(() => {
           </li>
 
           <!-- Users Dropdown -->
-          <li v-if="hasRole('admin')">
+          <li v-if="hasPermission('view_users')">
             <div class="relative">
               <button
                 @click="toggleDropdown('users')"
@@ -257,7 +214,7 @@ onUnmounted(() => {
                   >
                     All Users
                   </SidebarLink>
-                  <SidebarLink
+                  <SidebarLink v-if="hasPermission('create_users')"
                     :href="route('users.create')"
                     :active="route().current('users.create')"
                     class="text-sm hover:bg-blue-50"
@@ -270,7 +227,7 @@ onUnmounted(() => {
           </li>
 
           <!-- Clients Dropdown -->
-          <li>
+          <li v-if="hasPermission('view_clients')">
             <div class="relative">
               <button
                 @click="toggleDropdown('clients')"
@@ -310,6 +267,7 @@ onUnmounted(() => {
                     All Clients
                   </SidebarLink>
                   <SidebarLink
+                  v-if="hasPermission('create_clients')"
                     :href="route('clients.create')"
                     :active="route().current('clients.create')"
                     class="text-sm hover:bg-blue-50"
@@ -322,7 +280,7 @@ onUnmounted(() => {
           </li>
 
           <!-- Products Dropdown -->
-          <li>
+          <li v-if="hasPermission('view_products')">
             <div class="relative">
               <button
                 @click="toggleDropdown('products')"
@@ -355,6 +313,7 @@ onUnmounted(() => {
               >
                 <div v-if="dropdowns.products.value" class="ml-8 mt-1.5 space-y-1.5 overflow-hidden">
                   <SidebarLink
+                    v-if="hasPermission('view_categories')"
                     :href="route('categories.index')"
                     :active="route().current('categories.index')"
                     class="text-sm hover:bg-blue-50"
@@ -374,7 +333,7 @@ onUnmounted(() => {
           </li>
 
           <!-- Roles Dropdown -->
-          <li>
+          <li v-if="hasRole('admin')">
             <div class="relative">
               <button
                 @click="toggleDropdown('posts')"
@@ -449,38 +408,113 @@ onUnmounted(() => {
       :class="{ 'lg:ml-64': isSidebarOpen }"
     >
       <!-- Top Navigation -->
-      <header class="sticky top-0 z-10 bg-white border-b shadow-sm">
-        <div class="flex items-center justify-between h-16 px-4">
-          <button
-            @click="isSidebarOpen = !isSidebarOpen"
-            class="p-2 rounded-lg hover:bg-blue-50 transition-colors lg:hidden"
-          >
-            <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
-          </button>
+<!-- Top Navigation -->
+<header class="sticky top-0 z-10 bg-white border-b shadow-sm">
+  <div class="flex items-center justify-between h-16 px-4">
+    <button
+      @click="isSidebarOpen = !isSidebarOpen"
+      class="p-2 rounded-lg hover:bg-blue-50 transition-colors lg:hidden"
+    >
+      <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
 
-          <div class="flex items-center gap-2">
-            <Link
-              v-for="link in [
-                { route: 'activity.index', icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', label: 'Activity' },
-                { route: 'profile.edit', icon: 'M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z', label: 'Profile' },
-                { route: 'sales.index', icon: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z', label: 'Sales' },
-                 {route:'stocks.index', icon: 'M12 14l9-5-9-5-9 5 9 5z', label: 'Stocks' },
-              ]"
-              :key="link.route"
-              :href="route(link.route)"
-              class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors"
-              :class="{ 'bg-blue-50 text-blue-600': route().current(link.route) }"
-            >
-              <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="link.icon" />
-              </svg>
-              <span class="text-sm font-medium hidden sm:inline">{{ link.label }}</span>
-            </Link>
+    <div class="flex items-center gap-2">
+      <template v-for="link in [
+        { route: 'activity.index', icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', label: 'Activity', permission: 'view_activity' },
+        { route: 'profile.edit', icon: 'M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z', label: 'Profile', permission: null },
+        { route: 'sales.index', icon: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z', label: 'Sales', permission: 'view_sales' },
+        { route: 'stocks.index', icon: 'M12 14l9-5-9-5-9 5 9 5z', label: 'Stocks', permission: 'view_stocks' },
+      ]" :key="link.route">
+        <Link
+          v-if="!link.permission || hasPermission(link.permission)"
+          :href="route(link.route)"
+          class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors"
+          :class="{ 'bg-blue-50 text-blue-600': route().current(link.route) }"
+        >
+          <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="link.icon" />
+          </svg>
+          <span class="text-sm font-medium hidden sm:inline">{{ link.label }}</span>
+        </Link>
+      </template>
+
+      <!-- Notification Bell -->
+      <div class="relative" v-if="hasPermission('view_notifications')">
+        <button 
+          @click="toggleNotifications" 
+          class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors relative"
+        >
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+          <span class="text-sm font-medium hidden sm:inline">Notifications</span>
+          <span 
+            v-if="unreadNotificationsCount > 0" 
+            class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full"
+          >
+            {{ unreadNotificationsCount }}
+          </span>
+        </button>
+
+        <!-- Notifications Dropdown -->
+        <Transition
+          enter-active-class="transition ease-out duration-200"
+          enter-from-class="opacity-0 translate-y-1"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition ease-in duration-150"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 translate-y-1"
+        >
+          <div 
+            v-if="showNotifications" 
+            class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl overflow-hidden z-50"
+          >
+            <div class="p-4 border-b bg-gray-50">
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-gray-900">Notifications</h3>
+                <Link 
+                  :href="route('notifications.index')" 
+                  class="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  View All
+                </Link>
+              </div>
+            </div>
+            <div class="max-h-96 overflow-y-auto">
+              <div v-if="notifications.length > 0" class="divide-y">
+                <div 
+                  v-for="notification in notifications" 
+                  :key="notification.id"
+                  class="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                  @click="markAsRead(notification.id)"
+                >
+                  <div class="flex items-start">
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-medium text-gray-900 truncate">{{ notification.data.title }}</p>
+                      <p class="text-sm text-gray-600 truncate">{{ notification.data.message }}</p>
+                      <p class="text-xs text-gray-500 mt-1">{{ formatDate(notification.created_at) }}</p>
+                    </div>
+                    <button 
+                      v-if="!notification.read_at" 
+                      class="ml-4 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                    >
+                      Mark as read
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="p-4 text-center text-gray-600">
+                No notifications
+              </div>
+            </div>
           </div>
-        </div>
-      </header>
+        </Transition>
+      </div>
+    </div>
+  </div>
+</header>
 
       <!-- Page Content -->
       <main class="flex-1 overflow-y-auto bg-slate-50 p-4 md:p-6">

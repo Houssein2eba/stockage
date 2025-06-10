@@ -12,6 +12,7 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Log;
 use Maatwebsite\Excel\Excel;
 
 class ClientsController extends Controller
@@ -19,7 +20,7 @@ class ClientsController extends Controller
     public function deleteJson($id){
         $client=Client::findOrFail( $id );
         $client->delete();
-        return response()->json(200);
+        return response()->json(['message'=>'Client deleted']);
 
     }
     public function index(Request $request)
@@ -32,6 +33,22 @@ class ClientsController extends Controller
             'page' => 'nullable|integer|min:1',
 
         ]);
+
+      if($request->wantsJson()){
+        Log::info($request->wantsJson());
+
+        $clients=Client::with('orders')->
+        when($request->search, function ($query) use ($request) {
+            $query->where('name', 'like', '%'. $request->search. '%')
+                ->orWhere('number', 'like', '%'. $request->search. '%');
+        })->
+        get();
+        return response()->json([
+            'clients' => ClientResource::collection($clients),
+        ]);
+      }
+
+
         $clients = Client::with(['orders' => function ($q) {
             $q->with('products'); // if you need product info
         }])
@@ -190,6 +207,7 @@ class ClientsController extends Controller
 
     public function destroy($id)
     {
+
         $client = Client::findOrFail($id);
         DB::transaction(function () use ($client) {
             $old = $client->toArray();

@@ -11,7 +11,7 @@ class PermissionSeeder extends Seeder
     public function run(): void
     {
         // Create permissions grouped by module
-        $permissions = [
+        $permissions= [
     // Clients
     'view_clients',
     'create_clients',
@@ -27,37 +27,40 @@ class PermissionSeeder extends Seeder
     'delete_sales',
     'generate_invoice',
 
-    // Categories
-    'view_categories',
-    'create_categories',
-    'update_categories',
-    'delete_categories',
-
-    // Payment Methods
-    'view_payment_methods',
-    'create_payment_methods',
-    'delete_payment_methods',
-
-    // Products
-    'view_products',
-    'create_products',
-    'update_products',
-    'delete_products',
+    // Stocks
+    'view_stocks',
+    'create_stocks',
+    'update_stocks',
+    'delete_stocks',
 
     // Users
     'view_users',
     'create_users',
     'update_users',
     'delete_users',
+    'export_users',
 
-    // Roles
-    'view_roles',
-    'create_roles',
-    'update_roles',
-    'delete_roles',
-    //Activity Log
+    // Activity Logs
     'view_activity_log',
+
+    // Products
+    'view_products',
+    'create_products',
+    'export_products',
+    'update_products',
+    'delete_products',
+
+    // Categories
+    'view_categories',
+    'create_categories',
+    'update_categories',
+    'delete_categories',
+
+    // Notifications
+    'view_notifications',
+
 ];
+
 
 
         // Create permissions
