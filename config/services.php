@@ -27,6 +27,10 @@ return [
     'resend' => [
         'key' => env('RESEND_KEY'),
     ],
+    'firebase' => [
+    'credentials' => storage_path('app/firebase/fcm-demo-812e4-firebase-adminsdk-fbsvc-e0a69b193f.json'),
+],
+
 
     'slack' => [
         'notifications' => [

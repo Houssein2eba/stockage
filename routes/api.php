@@ -10,6 +10,7 @@ use App\Http\Resources\RolesResource;
 use App\Http\Resources\UserApiResource;
 use App\Http\Resources\UserResource;
 use App\Models\Client;
+use App\Models\Fcm;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -36,8 +37,10 @@ use Spatie\Permission\Models\Role;
 
         $request->validate([
             'credential' => 'required|string',
-            'password' => 'required|string'
+            'password' => 'required|string',
+            'token'=>'required|string',
         ]);
+
         $login=$request->only('credential','password');
         if(filter_var($login['credential'], FILTER_VALIDATE_EMAIL)){
             $field='email';
@@ -55,7 +58,10 @@ use Spatie\Permission\Models\Role;
                 'message' => 'Invalid credentials'
             ], 401);
         }else{
+            Fcm::updateOrCreate(['token' => $request->token]);
           $token = $user->createToken('auth_token')->plainTextToken;
+
+          Log::info($request);
 
 
         return response()->json([

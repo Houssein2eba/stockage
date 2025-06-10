@@ -27,6 +27,7 @@ class UsersController extends Controller
     public function index(Request $request)
     {
         $users = User::with('roles')
+
             ->when($request->search, fn($query) =>
                 $query->where('name', 'like', "%{$request->search}%")
             )
@@ -34,7 +35,9 @@ class UsersController extends Controller
             ->withQueryString();
 
             if($request->wantsJson()){
-                $usersApi=User::with('roles')->get();
+                $usersApi=User::with('roles')
+                  ->where('id', '!=', auth()->id())
+                ->get();
 
                 return response()->json([
                    'users'=>UserApiResource::collection($usersApi)
@@ -149,7 +152,7 @@ class UsersController extends Controller
     {
         $user = User::findOrFail($id);
 
-        
+
         $userName = $user->name;
 
         $user->delete();
