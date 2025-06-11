@@ -101,11 +101,11 @@ class RolesController extends Controller
 
 
         $request->validate([
-            'id' => 'required|integer|exists:roles,id',
+
             'name' => ['required', 'string', 'max:255',Rule::unique('roles')->ignore($id)],
             'permissions' => 'required|array',
             'permissions.*.name'=>'string|exists:permissions,name',
-            'permissions.*.id' => 'integer|exists:permissions,id',
+            'permissions.*.id' => 'exists:permissions,id',
         ]);
 
         $role = Role::findOrFail($id);
