@@ -1,5 +1,4 @@
 <script setup>
-
 import AuthLayout from '@/layouts/AuthLayout.vue'
 import InputError from '@/Components/InputError.vue'
 import InputLabel from '@/Components/InputLabel.vue'
@@ -32,10 +31,10 @@ form.role = props.user.roles;
 const submit = () => {
   form.put(route('users.update',props.user.id),{
     onSuccess: () => {
-      toast.success('User updated successfully');
+      toast.success('Utilisateur mis à jour avec succès');
     },
     onError: (errors) => {
-      toast.error('Failed to update user');
+      toast.error('Échec de la mise à jour de l\'utilisateur');
     }
   })
 }
@@ -43,31 +42,28 @@ const submit = () => {
 
 <template>
   <AuthLayout>
-    <Head title="Create user" />
+    <Head title="Modifier l'utilisateur" />
 
     <div class="max-w-7xl mx-auto mt-4">
-
       <div class="flex justify-between">
         <Link
           :href="route('users.index')"
           class="px-3 py-2 text-white font-semibold bg-indigo-500 hover:bg-indigo-700 rounded"
-          >Back</Link
+          >Retour</Link
         >
       </div>
     </div>
     <div class="max-w-md mx-auto mt-6 p-6 bg-slate-100">
       <form @submit.prevent="submit">
         <div>
-          <InputLabel for="name" value="Name" />
+          <InputLabel for="name" value="Nom" />
 
           <TextInput
             id="name"
             type="text"
             class="mt-1 block w-full"
             v-model="form.name"
-
             required
-            
             autocomplete="name"
           />
 
@@ -82,7 +78,6 @@ const submit = () => {
             type="email"
             class="mt-1 block w-full"
             v-model="form.email"
-
             required
             autocomplete="username"
           />
@@ -90,14 +85,13 @@ const submit = () => {
           <InputError class="mt-2" :message="form.errors.email" />
         </div>
         <div class="mt-4">
-          <InputLabel for="number" value="Number" />
+          <InputLabel for="number" value="Numéro" />
 
           <TextInput
             id="number"
             type="text"
             class="mt-1 block w-full"
             v-model="form.number"
-
             required
             autocomplete="number"
           />
@@ -106,20 +100,19 @@ const submit = () => {
         </div>
 
         <div class="mt-4">
-          <InputLabel for="role" value="Role" />
+          <InputLabel for="role" value="Rôle" />
 
           <MultiSelect
             v-model="form.role"
             :options="props.roles"
             :multiple="false"
             :close-on-select="true"
-            placeholder="Pick some"
+            placeholder="Sélectionner"
             label="name"
             track-by="id"
             class="w-full"
           />
           <InputError class="mt-2" :message="form.errors.role" />
-
         </div>
         <div class="flex items-center justify-end mt-4">
           <PrimaryButton
@@ -127,7 +120,7 @@ const submit = () => {
             :class="{ 'opacity-25': form.processing }"
             :disabled="form.processing"
           >
-            Update
+            Mettre à jour
           </PrimaryButton>
         </div>
       </form>
@@ -135,4 +128,3 @@ const submit = () => {
   </AuthLayout>
 </template>
 <style src="vue-multiselect/dist/vue-multiselect.css"></style>
-

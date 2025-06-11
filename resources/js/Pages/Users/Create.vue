@@ -30,7 +30,7 @@ const submit = () => {
   form.post(route("users.store"), {
 
     onSuccess: () =>{
-      toast.success('User created successfully');
+      toast.success('Utilisateur créé avec succès');
 
     } ,
   });
@@ -39,7 +39,7 @@ const submit = () => {
 
 <template>
   <AuthLayout>
-    <Head title="Create user" />
+    <Head title="Créer un utilisateur" />
 
     <div class="max-w-7xl mx-auto mt-4">
 
@@ -47,14 +47,14 @@ const submit = () => {
         <Link
           :href="route('users.index')"
           class="px-3 py-2 text-white font-semibold bg-indigo-500 hover:bg-indigo-700 rounded"
-          >Back</Link
+          >Retour</Link
         >
       </div>
     </div>
     <div class="max-w-md mx-auto mt-6 p-6 bg-slate-100">
       <form @submit.prevent="submit">
         <div>
-          <InputLabel for="name" value="Name" />
+          <InputLabel for="name" value="Nom" />
 
           <TextInput
             id="name"
@@ -84,7 +84,7 @@ const submit = () => {
           <InputError class="mt-2" :message="form.errors.email" />
         </div>
         <div class="mt-4">
-          <InputLabel for="number" value="Number" />
+          <InputLabel for="number" value="Numéro" />
 
           <TextInput
             id="number"
@@ -99,7 +99,7 @@ const submit = () => {
         </div>
 
         <div class="mt-4">
-          <InputLabel for="password" value="Password" />
+          <InputLabel for="password" value="Mot de passe" />
 
           <TextInput
             id="password"
@@ -114,7 +114,7 @@ const submit = () => {
         </div>
 
         <div class="mt-4">
-          <InputLabel for="password_confirmation" value="Confirm Password" />
+          <InputLabel for="password_confirmation" value="Confirmer le mot de passe" />
 
           <TextInput
             id="password_confirmation"
@@ -131,13 +131,13 @@ const submit = () => {
           />
         </div>
         <div class="mt-4">
-            <InputLabel for="roles" value="Roles" />
+            <InputLabel for="roles" value="Rôles" />
             <MultiSelect
               v-model="form.role"
               :options="props.roles"
               :multiple="false"
               :close-on-select="true"
-              placeholder="Pick some"
+              placeholder="Choisir un rôle"
               label="name"
               track-by="id"
               class="w-full"
@@ -153,7 +153,7 @@ const submit = () => {
             :class="{ 'opacity-25': form.processing }"
             :disabled="form.processing"
           >
-            Create User
+            Créer l'utilisateur
           </PrimaryButton>
         </div>
       </form>

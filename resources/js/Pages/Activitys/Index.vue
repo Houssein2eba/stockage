@@ -31,41 +31,39 @@ const filteredActivities = computed(() => {
 const date = ref(props.dates);
 const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return format(date, 'EEEE, MMMM d, yyyy - h:mm a');
+    return format(date, 'EEEE, d MMMM yyyy - HH:mm');
 };
 
 
 watch(date, (newDate) => {
-
     const formattedDate = format(newDate, 'yyyy-MM-dd');
     router.get(`/activity`, { dates: formattedDate }, { preserveState: true, preserveScroll: true });
 });
 const formatModelName = (modelType) => {
-    if (!modelType) return 'System';
+    if (!modelType) return 'Système';
     return modelType.split('\\').pop();
 };
 
 </script>
 
 <template>
-    <Head title="Activities" />
+    <Head title="Journal d'activité" />
 
-        <H1>Activity Log</H1>
+        <H1>Journal des activités</H1>
 
         <div class="mb-4 w-1/2">
-
-            <h2>Select Date</h2>
-        <DatePicker v-model="date" />
+            <h2>Sélectionner une date</h2>
+            <DatePicker v-model="date" />
         </div>
 
         <Table class="w-full">
             <template #header>
                 <tr>
                     <TableHeaderCell>Action</TableHeaderCell>
-                    <TableHeaderCell>Performed By</TableHeaderCell>
-                    <TableHeaderCell>Related To</TableHeaderCell>
-                    <TableHeaderCell>Time</TableHeaderCell>
-                    <TableHeaderCell>Details</TableHeaderCell>
+                    <TableHeaderCell>Effectué par</TableHeaderCell>
+                    <TableHeaderCell>Relatif à</TableHeaderCell>
+                    <TableHeaderCell>Date et heure</TableHeaderCell>
+                    <!-- <TableHeaderCell>Détails</TableHeaderCell> -->
                 </tr>
             </template>
             <template #body>
@@ -80,29 +78,29 @@ const formatModelName = (modelType) => {
                             {{ activity.description }}
                         </span>
                     </TableDataCell>
-                    <TableDataCell>{{ activity.causer?.name ?? 'System' }}</TableDataCell>
+                    <TableDataCell>{{ activity.causer?.name ?? 'Système' }}</TableDataCell>
                     <TableDataCell>
-                        {{ formatModelName(activity.subject_type) }}s
+                        {{ formatModelName(activity.subject_type) === 'Order' ? 'Ventes' : formatModelName(activity.subject_type) }}
+
                     </TableDataCell>
                     <TableDataCell>{{ formatDate(activity.created_at) }}</TableDataCell>
-                    <TableDataCell>
+                    <!-- <TableDataCell>
                         <Link
                             :href="route('activity.view', activity.id)"
                             class=" hover:text-green-600 hover:underline">
-                            View Details
+                            Voir détails
                         </Link>
-                    </TableDataCell>
+                    </TableDataCell> -->
                 </TableRow>
             </template>
         </Table>
-                    <!-- Pagination  -->
+        <!-- Pagination  -->
         <div class="flex items-center justify-between mt-4">
             <div class="text-sm text-gray-700">
-                Showing <span class="font-medium">{{ activities.from }}</span> to
-                <span class="font-medium">{{ activities.to }}</span> of
-                <span class="font-medium">{{ activities.total }}</span> results
+                Affichage de <span class="font-medium">{{ activities.from }}</span> à
+                <span class="font-medium">{{ activities.to }}</span> sur
+                <span class="font-medium">{{ activities.total }}</span> résultats
             </div>
             <Pagination :links="activities.links" />
         </div>
-
 </template>

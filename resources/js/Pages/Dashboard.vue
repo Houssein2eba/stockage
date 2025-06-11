@@ -27,38 +27,38 @@ const props = defineProps({
 </script>
 
 <template>
-    <Head title="Dashboard" />
+    <Head title="Tableau de bord" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                Dashboard
+                Tableau de bord
             </h2>
         </template>
 
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <!-- Stats -->
+                <!-- Statistiques -->
                 <div class="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-4">
-                    <!-- Total Products -->
+                    <!-- Produits totaux -->
                     <div class="p-6 bg-white rounded-lg shadow-md">
                         <div class="flex items-center">
                             <div class="p-3 rounded-full bg-indigo-100">
                                 <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                                 </svg>
                             </div>
                             <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Total Products</p>
+                                <p class="text-sm font-medium text-gray-500">Produits totaux</p>
                                 <p class="text-2xl font-bold text-gray-700">{{ stats.totalProducts }}</p>
                             </div>
                         </div>
                         <div class="mt-4">
-                            <a href="/products" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">View all products</a>
+                            <a href="/products" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Voir tous les produits</a>
                         </div>
                     </div>
 
-                    <!-- Low Stock Products -->
+                    <!-- Produits en rupture -->
                     <div class="p-6 bg-white rounded-lg shadow-md">
                         <div class="flex items-center">
                             <div class="p-3 rounded-full bg-red-100">
@@ -67,20 +67,19 @@ const props = defineProps({
                                 </svg>
                             </div>
                             <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Low Stock Products</p>
+                                <p class="text-sm font-medium text-gray-500">Produits en rupture</p>
                                 <p class="text-2xl font-bold text-gray-700">{{ stats.lowStockCount }}</p>
                             </div>
                         </div>
                         <div class="mt-4">
                             <Link
-
                             class="text-sm font-medium text-red-600 hover:text-red-500"
                             :href="route('products.lowStock')"
-                            >  View Low Stock</Link>
+                            >Voir les ruptures</Link>
                         </div>
                     </div>
 
-                    <!-- Total Sales -->
+                    <!-- Ventes totales -->
                     <div class="p-6 bg-white rounded-lg shadow-md">
                         <div class="flex items-center">
                             <div class="p-3 rounded-full bg-green-100">
@@ -89,7 +88,7 @@ const props = defineProps({
                                 </svg>
                             </div>
                             <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Total Sales</p>
+                                <p class="text-sm font-medium text-gray-500">Ventes totales</p>
                                 <p class="text-2xl font-bold text-gray-700">{{ stats.totalSales }}</p>
                             </div>
                         </div>
@@ -97,11 +96,11 @@ const props = defineProps({
                             <Link
                                 class="text-sm font-medium text-green-600 hover:text-green-500"
                                 :href="route('sales.index')"
-                            >View all sales</Link>
+                            >Voir toutes les ventes</Link>
                         </div>
                     </div>
 
-                    <!-- Revenue -->
+                    <!-- Chiffre d'affaires -->
                     <div class="p-6 bg-white rounded-lg shadow-md">
                         <div class="flex items-center">
                             <div class="p-3 rounded-full bg-blue-100">
@@ -110,64 +109,64 @@ const props = defineProps({
                                 </svg>
                             </div>
                             <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Total Revenue</p>
+                                <p class="text-sm font-medium text-gray-500">Chiffre d'affaires</p>
                                 <p class="text-2xl font-bold text-gray-700">{{ formatPrice(stats.totalRevenue) }}</p>
                             </div>
                         </div>
                         <div class="mt-2">
-                            <p class="text-sm font-medium text-gray-600">Profit: {{ formatPrice(stats.totalProfit) }}</p>
+                            <p class="text-sm font-medium text-gray-600">Bénéfice : {{ formatPrice(stats.totalProfit) }}</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Today's Stats -->
+                <!-- Statistiques du jour -->
                 <div class="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-2">
-                    <!-- Today's Sales -->
+                    <!-- Ventes du jour -->
                     <div class="p-6 bg-white rounded-lg shadow-md">
-                        <h3 class="mb-4 text-lg font-semibold text-gray-700">Today's Summary</h3>
+                        <h3 class="mb-4 text-lg font-semibold text-gray-700">Résumé du jour</h3>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Sales Today</p>
+                                <p class="text-sm font-medium text-gray-500">Ventes aujourd'hui</p>
                                 <p class="text-xl font-bold text-green-700">{{ stats.todaySales }} </p>
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Revenue Today</p>
+                                <p class="text-sm font-medium text-gray-500">CA aujourd'hui</p>
                                 <p class="text-xl font-bold text-gray-700">{{ formatPrice(stats.todayRevenue) }}</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Payment Status -->
+                    <!-- Statut des paiements -->
                     <div class="p-6 bg-white rounded-lg shadow-md">
-                        <h3 class="mb-4 text-lg font-semibold text-gray-700">Payment Status</h3>
+                        <h3 class="mb-4 text-lg font-semibold text-gray-700">Statut des paiements</h3>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Total Paid</p>
+                                <p class="text-sm font-medium text-gray-500">Total payé</p>
                                 <p class="text-xl font-bold text-green-600">{{ formatPrice(stats.paidAmount) }}</p>
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Total Due</p>
+                                <p class="text-sm font-medium text-gray-500">Total dû</p>
                                 <p class="text-xl font-bold text-red-600">{{ formatPrice(stats.dueAmount) }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Recent Sales -->
+                <!-- Ventes récentes -->
                 <div class="mb-8 bg-white rounded-lg shadow-md">
                     <div class="flex items-center justify-between px-6 py-4 border-b">
-                        <h3 class="text-lg font-semibold text-gray-700">Recent Sales</h3>
-                        <Link :href="route('sales.index')" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">View All</Link>
+                        <h3 class="text-lg font-semibold text-gray-700">Ventes récentes</h3>
+                        <Link :href="route('sales.index')" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Voir tout</Link>
                     </div>
                     <div class="p-6">
                         <Table class="w-full">
                             <template #header>
                                 <TableRow>
-                                    <TableHeaderCell>Invoice</TableHeaderCell>
-                                    <TableHeaderCell>Customer</TableHeaderCell>
+                                    <TableHeaderCell>Facture</TableHeaderCell>
+                                    <TableHeaderCell>Client</TableHeaderCell>
                                     <TableHeaderCell>Date</TableHeaderCell>
-                                    <TableHeaderCell>Amount</TableHeaderCell>
-                                    <TableHeaderCell>Status</TableHeaderCell>
+                                    <TableHeaderCell>Montant</TableHeaderCell>
+                                    <TableHeaderCell>Statut</TableHeaderCell>
                                 </TableRow>
                             </template>
                             <template #body>
@@ -175,7 +174,7 @@ const props = defineProps({
                                     <TableDataCell class="py-3">{{ sale.reference }}</TableDataCell>
                                     <TableDataCell class="py-3">
                                         <div class="truncate">
-                                        <div class="text-sm font-medium text-gray-900">{{ sale.client?.name || 'No Client' }}</div>
+                                        <div class="text-sm font-medium text-gray-900">{{ sale.client?.name || 'Aucun client' }}</div>
                                         <div class="text-xs text-gray-400">{{ sale.client?.number || '--' }}</div>
                                     </div>
                                     </TableDataCell>
@@ -188,7 +187,11 @@ const props = defineProps({
                                             'bg-yellow-100 text-yellow-800': sale.status === 'pending',
                                             'bg-red-100 text-red-800': sale.status === 'cancelled'
                                         }">
-                                            {{ sale.status }}
+                                            {{
+                                                sale.status === 'paid' ? 'Payé' :
+                                                sale.status === 'pending' ? 'En attente' :
+                                                'Annulé'
+                                            }}
                                         </span>
                                     </TableDataCell>
                                 </TableRow>
@@ -197,21 +200,21 @@ const props = defineProps({
                     </div>
                 </div>
 
-                <!-- Popular products -->
+                <!-- Produits populaires -->
                 <div class="mb-8 bg-white rounded-lg shadow-md">
                     <div class="flex items-center justify-between px-6 py-4 border-b">
-                        <h3 class="text-lg font-semibold text-gray-700">Popular Products</h3>
-                        <a href="/sales" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">View All</a>
+                        <h3 class="text-lg font-semibold text-gray-700">Produits populaires</h3>
+                        <a href="/sales" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Voir tout</a>
                     </div>
                     <div class="p-6">
                         <Table class="w-full">
                             <template #header>
                                 <TableRow>
-                                    <TableHeaderCell>Name</TableHeaderCell>
+                                    <TableHeaderCell>Nom</TableHeaderCell>
                                     <TableHeaderCell>Description</TableHeaderCell>
-                                    <TableHeaderCell>Price</TableHeaderCell>
-                                    <TableHeaderCell>Sold</TableHeaderCell>
-                                    <TableHeaderCell>Total Revenue</TableHeaderCell>
+                                    <TableHeaderCell>Prix</TableHeaderCell>
+                                    <TableHeaderCell>Vendus</TableHeaderCell>
+                                    <TableHeaderCell>CA généré</TableHeaderCell>
                                 </TableRow>
                             </template>
                             <template #body>
@@ -219,7 +222,6 @@ const props = defineProps({
                                     <TableDataCell class="py-3">{{ product.name }}</TableDataCell>
                                     <TableDataCell class="py-3">
                                         {{ product.description }}
-
                                     </TableDataCell>
                                     <TableDataCell class="py-3">{{ formatPrice(product.price) }} MRU</TableDataCell>
                                     <TableDataCell class="py-3">{{ product.total_quantity }}</TableDataCell>
@@ -230,25 +232,25 @@ const props = defineProps({
                     </div>
                 </div>
 
-                <!-- Additional Statistics Info -->
+                <!-- Informations supplémentaires -->
                 <div class="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-3">
                     <div class="col-span-1 p-6 bg-white rounded-lg shadow-md sm:col-span-1">
-                        <h3 class="mb-4 text-lg font-semibold text-gray-700">Categories</h3>
+                        <h3 class="mb-4 text-lg font-semibold text-gray-700">Catégories</h3>
                         <p class="text-2xl font-bold text-gray-700">{{ stats.totalCategories }}</p>
-                        <Link :href="route('categories.index')" class="mt-2 text-sm font-medium text-indigo-600 hover:text-indigo-500">Manage Categories</Link>
+                        <Link :href="route('categories.index')" class="mt-2 text-sm font-medium text-indigo-600 hover:text-indigo-500">Gérer les catégories</Link>
                     </div>
 
                     <div class="col-span-1 p-6 bg-white rounded-lg shadow-md sm:col-span-1">
                         <h3 class="mb-4 text-lg font-semibold text-gray-700">Clients</h3>
                         <p class="text-2xl font-bold text-gray-700">{{ stats.clientCount }}</p>
-                        <Link :href="route('clients.index')" class="mt-2 text-sm font-medium text-indigo-600 hover:text-indigo-500">Manage Clients</Link>
+                        <Link :href="route('clients.index')" class="mt-2 text-sm font-medium text-indigo-600 hover:text-indigo-500">Gérer les clients</Link>
                     </div>
 
                     <div class="col-span-1 p-6 bg-white rounded-lg shadow-md sm:col-span-2">
-                        <h3 class="mb-4 text-lg font-semibold text-gray-700">Quick Links</h3>
+                        <h3 class="mb-4 text-lg font-semibold text-gray-700">Accès rapide</h3>
                         <div class="grid grid-cols-2 gap-4">
-                            <Link :href="route('products.create')" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Add New Product</Link>
-                            <Link :href="route('sales.create') " class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700">Create New Sale</Link>
+                            <Link :href="route('products.create')" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Ajouter un produit</Link>
+                            <Link :href="route('sales.create') " class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700">Nouvelle vente</Link>
                         </div>
                     </div>
                 </div>

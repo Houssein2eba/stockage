@@ -1,6 +1,6 @@
 <script setup>
 import Checkbox from '@/Components/Checkbox.vue';
-import GuestLayout from '@/Layouts/GuestLayout.vue';
+import GuestLayout from '@/layouts/GuestLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
@@ -32,7 +32,7 @@ const passwordField = ref(null);
 const submit = () => {
     form.post(route('login'), {
         onSuccess: () => {
-            toast.success('Login successful!', {
+            toast.success('Connexion réussie !', {
                 position: 'top-right',
                 timeout: 3000,
             });
@@ -59,12 +59,12 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Log in" />
+        <Head title="Connexion" />
 
         <div class="w-full max-w-md mx-auto p-6">
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Welcome Back</h1>
-                <p class="text-gray-600 dark:text-gray-400 mt-2">Please login to continue</p>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Bienvenue</h1>
+                <p class="text-gray-600 dark:text-gray-400 mt-2">Veuillez vous connecter pour continuer</p>
             </div>
 
             <div
@@ -76,7 +76,7 @@ const submit = () => {
 
             <form @submit.prevent="submit" class="space-y-6">
                 <div>
-                    <InputLabel for="login" value="Email or Phone" class="text-gray-700 dark:text-gray-300" />
+                    <InputLabel for="login" value="Email ou Téléphone" class="text-gray-700 dark:text-gray-300" />
                     <div class="mt-2 relative">
                         <TextInput
                             id="login"
@@ -84,7 +84,7 @@ const submit = () => {
                             class="block w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                             v-model="form.login"
                             required
-                            
+
                             autocomplete="username"
                             :class="{ 'border-red-500 ring-red-500': form.errors.login }"
                         />
@@ -93,7 +93,7 @@ const submit = () => {
                 </div>
 
                 <div>
-                    <InputLabel for="password" value="Password" class="text-gray-700 dark:text-gray-300" />
+                    <InputLabel for="password" value="Mot de passe" class="text-gray-700 dark:text-gray-300" />
                     <div class="mt-2 relative">
                         <TextInput
                             id="password"
@@ -116,7 +116,7 @@ const submit = () => {
                             v-model:checked="form.remember"
                             class="ring-2 text-blue-500 ring-blue-500 dark:focus:ring-blue-600 dark:border-gray-600"
                         />
-                        <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Remember me</span>
+                        <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Se souvenir de moi</span>
                     </label>
 
                     <Link
@@ -124,26 +124,26 @@ const submit = () => {
                         :href="route('password.request')"
                         class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline"
                     >
-                        Forgot password?
+                        Mot de passe oublié ?
                     </Link>
                 </div>
 
                 <div class="mt-6">
-    <PrimaryButton
-        class="w-full py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white rounded-lg transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex justify-center items-center"
-        :class="{ 'opacity-75 cursor-not-allowed': form.processing }"
-        :disabled="form.processing"
-    >
-        <template v-if="form.processing">
-            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span>Logging in...</span>
-        </template>
-        <span v-else>Log In</span>
-    </PrimaryButton>
-</div>
+                    <PrimaryButton
+                        class="w-full py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white rounded-lg transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex justify-center items-center"
+                        :class="{ 'opacity-75 cursor-not-allowed': form.processing }"
+                        :disabled="form.processing"
+                    >
+                        <template v-if="form.processing">
+                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Connexion en cours...</span>
+                        </template>
+                        <span v-else>Se connecter</span>
+                    </PrimaryButton>
+                </div>
             </form>
         </div>
     </GuestLayout>

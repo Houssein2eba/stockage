@@ -59,7 +59,7 @@ const exportExcel=() => {
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            Export to Excel
+            Exporter vers Excel
           </button>
                 </div>
             </div>
@@ -68,19 +68,19 @@ const exportExcel=() => {
             <!-- Stats -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-2">Total Orders</h2>
+                    <h2 class="text-lg font-semibold text-gray-800 mb-2">totale ventes</h2>
                     <p class="text-2xl font-bold text-blue-600">{{ props.client.orders_count}}</p>
                 </div>
 
                 <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-2">Pending Depts</h2>
+                    <h2 class="text-lg font-semibold text-gray-800 mb-2">Dettes impayées</h2>
                     <p class="text-2xl font-bold text-red-500">{{ amountFormat(props.client.depts_amount) }} MRU</p>
                 </div>
             </div>
 
             <!-- Orders List -->
             <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-lg font-bold text-gray-900 mb-4">Orders</h2>
+                <h2 class="text-lg font-bold text-gray-900 mb-4">Ventes</h2>
 
                 <div v-if="props.orders.data" class="space-y-4">
                     <div

@@ -8,17 +8,17 @@
                 <!-- Company Header -->
                 <div class="flex justify-between mb-8">
                     <div>
-                        <h1 class="text-3xl font-bold text-gray-900">INVOICE</h1>
-                        <p class="text-sm text-gray-600 mt-1">Stock Management System</p>
-                        <p class="text-sm text-gray-600">123 Main Street, City</p>
-                        <p class="text-sm text-gray-600">Phone: +222 00 00 00 00</p>
-                        <p class="text-sm text-gray-600">Email: contact@stockmanagement.com</p>
+                        <h1 class="text-3xl font-bold text-gray-900">FACTURE</h1>
+                        <p class="text-sm text-gray-600 mt-1">Système de Gestion de Stock</p>
+                        <p class="text-sm text-gray-600">123 Rue Principale, Ville</p>
+                        <p class="text-sm text-gray-600">Téléphone: +222 00 00 00 00</p>
+                        <p class="text-sm text-gray-600">Email: contact@gestionstock.com</p>
                     </div>
                     <div class="text-right">
                         <div class="text-4xl font-bold text-blue-600">#{{ sale.reference }}</div>
                         <p class="text-sm text-gray-600 mt-1">Date: {{ formatDate(sale.created_at) }}</p>
-                        <p class="text-sm text-gray-600">Payment Method: {{ sale.payment?.name || 'Cash' }}</p>
-                        <p class="text-sm text-gray-600">Status:
+                        <p class="text-sm text-gray-600">Méthode de Paiement: {{ sale.payment?.name || 'Espèces' }}</p>
+                        <p class="text-sm text-gray-600">Statut:
                             <span :class="{
                                 'px-2 py-0.5 rounded-full text-xs font-medium': true,
                                 'bg-green-100 text-green-800': sale.status === 'paid',
@@ -33,11 +33,11 @@
 
                 <!-- Client Details -->
                 <div v-if="sale.client" class="border-t border-b border-gray-200 py-6 mb-8">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Client Information</h2>
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Informations Client</h2>
                     <div class="grid grid-cols-2 gap-x-8">
                         <div>
-                            <p class="font-medium text-gray-800">Name: {{ sale.client.name }}</p>
-                            <p class="text-gray-600">Phone: {{ sale.client.number }}</p>
+                            <p class="font-medium text-gray-800">Nom: {{ sale.client.name }}</p>
+                            <p class="text-gray-600">Téléphone: {{ sale.client.number }}</p>
                         </div>
                     </div>
                 </div>
@@ -47,9 +47,9 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead>
                             <tr>
-                                <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                                <th class="px-4 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                                <th class="px-4 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                                <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produit</th>
+                                <th class="px-4 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
+                                <th class="px-4 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Quantité</th>
                                 <th class="px-4 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                             </tr>
                         </thead>
@@ -79,7 +79,7 @@
                         :href="route('sales.index')"
                         class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                     >
-                        Back
+                        Retour
                     </Link>
                     <button
                         @click="downloadPdf"
@@ -88,7 +88,7 @@
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        Download PDF
+                        Télécharger PDF
                     </button>
 
                 </div>

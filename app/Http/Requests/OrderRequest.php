@@ -25,8 +25,8 @@ class OrderRequest extends FormRequest
     {
 
 
-
-        $isClient = $this->client===null ? false : true;
+        $isClient = $this->client==null ? false : true;
+        // dd($this);
 
 
         return [
@@ -35,7 +35,7 @@ class OrderRequest extends FormRequest
         'stock.id' => ['required', 'uuid', 'exists:stocks,id'],
 
         // paid field
-        'paid' => $isClient ? ['nullable', 'boolean'] : ['required', 'boolean'],
+        'paid' => $isClient ? ['in:1,0', 'boolean'] : ['in:1', 'boolean'],
 
         // items array
         'products' => ['required', 'array', 'min:1'],
@@ -49,12 +49,29 @@ class OrderRequest extends FormRequest
     public function messages()
     {
         return [
-            'client.id.exists' => 'The selected client does not exist.',
-            'stock.id.exists' => 'The selected stock does not exist.',
-            'products.*.product.id.exists' => 'The selected product does not exist.',
-            'products.required' => 'At least one product is required.',
-            'products.*.quantity.min' => 'The quantity must be at least 1.',
-            'paid.boolean' => 'The paid field must be true or false.',
+
+        // stock.id
+        'stock.id.required' => 'Le stock est obligatoire.',
+        'stock.id.exists' => 'Le stock sélectionné n\'existe pas.',
+
+        // paid
+        'paid.in' => 'payement est obligatoire pour les non-clients.',
+        'paid.boolean' => 'Le champ payé doit être vrai  ou faux .',
+
+        // products
+        'products.required' => 'La liste des produits est obligatoire.',
+        'products.array' => 'Le champ produits doit être une liste.',
+        'products.min' => 'Vous devez sélectionner au moins un produit.',
+
+        // products.*.product.id
+        'products.*.product.id.required' => 'Chaque produit doit avoir un identifiant.',
+
+        'products.*.product.id.exists' => 'Le produit sélectionné n\'existe pas.',
+
+        // products.*.quantity
+        'products.*.quantity.required' => 'La quantité est obligatoire pour chaque produit.',
+        'products.*.quantity.integer' => 'La quantité doit être un nombre entier.',
+        'products.*.quantity.min' => 'La quantité doit être d\'au moins 1.',
         ];
     }
 

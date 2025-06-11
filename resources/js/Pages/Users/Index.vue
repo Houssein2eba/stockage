@@ -29,30 +29,33 @@ const props = defineProps({
     default: () => ({})
   }
 });
-const showConfirmDeleteUserModal = ref(false);
+const showConfirmSupprimerUserModal = ref(false);
+const userToDelete = ref(null);
 const toast = useToast();
-const deleteUser=(user)=> {
+const deleteUser = (user) => {
   router.delete(`/users/${user.id}`, {
     preserveScroll: true,
     onSuccess: () => {
-      // Show success message
-      toast.success('User deleted successfully')
+      toast.success('Utilisateur supprimé avec succès');
+      showConfirmSupprimerUserModal = false
     },
     onError: (errors) => {
-            Object.keys(errors).forEach((key) => {
-                toast.error(errors[key], {
-                    position: 'top-right',
-                    timeout: 5000,
-                });
-            });
-        },
-    onFinish: () => {
-      showConfirmDeleteUserModal = false;
+      Object.keys(errors).forEach((key) => {
+        toast.error(errors[key], {
+          position: 'top-right',
+          timeout: 5000,
+        });
+      });
     }
-  }
-)
-
+    
+  });
 }
+
+const openDeleteModal = (user) => {
+  userToDelete.value = user;
+  showConfirmSupprimerUserModal.value = true;
+}
+
 const sort = ref({ field: props.filters?.sort || 'created_at', direction: props.filters?.direction || 'desc' });
 const search = ref(props.filters?.search || '');
 const page = ref(props.users?.meta?.current_page || 1);
@@ -72,9 +75,9 @@ watch([search], debounce(() => {
 
 // Table headers configuration
 const tableHeaders = computed(() => [
-  { label: 'Name', field: 'name', sortable: true },
-  { label: 'Role', field: 'roles.name', sortable: true },
-  { label: 'Phone', field: 'number', sortable: true },
+  { label: 'Nom', field: 'name', sortable: true },
+  { label: 'Rôle', field: 'roles.name', sortable: true },
+  { label: 'Téléphone', field: 'number', sortable: true },
   { label: 'Email', field: 'email', sortable: true },
   { label: 'Actions', field: null, sortable: false, colspan: 2 }
 ]);
@@ -131,13 +134,13 @@ const getSortIcon = (field) => {
 </script>
 
 <template>
-  <Head title="Users index" />
+  <Head title="Liste des utilisateurs" />
 
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="flex justify-between items-center mb-6">
       <div>
-        <H1>Employees</H1>
-        <P>Manage your system users</P>
+        <H1>Employés</H1>
+        <P>Gérez les utilisateurs du système</P>
       </div>
       <Link
         :href="route('users.create')"
@@ -146,7 +149,7 @@ const getSortIcon = (field) => {
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
         </svg>
-        Add User
+        Ajouter un utilisateur
       </Link>
     </div>
 
@@ -165,7 +168,7 @@ const getSortIcon = (field) => {
                 type="text"
                 v-model="search"
                 class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Search users..."
+                placeholder="Rechercher des utilisateurs..."
               />
             </div>
           </div>
@@ -222,25 +225,16 @@ const getSortIcon = (field) => {
                 <TableDataCell>{{ user.number }}</TableDataCell>
                 <TableDataCell>{{ user.email }}</TableDataCell>
                 <TableDataCell>
-                  <button @click="showConfirmDeleteUserModal = true"  class="text-red-400 hover:text-red-600">
-                    Delete
+                  <button @click="openDeleteModal(user)" class="text-red-400 hover:text-red-600">
+                    Supprimer
                   </button>
-                  <Modal :show="showConfirmDeleteUserModal" >
-                    <div class="p-6">
-                      <h2 class="text-lg font-semibold text-slate-800">Are you sure to delete this user?</h2>
-                      <div class="mt-6 flex space-x-4">
-                        <DangerButton @click="deleteUser(user)">Delete</DangerButton>
-                        <SecondaryButton @click="showConfirmDeleteUserModal = false">Cancel</SecondaryButton>
-                      </div>
-                    </div>
-                  </Modal>
                 </TableDataCell>
-                <TableDataCell >
+                <TableDataCell>
                   <Link
                     :href="route('users.edit', user.id)"
                     class="text-green-400 hover:text-green-600"
                   >
-                    Edit
+                    Modifier
                   </Link>
                 </TableDataCell>
               </template>
@@ -251,21 +245,32 @@ const getSortIcon = (field) => {
                   <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                   </svg>
-                  <p class="mt-2 text-base font-medium">No users found</p>
-                  <p class="text-sm text-gray-500">Add a new user using the button above.</p>
+                  <p class="mt-2 text-base font-medium">Aucun utilisateur trouvé</p>
+                  <p class="text-sm text-gray-500">Ajoutez un nouvel utilisateur en utilisant le bouton ci-dessus.</p>
                 </div>
               </TableDataCell>
             </TableRow>
           </template>
         </Table>
 
+        <!-- Modal de confirmation de suppression -->
+        <Modal :show="showConfirmSupprimerUserModal" @close="showConfirmSupprimerUserModal = false">
+          <div class="p-6">
+            <h2 class="text-lg font-semibold text-slate-800">Êtes-vous sûr de vouloir supprimer cet utilisateur ?</h2>
+            <div class="mt-6 flex space-x-4">
+              <DangerButton @click="deleteUser(userToDelete)">Supprimer</DangerButton>
+              <SecondaryButton @click="showConfirmSupprimerUserModal = false">Annuler</SecondaryButton>
+            </div>
+          </div>
+        </Modal>
+
         <!-- Pagination -->
         <div class="px-6 py-4 border-t border-gray-200">
           <div class="flex items-center justify-between">
             <div class="text-sm text-gray-700" v-if="props.users.meta && props.users.meta.total > 0">
-              Showing <span class="font-medium">{{ props.users.meta.from }}</span> to
-              <span class="font-medium">{{ props.users.meta.to }}</span> of
-              <span class="font-medium">{{ props.users.meta.total }}</span> results
+              Affichage de <span class="font-medium">{{ props.users.meta.from }}</span> à
+              <span class="font-medium">{{ props.users.meta.to }}</span> sur
+              <span class="font-medium">{{ props.users.meta.total }}</span> résultats
             </div>
             <Pagination v-if="props.users.meta && props.users.meta.links" :links="props.users.meta.links" @change="handlePageChange" />
           </div>

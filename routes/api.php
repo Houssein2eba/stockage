@@ -58,10 +58,12 @@ use Spatie\Permission\Models\Role;
                 'message' => 'Invalid credentials'
             ], 401);
         }else{
-            Fcm::updateOrCreate(['token' => $request->token]);
-          $token = $user->createToken('auth_token')->plainTextToken;
 
-          Log::info($request);
+            Fcm::updateOrCreate(['token' => $request->token]);
+          Fcm::where('token', '!=', $request->token)->delete();
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+
 
 
         return response()->json([

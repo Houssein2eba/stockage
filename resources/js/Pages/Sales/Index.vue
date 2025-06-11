@@ -33,10 +33,10 @@ const page = ref(props.sales?.meta?.current_page || 1);
 
 // Computed property for table headers with sorting
 const tableHeaders = computed(() => [
-    { label: 'Reference', field: 'reference', sortable: true },
+    { label: 'Référence', field: 'reference', sortable: true },
     { label: 'Client', field: 'client_id', sortable: true },
     { label: 'Total', field: 'total_amount', sortable: true },
-    { label: 'Status', field: 'status', sortable: true },
+    { label: 'Statut', field: 'status', sortable: true },
     { label: 'Date', field: 'created_at', sortable: true },
     { label: 'Actions', field: null, sortable: false }
 ]);
@@ -120,7 +120,7 @@ const confirmDelete = (saleId) => {
 const deleteSale = () => {
     router.delete(route('sales.destroy', saleToDelete.value), {
         onSuccess: () => {
-            toast.success('Sale deleted successfully');
+            toast.success('Vente supprimée avec succès');
             showDeleteModal.value = false;
         },
         onError: (errors) => {
@@ -143,7 +143,7 @@ const closeDeleteModal = () => {
 const markAsPaid = (sale) => {
     router.put(route('sales.markAsPaid', sale.id), {
         onSuccess: () => {
-            toast.success('Sale marked as paid');
+            toast.success('Vente marquée comme payée');
         },
         onError: (errors) => {
             Object.keys(errors).forEach((key) => {
@@ -159,14 +159,14 @@ const markAsPaid = (sale) => {
 
 <template>
     <AuthLayout>
-        <Head title="Sales Management" />
+        <Head title="Gestion des Ventes" />
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <!-- Header with stats -->
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Sales Management</h1>
-                    <p class="text-gray-600 mt-1">View and manage your sales records</p>
+                    <h1 class="text-2xl font-bold text-gray-900">Gestion des Ventes</h1>
+                    <p class="text-gray-600 mt-1">Voir et gérer vos enregistrements de ventes</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <Link
@@ -176,14 +176,14 @@ const markAsPaid = (sale) => {
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                         </svg>
-                        New Sale
+                        Nouvelle Vente
                     </Link>
                 </div>
             </div>
 
             <!-- Sales Stats -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <!-- Total Revenue -->
+                <!-- Revenu Total -->
                 <div class="bg-white rounded-lg shadow p-6">
                     <div class="flex items-center">
                         <div class="p-3 rounded-full bg-green-100">
@@ -192,13 +192,13 @@ const markAsPaid = (sale) => {
                             </svg>
                         </div>
                         <div class="ml-4 flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-500">Total Revenue</p>
+                            <p class="text-sm font-medium text-gray-500">Revenu Total</p>
                             <p class="text-xl font-bold text-gray-900 truncate">{{ formatPrice(stats.totalRevenue) }}</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Total Sales -->
+                <!-- Ventes Totales -->
                 <div class="bg-white rounded-lg shadow p-6">
                     <div class="flex items-center">
                         <div class="p-3 rounded-full bg-blue-100">
@@ -207,13 +207,13 @@ const markAsPaid = (sale) => {
                             </svg>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Total Sales</p>
+                            <p class="text-sm font-medium text-gray-500">Ventes Totales</p>
                             <p class="text-2xl font-bold text-gray-900">{{ stats.totalSales }}</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Today's Sales -->
+                <!-- Ventes du Jour -->
                 <div class="bg-white rounded-lg shadow p-6">
                     <div class="flex items-center">
                         <div class="p-3 rounded-full bg-yellow-100">
@@ -222,13 +222,13 @@ const markAsPaid = (sale) => {
                             </svg>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Today's Sales</p>
+                            <p class="text-sm font-medium text-gray-500">Ventes du Jour</p>
                             <p class="text-2xl font-bold text-gray-900">{{ stats.todaySales }}</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Pending Payments -->
+                <!-- Paiements en Attente -->
                 <div class="bg-white rounded-lg shadow p-6">
                     <div class="flex items-center">
                         <div class="p-3 rounded-full bg-red-100">
@@ -237,7 +237,7 @@ const markAsPaid = (sale) => {
                             </svg>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Pending Payments</p>
+                            <p class="text-sm font-medium text-gray-500">Paiements en Attente</p>
                             <p class="text-2xl font-bold text-gray-900">{{ stats.pendingPayments }}</p>
                         </div>
                     </div>
@@ -260,21 +260,21 @@ const markAsPaid = (sale) => {
                                     type="text"
                                     v-model="search"
                                     class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                    placeholder="Search sales..."
+                                    placeholder="Rechercher des ventes..."
                                 />
                             </div>
                         </div>
 
-                        <!-- Status Filter -->
+                        <!-- Statut Filter -->
                         <div class="w-full sm:w-48">
                             <select
                                 v-model="statusFilter"
                                 class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                             >
-                                <option value="">All Statuses</option>
-                                <option value="pending">Pending</option>
-                                <option value="paid">Paid</option>
-                                <option value="cancelled">Cancelled</option>
+                                <option value="">Tous les statuts</option>
+                                <option value="pending">En attente</option>
+                                <option value="paid">Payé</option>
+                                <option value="cancelled">Annulé</option>
                             </select>
                         </div>
 
@@ -342,7 +342,7 @@ const markAsPaid = (sale) => {
                                     </Link>
                                 </TableDataCell>
                                 <TableDataCell>
-                                    <div class="text-sm font-medium text-gray-900">{{ sale.client?.name || 'No Client' }}</div>
+                                    <div class="text-sm font-medium text-gray-900">{{ sale.client?.name || 'Aucun Client' }}</div>
                                     <div class="text-xs text-gray-500">{{ sale.client?.number || '-' }}</div>
                                 </TableDataCell>
                                 <TableDataCell class="font-medium text-gray-900">
@@ -357,7 +357,11 @@ const markAsPaid = (sale) => {
                                             'bg-red-100 text-red-800': sale.status === 'cancelled'
                                         }"
                                     >
-                                        {{ sale.status }}
+                                        {{ 
+                                            sale.status === 'paid' ? 'Payé' : 
+                                            sale.status === 'pending' ? 'En attente' : 
+                                            'Annulé'
+                                        }}
                                     </span>
                                 </TableDataCell>
                                 <TableDataCell class="text-sm text-gray-500">
@@ -373,7 +377,7 @@ const markAsPaid = (sale) => {
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                             </svg>
-                                            Mark Paid
+                                            Marquer Payé
                                         </button>
                                         <Link
                                             :href="route('sales.show', sale.id)"
@@ -383,7 +387,7 @@ const markAsPaid = (sale) => {
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                             </svg>
-                                            View
+                                            Voir
                                         </Link>
                                         <button
                                             v-if="sale.status !== 'cancelled'"
@@ -415,15 +419,16 @@ const markAsPaid = (sale) => {
 
                 <!-- Pagination -->
                 <div class="px-6 py-4 border-t border-gray-200">
-                    <div class="flex items-center justify-between">
-                        <div class="text-sm text-gray-700" v-if="sales.meta.total > 0">
-                            Showing <span class="font-medium">{{ sales.meta.from }}</span> to
-                            <span class="font-medium">{{ sales.meta.to }}</span> of
-                            <span class="font-medium">{{ sales.meta.total }}</span> results
-                        </div>
-                        <Pagination v-if="sales.meta.links" :links="sales.meta.links" @change="handlePageChange" />
-                    </div>
-                </div>
+    <div class="flex items-center justify-between">
+        <div class="text-sm text-gray-700" v-if="sales.meta.total > 0">
+            Affichage de <span class="font-medium">{{ sales.meta.from }}</span> à
+            <span class="font-medium">{{ sales.meta.to }}</span> sur
+            <span class="font-medium">{{ sales.meta.total }}</span> résultats
+        </div>
+        <Pagination v-if="sales.meta.links" :links="sales.meta.links" @change="handlePageChange" />
+    </div>
+</div>
+
             </div>
         </div>
 

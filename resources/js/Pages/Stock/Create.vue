@@ -5,8 +5,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Create New Stock Location</h1>
-          <p class="text-sm text-gray-500">Add a new inventory storage location</p>
+          <h1 class="text-2xl font-bold text-gray-900">Créer un nouvel emplacement de stock</h1>
+          <p class="text-sm text-gray-500">Ajouter un nouvel emplacement de stockage d'inventaire</p>
         </div>
         <div>
           <Link
@@ -17,7 +17,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back to Stocks
+            Retour aux stocks
           </Link>
         </div>
       </div>
@@ -26,7 +26,7 @@
         <!-- Form Header -->
         <div class="px-4 py-5 sm:px-6 bg-gradient-to-r from-blue-600 to-blue-800">
           <h3 class="text-lg leading-6 font-medium text-white">
-            Stock Location Information
+            Informations sur l'emplacement de stock
           </h3>
         </div>
 
@@ -35,7 +35,7 @@
           <div class="border-t border-gray-200 px-4 py-5 sm:p-0">
             <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt class="text-sm font-medium text-gray-500">
-                <label for="name" class="block">Stock Name *</label>
+                <label for="name" class="block">Nom du stock *</label>
               </dt>
               <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                 <input
@@ -44,7 +44,7 @@
                   v-model="form.name"
                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   :class="{ 'border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500': form.errors.name }"
-                  placeholder="e.g. Main Warehouse"
+                  placeholder="ex. Entrepôt principal"
                 />
                 <p v-if="form.errors.name" class="mt-2 text-sm text-red-600">
                   {{ form.errors.name }}
@@ -54,7 +54,7 @@
 
             <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt class="text-sm font-medium text-gray-500">
-                <label for="location" class="block">Location *</label>
+                <label for="location" class="block">Emplacement *</label>
               </dt>
               <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                 <input
@@ -63,7 +63,7 @@
                   v-model="form.location"
                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   :class="{ 'border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500': form.errors.location }"
-                  placeholder="e.g. Building A, Floor 2"
+                  placeholder="ex. Bâtiment A, étage 2"
                 />
                 <p v-if="form.errors.location" class="mt-2 text-sm text-red-600">
                   {{ form.errors.location }}
@@ -83,7 +83,7 @@
               @click="reset"
               class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              Reset
+              Réinitialiser
             </button>
             <button
               type="submit"
@@ -94,7 +94,7 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Create Stock Location
+              Créer l'emplacement de stock
             </button>
           </div>
         </form>
@@ -119,7 +119,7 @@ const form = useForm({
 const submit = () => {
       form.post(route('stocks.store'), {
         onSuccess: () => {
-            toast.success('Stock created successfully')
+            toast.success('Stock créé avec succès')
             form.reset()
         },
         onError: (errors) => {

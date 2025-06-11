@@ -42,7 +42,7 @@ const updateProduct = () => {
     editForm.put(route('products.update', editForm.id), {
         preserveScroll: true,
         onSuccess: () => {
-            toast.success('Product updated successfully');
+            toast.success('Produit mis à jour avec succès');
         },
         onError: (errors) => {
             Object.keys(errors).forEach((key) => {
@@ -58,12 +58,12 @@ const updateProduct = () => {
 
 <template>
     <AuthLayout>
-        <Head title="Edit Product" />
+        <Head title="Modifier Produit" />
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="mb-8 flex items-center justify-between">
                 <div>
-                    <H1>Edit Product</H1>
-                    <P>Update the product information</P>
+                    <H1>Modifier Produit</H1>
+                    <P>Mettre à jour les informations du produit</P>
                 </div>
                 <div>
                     <Link
@@ -73,7 +73,7 @@ const updateProduct = () => {
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
-                        Back to Products
+                        Retour aux Produits
                     </Link>
                 </div>
             </div>
@@ -81,17 +81,17 @@ const updateProduct = () => {
 
         <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
             <div class="flex justify-between items-start">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Edit Product</h3>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Modifier Produit</h3>
             </div>
             <div class="mt-4 space-y-4">
                 <div>
-                    <InputLabel for="edit-name" value="Product Name" class="mb-1.5" />
+                    <InputLabel for="edit-name" value="Nom du Produit" class="mb-1.5" />
                     <TextInput
                         id="edit-name"
                         type="text"
                         class="w-full"
                         v-model="editForm.name"
-                        placeholder="Enter product name"
+                        placeholder="Entrez le nom du produit"
                         :class="{ 'ring-1 ring-red-500  mt-2': editForm.errors.name }"
                     />
                     <InputError class="mt-1.5" :message="editForm.errors.name" />
@@ -104,20 +104,20 @@ const updateProduct = () => {
                         rows="3"
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
                         v-model="editForm.description"
-                        placeholder="Enter product description"
+                        placeholder="Entrez la description du produit"
                         :class="{ 'ring-1 ring-red-500  mt-2': editForm.errors.description }"
                     ></textarea>
                     <InputError class="mt-1.5" :message="editForm.errors.description" />
                 </div>
 
-                
+
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <InputLabel for="edit-price" value="Price" class="mb-1.5" />
+                        <InputLabel for="edit-price" value="Prix" class="mb-1.5" />
                         <div class="relative rounded-md shadow-sm">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <span class="text-gray-500 sm:text-sm">MRU</span>
+                                <span class="text-gray-500 sm:text-sm">UMR</span>
                             </div>
                             <TextInput
                                 id="edit-price"
@@ -134,7 +134,7 @@ const updateProduct = () => {
                     </div>
 
                     <div>
-                        <InputLabel for="edit-quantity" value="Quantity" class="mb-1.5" />
+                        <InputLabel for="edit-quantity" value="Quantité" class="mb-1.5" />
                         <TextInput
                             id="edit-quantity"
                             type="number"
@@ -150,7 +150,7 @@ const updateProduct = () => {
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <InputLabel for="edit-min_quantity" value="Min Quantity" class="mb-1.5" />
+                        <InputLabel for="edit-min_quantity" value="Quantité Minimale" class="mb-1.5" />
                         <TextInput
                             id="edit-min_quantity"
                             type="number"
@@ -164,7 +164,7 @@ const updateProduct = () => {
                         <InputError class="mt-1.5" :message="editForm.errors.min_quantity" />
                     </div>
                     <div>
-                        <InputLabel for="cost" value="Cost" class="mb-1.5" />
+                        <InputLabel for="cost" value="Coût" class="mb-1.5" />
                         <TextInput
                             id="cost"
                             type="number"
@@ -179,16 +179,16 @@ const updateProduct = () => {
                     </div>
                 </div>
 
-                <!-- Added Expiry Date Field -->
+                <!-- Added Date d'expiration Field -->
                 <div>
-                    <InputLabel for="expiry_date" value="Expiry Date" class="mb-1.5" />
+                    <InputLabel for="expiry_date" value="Date d'expiration" class="mb-1.5" />
                     <DatePicker
                         v-model="editForm.expiry_date"
                         class="w-full"
                         :class="{ 'ring-1 ring-red-500 rounded-md mt-2': editForm.errors.expiry_date }"
                         showIcon
                         dateFormat="yy-mm-dd"
-                        placeholder="Select expiry date"
+                        placeholder="Sélectionnez la date d'expiration"
                     />
                     <InputError class="mt-1.5" :message="editForm.errors.expiry_date" />
                 </div>
@@ -199,7 +199,7 @@ const updateProduct = () => {
                     <VueMultiselect
                         v-model="editForm.stock"
                         :options="props.stocks"
-                        placeholder="Select stock"
+                        placeholder="Sélectionnez le stock"
                         label="name"
                         track-by="id"
                         :class="{ 'ring-1 ring-red-500 rounded-md mt-2': editForm.errors.stock }"
@@ -208,13 +208,13 @@ const updateProduct = () => {
                 </div>
 
                 <div>
-                    <InputLabel for="edit-category" value="Category" class="mb-1.5" />
+                    <InputLabel for="edit-category" value="Catégorie" class="mb-1.5" />
                     <VueMultiselect
                         v-model="editForm.category"
                         :options="categories"
                         :multiple="true"
                         :close-on-select="true"
-                        placeholder="Select category"
+                        placeholder="Sélectionnez la catégorie"
                         label="name"
                         track-by="id"
                         :class="{ 'ring-1 ring-red-500  mt-2': editForm.errors.category }"
@@ -229,24 +229,23 @@ const updateProduct = () => {
                 class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
                 :disabled="editForm.processing"
             >
-                <span v-if="!editForm.processing">Update Product</span>
+                <span v-if="!editForm.processing">Mettre à jour le Produit</span>
                 <span v-else class="flex items-center">
                     <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Updating...
+                    Mise à jour...
                 </span>
             </PrimaryButton>
             <button
                 @click="$inertia.get(route('products.index'))"
                 class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
             >
-                Cancel
+                Annuler
             </button>
         </div>
     </AuthLayout>
 </template>
 
 <style src="vue-multiselect/dist/vue-multiselect.css"></style>
-

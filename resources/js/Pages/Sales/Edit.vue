@@ -5,14 +5,14 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <!-- Header -->
             <div class="mb-8">
-                <h1 class="text-2xl font-bold text-gray-900">Edit Sale #{{ sale.reference }}</h1>
-                <p class="mt-1 text-sm text-gray-600">Update sale details and items</p>
+                <h1 class="text-2xl font-bold text-gray-900">Modifier la vente #{{ sale.reference }}</h1>
+                <p class="mt-1 text-sm text-gray-600">Mettre à jour les détails et articles de la vente</p>
             </div>
 
             <div class="bg-white rounded-lg shadow divide-y divide-gray-200">
                 <!-- Sale Info Section -->
                 <div class="p-6">
-                    <h2 class="text-lg font-medium text-gray-900 mb-4">Sale Information</h2>
+                    <h2 class="text-lg font-medium text-gray-900 mb-4">Informations sur la vente</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Client</label>
@@ -21,7 +21,7 @@
                                 :options="clients"
                                 :searchable="true"
                                 :allow-empty="true"
-                                placeholder="Select client"
+                                placeholder="Sélectionner un client"
                                 label="name"
                                 track-by="id"
                             />
@@ -35,7 +35,7 @@
                 <!-- Items Section -->
                 <div class="p-6">
                     <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-lg font-medium text-gray-900">Sale Items</h2>
+                        <h2 class="text-lg font-medium text-gray-900">Articles vendus</h2>
                         <button
                             type="button"
                             @click="addItem"
@@ -44,7 +44,7 @@
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             </svg>
-                            Add Item
+                            Ajouter un article
                         </button>
                     </div>
 
@@ -53,12 +53,12 @@
                         <div v-for="(item, index) in form.items" :key="index" class="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
                             <div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Product</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Produit</label>
                                     <VueMultiselect
                                         v-model="item.product"
                                         :options="products"
                                         :searchable="true"
-                                        placeholder="Select product"
+                                        placeholder="Sélectionner un produit"
                                         label="name"
                                         track-by="id"
                                         @input="updateItemTotal(index)"
@@ -76,7 +76,7 @@
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Quantité</label>
                                     <TextInput
                                         type="number"
                                         v-model="item.quantity"
@@ -109,7 +109,7 @@
                     </div>
 
                     <div v-if="form.items.length === 0" class="text-center py-12">
-                        <p class="text-gray-500">No items added yet. Click "Add Item" to start.</p>
+                        <p class="text-gray-500">Aucun article ajouté. Cliquez sur "Ajouter un article" pour commencer.</p>
                     </div>
                 </div>
 
@@ -117,10 +117,10 @@
                 <div class="p-6">
                     <div class="flex justify-between items-center">
                         <div class="text-gray-700">
-                            Total Items: <span class="font-medium">{{ form.items.length }}</span>
+                            Articles totaux: <span class="font-medium">{{ form.items.length }}</span>
                         </div>
                         <div class="text-xl font-bold text-gray-900">
-                            Total Amount: {{ formatPrice(totalAmount) }}
+                            Montant total: {{ formatPrice(totalAmount) }}
                         </div>
                     </div>
                 </div>
@@ -131,7 +131,7 @@
                         :href="route('sales.index')"
                         class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                     >
-                        Cancel
+                        Annuler
                     </Link>
                     <button
                         type="button"
@@ -139,7 +139,7 @@
                         :disabled="form.processing"
                         class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
                     >
-                        <span v-if="!form.processing">Update Sale</span>
+                        <span v-if="!form.processing">Mettre à jour la vente</span>
                         <span v-else class="flex items-center">
                             <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -217,7 +217,7 @@ const removeItem = (index) => {
 const updateSale = () => {
     form.put(route('sales.update', props.sale.id), {
         onSuccess: () => {
-            toast.success('Sale updated successfully')
+            toast.success('Vente mise à jour avec succès')
         },
         onError: (errors) => {
             Object.keys(errors).forEach((key) => {

@@ -27,13 +27,12 @@ function handleImageError() {
 </script>
 
 <template>
-    <Head title="Welcome to Stock Management" />
+    <Head title="Bienvenue dans le Gestionnaire de Stock" />
     <div class="bg-gray-50 text-black/50 dark:bg-black dark:text-white/50">
         <div class="relative flex min-h-screen flex-col items-center justify-center selection:bg-blue-500 selection:text-white">
             <div class="relative w-full max-w-2xl px-6 lg:max-w-7xl">
                 <header class="grid grid-cols-2 items-center gap-2 py-10 lg:grid-cols-3">
                     <div class="flex lg:col-start-2 lg:justify-center">
-                        
                         <svg class="h-12 w-auto text-blue-600 lg:h-16" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                         </svg>
@@ -44,7 +43,7 @@ function handleImageError() {
                             :href="route('dashboard')"
                             class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-blue-500 dark:text-white dark:hover:text-white/80"
                         >
-                            Dashboard
+                            Tableau de bord
                         </Link>
 
                         <template v-else>
@@ -55,7 +54,7 @@ function handleImageError() {
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clip-rule="evenodd" />
                                 </svg>
-                                Log in
+                                Connexion
                             </Link>
                         </template>
                     </nav>
@@ -64,10 +63,10 @@ function handleImageError() {
                 <main class="mt-6">
                     <div class="text-center mb-12">
                         <h1 class="text-4xl font-bold text-black dark:text-white mb-4">
-                            Stock Management System
+                            Système de Gestion de Stock
                         </h1>
                         <p class="text-xl text-gray-600 dark:text-gray-400">
-                            Efficiently manage your inventory, track products, and handle orders
+                            Gérez efficacement votre inventaire, suivez vos produits et traitez vos commandes
                         </p>
                     </div>
 
@@ -79,9 +78,9 @@ function handleImageError() {
                                 </svg>
                             </div>
                             <div>
-                                <h2 class="text-xl font-semibold text-black dark:text-white">Inventory Management</h2>
+                                <h2 class="text-xl font-semibold text-black dark:text-white">Gestion d'Inventaire</h2>
                                 <p class="mt-4 text-gray-600 dark:text-gray-400">
-                                    Keep track of your products, monitor stock levels, and receive alerts for low inventory.
+                                    Suivez vos produits, surveillez les niveaux de stock et recevez des alertes pour les stocks bas.
                                 </p>
                             </div>
                         </div>
@@ -93,9 +92,9 @@ function handleImageError() {
                                 </svg>
                             </div>
                             <div>
-                                <h2 class="text-xl font-semibold text-black dark:text-white">Order Management</h2>
+                                <h2 class="text-xl font-semibold text-black dark:text-white">Gestion des Commandes</h2>
                                 <p class="mt-4 text-gray-600 dark:text-gray-400">
-                                    Process orders efficiently, track order status, and manage customer information.
+                                    Traitez les commandes efficacement, suivez leur statut et gérez les informations clients.
                                 </p>
                             </div>
                         </div>
@@ -107,9 +106,9 @@ function handleImageError() {
                                 </svg>
                             </div>
                             <div>
-                                <h2 class="text-xl font-semibold text-black dark:text-white">Analytics & Reports</h2>
+                                <h2 class="text-xl font-semibold text-black dark:text-white">Analyses & Rapports</h2>
                                 <p class="mt-4 text-gray-600 dark:text-gray-400">
-                                    Generate detailed reports, analyze sales trends, and make data-driven decisions.
+                                    Générez des rapports détaillés, analysez les tendances de vente et prenez des décisions éclairées.
                                 </p>
                             </div>
                         </div>
@@ -121,9 +120,9 @@ function handleImageError() {
                                 </svg>
                             </div>
                             <div>
-                                <h2 class="text-xl font-semibold text-black dark:text-white">User Management</h2>
+                                <h2 class="text-xl font-semibold text-black dark:text-white">Gestion des Utilisateurs</h2>
                                 <p class="mt-4 text-gray-600 dark:text-gray-400">
-                                    Manage user roles and permissions, ensuring secure access to system features.
+                                    Gérez les rôles et permissions des utilisateurs pour un accès sécurisé aux fonctionnalités.
                                 </p>
                             </div>
                         </div>
@@ -131,7 +130,7 @@ function handleImageError() {
                 </main>
 
                 <footer class="py-16 text-center text-sm text-black dark:text-white/70">
-                    Stock Management System v{{ laravelVersion }} (PHP v{{ phpVersion }})
+                    Système de Gestion de Stock 
                 </footer>
             </div>
         </div>

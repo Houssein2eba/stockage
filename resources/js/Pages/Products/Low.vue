@@ -81,16 +81,16 @@ const totalValue = computed(() => {
 
 <template>
   <AuthLayout>
-    <Head title="Low Stock Products" />
+    <Head title="Produits en faible stock" />
 
     <div class="max-w-7xl mx-auto px-4 py-8">
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h1 class="text-2xl font-bold">Low Stock Products</h1>
-          <p class="text-sm text-gray-500">Products with quantity 10 or less</p>
+          <h1 class="text-2xl font-bold">Produits en faible stock</h1>
+          <p class="text-sm text-gray-500">Produits avec une quantité de 10 ou moins</p>
         </div>
         <div class="bg-yellow-100 text-yellow-800 px-4 py-2 rounded text-sm">
-          Total low stock value: {{ formatPrice(totalValue) }}
+          Valeur totale du stock faible : {{ formatPrice(totalValue) }}
         </div>
       </div>
 
@@ -98,7 +98,7 @@ const totalValue = computed(() => {
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="Search products by name..."
+          placeholder="Rechercher des produits par nom..."
           class="w-full sm:w-1/2 px-4 py-2 border rounded shadow-sm text-sm"
         />
       </div>
@@ -128,7 +128,7 @@ const totalValue = computed(() => {
               <TableDataCell>
                 <div>
                   <div class="font-medium">{{ product.name }}</div>
-                  
+
                 </div>
               </TableDataCell>
               <TableDataCell>
@@ -150,7 +150,7 @@ const totalValue = computed(() => {
 
             <TableRow v-if="products.data.length === 0">
               <TableDataCell colspan="5" class="text-center text-gray-500 py-4">
-                No products found.
+                Aucun produit trouvé.
               </TableDataCell>
             </TableRow>
           </template>
@@ -158,7 +158,7 @@ const totalValue = computed(() => {
 
         <div v-if="products.meta.total > 0" class="p-4 border-t">
           <div class="flex justify-between items-center text-sm">
-            <div>Showing {{ products.meta.from }} to {{ products.meta.to }} of {{ products.meta.total }}</div>
+            <div>Affichage de {{ products.meta.from }} à {{ products.meta.to }} sur {{ products.meta.total }}</div>
             <Pagination :links="products.meta.links" @change="handlePageChange" />
           </div>
         </div>

@@ -1,15 +1,12 @@
 <template>
   <AuthLayout>
-    <Head title="Create Category" />
-
+    <Head title="Créer une Catégorie" />
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-8 flex items-center justify-between">
         <div>
-          <H1 >Create New Category</H1>
-          <P>Add a new category to organize your Products</P>
-          
-
+          <H1>Créer une Nouvelle Catégorie</H1>
+          <P>Ajouter une nouvelle catégorie pour organiser vos Produits</P>
         </div>
         <div>
             <Link
@@ -19,23 +16,23 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                Back to Categories
+                Retour aux Catégories
             </Link>
         </div>
       </div>
 
       <div class="bg-white rounded-lg shadow lg:w-1/2 sm:w-1/3 mx-auto">
-        <div class="px-4  rounded-md py-5 sm:p-6">
+        <div class="px-4 rounded-md py-5 sm:p-6">
           <form @submit.prevent="submit" class="space-y-6">
             <div>
-              <InputLabel for="name" value="Category Name" class="mb-1.5" />
+              <InputLabel for="name" value="Nom de la Catégorie" class="mb-1.5" />
               <TextInput
                 id="name"
                 type="text"
                 class="w-full"
                 v-model="form.name"
-                placeholder="Enter category name"
-                :class="{ 'ring-1 ring-red-500  mt-2': form.errors.name }"
+                placeholder="Saisir le nom de la catégorie"
+                :class="{ 'ring-1 ring-red-500 mt-2': form.errors.name }"
               />
               <InputError class="mt-1.5" :message="form.errors.name" />
             </div>
@@ -47,8 +44,8 @@
                 rows="3"
                 class="w-full rounded-md ring-1 ring-gray-300 bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
                 v-model="form.description"
-                placeholder="Enter category description"
-                :class="{ 'ring-1 ring-red-500  mt-2': form.errors.description }"
+                placeholder="Saisir la description de la catégorie"
+                :class="{ 'ring-1 ring-red-500 mt-2': form.errors.description }"
               ></textarea>
               <InputError class="mt-1.5" :message="form.errors.description" />
             </div>
@@ -58,20 +55,20 @@
                 :href="route('categories.index')"
                 class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
               >
-                Cancel
+                Annuler
               </Link>
               <PrimaryButton
                 class="px-4 py-2"
                 :class="{ 'opacity-25': form.processing }"
                 :disabled="form.processing"
               >
-                <span v-if="!form.processing">Create Category</span>
+                <span v-if="!form.processing">Créer la Catégorie</span>
                 <span v-else class="flex items-center gap-2">
                   <svg class="animate-spin -ml-1 mr-1 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Processing...
+                  Traitement en cours...
                 </span>
               </PrimaryButton>
             </div>
@@ -99,10 +96,10 @@ const form = useForm({
   description: ''
 });
 
-const submit=()=>{
+const submit = () => {
     form.post(route('categories.store'), {
             onSuccess: () => {
-              toast.success('Category created successfully');
+              toast.success('Catégorie créée avec succès');
               router.visit(route('categories.index'));
             },
             onError: (errors) => {

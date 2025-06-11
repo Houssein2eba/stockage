@@ -5,8 +5,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="flex items-center justify-between mb-8">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Create Sale</h1>
-                    <p class="text-sm text-gray-500">Create a new sale record</p>
+                    <h1 class="text-2xl font-bold text-gray-900">Créer une vente</h1>
+                    <p class="text-sm text-gray-500">Créer un nouvel enregistrement de vente</p>
                 </div>
                 <div>
                     <Link
@@ -16,7 +16,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
-                        Back to Sales
+                        Retour aux ventes
                     </Link>
                 </div>
             </div>
@@ -30,7 +30,7 @@
                             v-model="form.client"
                             :options="clients"
                             :custom-label="client => `${client.name} - ${client.number}`"
-                            placeholder="Select or search client"
+                            placeholder="Sélectionner ou rechercher un client"
                             label="name"
                             track-by="id"
                             :class="{ 'border-red-500': form.errors.client }"
@@ -40,13 +40,13 @@
 
                     <!-- Stock Selection -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Stock Location</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Emplacement du stock</label>
                         <div class="p-4 border rounded-lg">
                             <VueMultiselect
                                 v-model="form.stock"
                                 :options="stocks"
                                 :custom-label="stock => `${stock.name} (${stock.location})`"
-                                placeholder="Select stock location"
+                                placeholder="Sélectionner un emplacement de stock"
                                 label="name"
                                 track-by="id"
                                 @input="updateAvailableProducts"
@@ -68,7 +68,7 @@
                                         const quantity = getAvailableQuantity(form.stock, prod);
                                         return `${prod.name} - ${formatPrice(prod.price)} (Available: ${quantity})`;
                                     }"
-                                    placeholder="Select product"
+                                    placeholder="Sélectionner un produit"
                                     label="name"
                                     track-by="id"
                                     :class="{ 'border-red-500': form.errors[`products.${index}.product`] }"
@@ -84,7 +84,7 @@
                                     :max="getAvailableQuantity(form.stock, product.product)"
                                     v-model.number="product.quantity"
                                     class="w-full"
-                                    placeholder="Qty"
+                                    placeholder="Qté"
                                     :class="{ 'border-red-500': form.errors[`products.${index}.quantity`] }"
                                 />
                                 <InputError class="mt-1.5" :message="form.errors[`products.${index}.quantity`]" />
@@ -95,14 +95,14 @@
                                 <span class="font-medium">{{ formatPrice(calculateProductTotal(product)) }}</span>
                             </div>
 
-                            <!-- Remove button -->
+                            <!-- Supprimer button -->
                             <button
                                 type="button"
                                 @click="removeProduct(index)"
                                 class="text-red-500 hover:text-red-700"
                                 v-if="form.products.length > 1"
                             >
-                                Remove
+                                Supprimer
                             </button>
                         </div>
 
@@ -112,13 +112,13 @@
                             class="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200"
                             :disabled="!form.stock"
                         >
-                            + Add Product
+                            + Ajouter un produit
                         </button>
                     </div>
 
                     <!-- Paid Checkbox -->
                     <div class="w-24">
-                        <label for="paid-checkbox" class="block text-sm font-medium text-gray-700 mb-2">Paid</label>
+                        <label for="paid-checkbox" class="block text-sm font-medium text-gray-700 mb-2">Payé</label>
                         <input
                             id="paid-checkbox"
                             type="checkbox"
@@ -133,7 +133,7 @@
                     <!-- Total -->
                     <div class="border-t pt-4">
                         <div class="flex justify-between items-center text-lg font-medium">
-                            <span>Total Amount:</span>
+                            <span>Montant total :</span>
                             <span>{{ formatPrice(calculateTotal) }}</span>
                         </div>
                     </div>
@@ -144,7 +144,7 @@
                             :href="route('sales.index')"
                             class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
                         >
-                            Cancel
+                            Annuler
                         </Link>
                         <button
                             type="submit"
@@ -152,8 +152,8 @@
                             :disabled="form.processing"
                             :class="{ 'opacity-75 cursor-not-allowed': form.processing }"
                         >
-                            <span v-if="form.processing">Saving...</span>
-                            <span v-else>Save Sale</span>
+                            <span v-if="form.processing">Enregistrement...</span>
+                            <span v-else>Enregistrer la vente</span>
                         </button>
                     </div>
                 </div>
@@ -251,7 +251,7 @@ const addProduct = () => {
     })
 }
 
-// Remove product
+// Supprimer product
 const removeProduct = (index) => {
     if (form.products.length > 1) {
         form.products.splice(index, 1)
@@ -272,7 +272,7 @@ const submitForm = () => {
     form.post(route('sales.store'), {
         data: submissionData,
         onSuccess: () => {
-            toast.success('Sale created successfully')
+            toast.success('Vente créée avec succès')
             form.reset()
         },
         onError: (errors) => {

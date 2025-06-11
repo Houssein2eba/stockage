@@ -51,13 +51,13 @@ props.stocks.data.forEach(stock => {
 });
 
 const tableHeaders = computed(() => [
-    { label: 'Product', field: 'name', sortable: true },
+    { label: 'Produit', field: 'name', sortable: true },
     { label: 'Category', field: null, sortable: false },
-    { label: 'Price', field: 'price', sortable: true },
-    { label: 'Quantity', field: 'quantity', sortable: true },
-    { label: 'Total Value', field: null, sortable: false },
-    { label: 'Edit', field: null, sortable: false },
-    { label: 'Delete', field: null, sortable: false }
+    { label: 'Prix', field: 'price', sortable: true },
+    { label: 'Quantite', field: 'quantity', sortable: true },
+    { label: 'Prix Totale', field: null, sortable: false },
+    { label: 'Modifier', field: null, sortable: false },
+    { label: 'Supprimer', field: null, sortable: false }
 ]);
 
 // Modal functions
@@ -187,22 +187,22 @@ const handleStockPageChange = (url) => {
 
 <template>
   <AuthLayout>
-    <Head title="Stock Management" />
+    <Head title="Gestion des stocks" />
 
     <!-- Delete Confirmation Modal -->
     <Modal :show="showDeleteModal" @close="closeDeleteModal" maxWidth="md">
       <div class="p-6">
         <h2 class="text-lg font-medium text-gray-900">
-          Confirm Product Deletion
+          Confirmation de suppression de produit
         </h2>
 
         <p class="mt-1 text-sm text-gray-600">
-          Are you sure you want to delete "{{ productToDelete?.name }}"? This action cannot be undone.
+          Êtes-vous sûr de vouloir supprimer "{{ productToDelete?.name }}" ? Cette action est irréversible.
         </p>
 
         <div class="mt-6 flex justify-end">
           <SecondaryButton @click="closeDeleteModal">
-            Cancel
+            Annuler
           </SecondaryButton>
 
           <DangerButton
@@ -210,13 +210,13 @@ const handleStockPageChange = (url) => {
             @click="deleteProduct"
             :disabled="deleteForm.processing"
           >
-            <span v-if="!deleteForm.processing">Delete Product</span>
+            <span v-if="!deleteForm.processing">Supprimer le produit</span>
             <span v-else class="flex items-center">
               <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Deleting...
+              Suppression en cours...
             </span>
           </DangerButton>
         </div>
@@ -227,8 +227,8 @@ const handleStockPageChange = (url) => {
       <!-- Header -->
       <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Stock Management</h1>
-          <p class="text-sm text-gray-500">Manage your stock locations and inventory</p>
+          <h1 class="text-2xl font-bold text-gray-900">Gestion des stocks</h1>
+          <p class="text-sm text-gray-500">Gérez vos emplacements et inventaires de stock</p>
         </div>
         <div class="flex items-center gap-4">
           <Link
@@ -238,7 +238,7 @@ const handleStockPageChange = (url) => {
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            Add New Product
+            Ajouter un nouveau produit
           </Link>
           <button
             @click="exportExcel()"
@@ -247,7 +247,7 @@ const handleStockPageChange = (url) => {
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            Export All
+            Exporter tout
           </button>
         </div>
       </div>
@@ -268,7 +268,7 @@ const handleStockPageChange = (url) => {
                   type="text"
                   v-model="globalSearchQuery"
                   class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Search products across all stocks..."
+                  placeholder="Rechercher des produits dans tous les stocks..."
                 />
               </div>
             </div>
@@ -287,7 +287,7 @@ const handleStockPageChange = (url) => {
                   {{ stock.name }} - {{ stock.location }}
                 </h3>
                 <p class="mt-1 text-sm text-blue-100">
-                  {{ stock.products_count }} products in stock
+                  {{ stock.products_count }} produits disponibles
                 </p>
               </div>
               <div class="flex items-center gap-3">
@@ -315,7 +315,7 @@ const handleStockPageChange = (url) => {
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
-                  Edit
+                  Modifier
                 </Link>
               </div>
             </div>
@@ -370,8 +370,8 @@ const handleStockPageChange = (url) => {
           <div class="px-4 py-5 sm:px-6 border-t border-gray-200">
             <div class="flex justify-between items-center">
               <div>
-                <h3 class="text-lg font-medium leading-6 text-gray-900">Products in Stock</h3>
-                <p class="mt-1 text-sm text-gray-500">Inventory items currently available in this location</p>
+                <h3 class="text-lg font-medium leading-6 text-gray-900">Produits en stock</h3>
+                <p class="mt-1 text-sm text-gray-500">Articles d'inventaire disponibles dans cet emplacement</p>
               </div>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -384,7 +384,7 @@ const handleStockPageChange = (url) => {
                   v-model="stockSearchQueries[stock.id]"
                   @input="handleStockSearch(stock.id)"
                   class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Search products in this stock..."
+                  placeholder="Rechercher des produits dans ce stock..."
                 />
               </div>
             </div>
@@ -426,7 +426,7 @@ const handleStockPageChange = (url) => {
                             {{ product.name }}
                           </Link>
                         </div>
-                        
+
                       </div>
                     </div>
                   </TableDataCell>
@@ -457,7 +457,7 @@ const handleStockPageChange = (url) => {
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
-                      Edit
+                      <span class="hidden sm:inline">Modifier</span>
                     </Link>
                   </TableDataCell>
                   <TableDataCell>
@@ -468,19 +468,19 @@ const handleStockPageChange = (url) => {
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
-                      Delete
+                     Suprimer
                     </button>
                   </TableDataCell>
                 </TableRow>
                 <TableRow v-if="!stock.paginated_products?.data?.length">
                   <TableDataCell colspan="7" class="px-6 py-4 text-center text-sm text-gray-500">
-                    No products found in this stock location
+                    Aucun produit trouvé dans cet emplacement de stock
                   </TableDataCell>
                 </TableRow>
 
                 <TableRow v-if="stock.paginated_products?.data?.length > 0">
                   <TableDataCell colspan="4" class="px-6 py-3 text-right text-sm font-medium text-gray-500">
-                    Total Inventory Value:
+                    Valeur totale du stock:
                   </TableDataCell>
                   <TableDataCell class="px-6 py-3 text-sm font-bold text-gray-900">
                     {{ formatPrice(calculateTotalValue(stock.paginated_products.data)) }}

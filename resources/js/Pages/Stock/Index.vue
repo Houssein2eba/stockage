@@ -5,8 +5,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Inventory Stocks</h1>
-          <p class="text-sm text-gray-500">Manage your product inventory</p>
+          <h1 class="text-2xl font-bold text-gray-900">Stocks d'Inventaire</h1>
+          <p class="text-sm text-gray-500">Gérez votre inventaire de produits</p>
         </div>
         <div>
           <Link
@@ -16,7 +16,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            Add New Stock
+            Ajouter un Nouveau Stock
           </Link>
         </div>
       </div>
@@ -32,7 +32,7 @@
           <input
             type="text"
             class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Search stocks..."
+            placeholder="Rechercher des stocks..."
             v-model="searchQuery"
           />
         </div>
@@ -70,15 +70,15 @@
 
             <div class="grid grid-cols-2 gap-4 mt-6">
             <div>
-                <p class="text-sm text-gray-500">Products Types</p>
+                <p class="text-sm text-gray-500">Types de Produits</p>
                 <p  class="text-lg font-semibold">{{ stock.productsCount }}  </p>
               </div>
               <div>
-                <p class="text-sm text-gray-500">Products Count</p>
+                <p class="text-sm text-gray-500">Nombre de Produits</p>
                 <p  class="text-lg font-semibold">{{ stock.totalProducts }}  </p>
               </div>
               <div>
-                <p class="text-sm text-gray-500">Total Value</p>
+                <p class="text-sm text-gray-500">Valeur Totale</p>
                 <p class="text-lg font-semibold">{{ formatPrice(stock.totalValue) }}</p>
               </div>
               <!-- <div>
@@ -89,7 +89,7 @@
                 <p class="text-xs text-gray-500 mt-1">{{ stock.usedSpace }} / {{ stock.totalSpace }}</p>
               </div> -->
               <div>
-                <p class="text-sm text-gray-500">Last Updated</p>
+                <p class="text-sm text-gray-500">Dernière Mise à Jour</p>
                 <p class="text-sm">{{ formatDate( stock.updated_at) }}</p>
               </div>
             </div>
@@ -103,7 +103,7 @@
               :href="route('stocks.show', stock.id)"
               class="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center"
             >
-              View Details
+              Voir les Détails
               <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
@@ -117,9 +117,9 @@
         <div class="px-6 py-4 border-t border-gray-200">
                     <div class="flex items-center justify-between">
                         <div class="text-sm text-gray-700" v-if="stocks.meta.total > 0">
-                            Showing <span class="font-medium">{{ stocks.meta.from }}</span> to
-                            <span class="font-medium">{{ stocks.meta.to }}</span> of
-                            <span class="font-medium">{{ stocks.meta.total }}</span> results
+                            Affichage de <span class="font-medium">{{ stocks.meta.from }}</span> à
+                            <span class="font-medium">{{ stocks.meta.to }}</span> sur
+                            <span class="font-medium">{{ stocks.meta.total }}</span> résultats
                         </div>
                         <Pagination v-if="stocks.meta.links" :links="stocks.meta.links" @change="handlePageChange" />
                     </div>

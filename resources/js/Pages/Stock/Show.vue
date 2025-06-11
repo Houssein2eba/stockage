@@ -35,9 +35,9 @@ const typeFilter = ref(props.filters.type || '');
 
 // Table headers configuration
 const tableHeaders = computed(() => [
-    { label: 'Product', field: 'product_name', sortable: false },
+    { label: 'Produit', field: 'product_name', sortable: false },
     { label: 'Type', field: 'type', sortable: false },
-    { label: 'Quantity', field: 'quantity', sortable: true },
+    { label: 'Quantité', field: 'quantity', sortable: true },
     { label: 'Date', field: 'crated_at', sortable: true },
 
 
@@ -101,9 +101,9 @@ const clearFilters = () => {
             <!-- Header -->
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Stock Movements</h1>
+                    <h1 class="text-2xl font-bold text-gray-900">Mouvements de Stock</h1>
                     <p class="text-sm text-gray-500">
-                        Movement history for:
+                        Historique des mouvements pour :
                         <span class="font-medium">{{ stock.name }}</span>
                     </p>
                 </div>
@@ -111,7 +111,7 @@ const clearFilters = () => {
                     :href="route('stocks.index')"
                     class="inline-flex items-center px-4 py-2 bg-gray-100 border border-transparent rounded-md font-semibold text-xs text-gray-800 hover:bg-gray-200 focus:outline-none transition"
                 >
-                    Back to Stocks
+                    Retour aux Stocks
                 </Link>
             </div>
 
@@ -121,7 +121,7 @@ const clearFilters = () => {
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <!-- Search Input -->
                         <div>
-                            <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search Products</label>
+                            <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Rechercher des Produits</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -133,14 +133,14 @@ const clearFilters = () => {
                                     type="text"
                                     v-model="searchQuery"
                                     class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                    placeholder="Search products..."
+                                    placeholder="Rechercher produits..."
                                 />
                             </div>
                         </div>
 
                         <!-- Date Filter -->
                         <div>
-                            <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Filter by Date</label>
+                            <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Filtrer par Date</label>
                             <input
                                 id="date"
                                 type="date"
@@ -150,25 +150,25 @@ const clearFilters = () => {
                         </div>
                         <!-- in out filter -->
                         <div>
-                            <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Filter by Type</label>
+                            <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Filtrer par Type</label>
                             <select
                                 id="type"
                                 v-model="typeFilter"
                                 class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                             >
-                                <option value="">All Types</option>
-                                <option value="in">Stock In</option>
-                                <option value="out">Stock Out</option>
+                                <option value="">Tous Types</option>
+                                <option value="in">Entrée Stock</option>
+                                <option value="out">Sortie Stock</option>
                             </select>
                         </div>
 
-                        <!-- Clear Filters -->
+                        <!-- Effacer Filtres -->
                         <div class="flex items-end">
                             <button
                                 @click="clearFilters"
                                 class="inline-flex items-center px-4 py-2 bg-gray-100 border border-transparent rounded-md font-semibold text-xs text-gray-800 hover:bg-gray-200 focus:outline-none transition"
                             >
-                                Clear Filters
+                                Effacer Filtres
                             </button>
                         </div>
                     </div>
@@ -210,7 +210,7 @@ const clearFilters = () => {
                                             'bg-red-100 text-red-800': movement.type === 'out'
                                         }"
                                     >
-                                        {{ movement.type === 'in' ? 'Stock In' : 'Stock Out' }}
+                                        {{ movement.type === 'in' ? 'Entrée Stock' : 'Sortie Stock' }}
                                     </span>
                                 </TableDataCell>
                                 <TableDataCell>
@@ -224,7 +224,7 @@ const clearFilters = () => {
                             </TableRow>
                             <TableRow v-if="movements.data.length === 0">
                                 <TableDataCell colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
-                                    No movements found for the selected filters
+                                    Aucun mouvement trouvé avec les critères actuels
                                 </TableDataCell>
                             </TableRow>
                         </template>
@@ -235,7 +235,7 @@ const clearFilters = () => {
                 <div v-if="movements.meta.total > 0" class="px-6 py-4 border-t border-gray-200">
                     <div class="flex items-center justify-between">
                         <div class="text-sm text-gray-700">
-                            Showing {{ movements.meta.from }} to {{ movements.meta.to }} of {{ movements.meta.total }} movements
+                            Affichage des mouvements {{ movements.meta.from }} à {{ movements.meta.to }} sur un total de {{ movements.meta.total }}
                         </div>
                         <Pagination :links="movements.meta.links" />
                     </div>

@@ -3,7 +3,7 @@ import AuthLayout from "@/layouts/AuthLayout.vue";
 import { Head, Link } from "@inertiajs/vue3";
 import { useToast } from "vue-toastification";
 
-import {formatPrice} from "@/utils/format.js";
+import {formatPrix} from "@/utils/format.js";
 const props = defineProps({
     product: Object
 });
@@ -24,8 +24,8 @@ const getImageLink = (image) => {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="flex items-center justify-between mb-6">
                 <div>
-                    <H1>Product Details</H1>
-                    <P>View and manage product details.</P>
+                    <H1>Détails du Produit</H1>
+                    <P>Voir et gérer les détails du produit.</P>
                 </div>
                 <div>
                     <Link
@@ -35,7 +35,7 @@ const getImageLink = (image) => {
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
-                        Back to Products
+                        Retour aux Produits
                     </Link>
                 </div>
 
@@ -93,38 +93,38 @@ const getImageLink = (image) => {
                             </span>
                         </div>
 
-                        <!-- Price -->
+                        <!-- Prix -->
                         <div class="mb-4">
-                            <h2 class="text-lg font-medium text-gray-900">Price</h2>
-                            <p class="mt-1 text-2xl font-bold text-blue-600">{{ formatPrice(product.price) }}</p>
+                            <h2 class="text-lg font-medium text-gray-900">Prix</h2>
+                            <p class="mt-1 text-2xl font-bold text-blue-600">{{ formatPrix(product.price) }}</p>
                         </div>
 
                         <!-- Description -->
                         <div class="mb-6">
                             <h2 class="text-lg font-medium text-gray-900">Description</h2>
-                            <p class="mt-2 text-gray-600 whitespace-pre-line">{{ product.description || 'No description available' }}</p>
+                            <p class="mt-2 text-gray-600 whitespace-pre-line">{{ product.description || 'Aucune description disponible' }}</p>
                         </div>
 
                         <!-- Additional details -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                             <div>
-                                <h2 class="text-lg font-medium text-gray-900">Created At</h2>
+                                <h2 class="text-lg font-medium text-gray-900">Créé le</h2>
                                 <p class="mt-1 text-gray-600">{{ new Date(product.created_at).toLocaleString() }}</p>
                             </div>
                             <div>
-                                <h2 class="text-lg font-medium text-gray-900">Updated At</h2>
+                                <h2 class="text-lg font-medium text-gray-900">Mis à jour le</h2>
                                 <p class="mt-1 text-gray-600">{{ new Date(product.updated_at).toLocaleString() }}</p>
                             </div>
                             <div v-if="product.cost">
-                                <h2 class="text-lg font-medium text-gray-900">Cost</h2>
-                                <p class="mt-1 text-gray-600">{{ formatPrice(product.cost) }}</p>
+                                <h2 class="text-lg font-medium text-gray-900">Coût</h2>
+                                <p class="mt-1 text-gray-600">{{ formatPrix(product.cost) }}</p>
                             </div>
                             <div >
-                                <h2 class="text-lg font-medium text-gray-900">Benefit</h2>
-                                <p class="mt-1 text-gray-600">{{ product.benefit===0 ? 'no benefit' : formatPrice(product.benefit) }}</p>
+                                <h2 class="text-lg font-medium text-gray-900">Bénéfice</h2>
+                                <p class="mt-1 text-gray-600">{{ product.benefit===0 ? 'aucun bénéfice' : formatPrix(product.benefit) }}</p>
                             </div>
                             <div>
-                                <h2 class="text-lg font-medium text-gray-900">Sold Items</h2>
+                                <h2 class="text-lg font-medium text-gray-900">Articles Vendus</h2>
                                 <p class="mt-1 text-gray-600">{{ product.sold || 0 }}</p>
                             </div>
                         </div>
@@ -140,7 +140,7 @@ const getImageLink = (image) => {
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                 </svg>
-                                Edit Product
+                                Modifier le Produit
                             </Link>
                         </div>
                     </div>
