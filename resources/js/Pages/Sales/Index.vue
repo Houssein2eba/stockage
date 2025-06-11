@@ -1,4 +1,4 @@
-<script setup>
+ <script setup>
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
@@ -162,11 +162,11 @@ const markAsPaid = (sale) => {
         <Head title="Gestion des Ventes" />
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Header with stats -->
+            <!-- En-tête avec statistiques -->
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">Gestion des Ventes</h1>
-                    <p class="text-gray-600 mt-1">Voir et gérer vos enregistrements de ventes</p>
+                    <p class="text-gray-600 mt-1">Consulter et gérer vos enregistrements de ventes</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <Link
@@ -181,7 +181,7 @@ const markAsPaid = (sale) => {
                 </div>
             </div>
 
-            <!-- Sales Stats -->
+            <!-- Statistiques des ventes -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <!-- Revenu Total -->
                 <div class="bg-white rounded-lg shadow p-6">
@@ -193,7 +193,8 @@ const markAsPaid = (sale) => {
                         </div>
                         <div class="ml-4 flex-1 min-w-0">
                             <p class="text-sm font-medium text-gray-500">Revenu Total</p>
-                            <p class="text-xl font-bold text-gray-900 truncate">{{ formatPrice(stats.totalRevenue) }}</p>
+                            <p class="text-xl font-bold text-gray-900 truncate">{{ formatPrice(stats.totalRevenue
+) }}</p>
                         </div>
                     </div>
                 </div>
@@ -244,11 +245,11 @@ const markAsPaid = (sale) => {
                 </div>
             </div>
 
-            <!-- Search and Filter Card -->
+            <!-- Recherche et Filtres -->
             <div class="bg-white rounded-lg border border-gray-200 shadow-xs mb-6">
                 <div class="p-4">
                     <div class="flex flex-col sm:flex-row gap-4">
-                        <!-- Search Input -->
+                        <!-- Champ de recherche -->
                         <div class="flex-1">
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -265,7 +266,7 @@ const markAsPaid = (sale) => {
                             </div>
                         </div>
 
-                        <!-- Statut Filter -->
+                        <!-- Filtre Statut -->
                         <div class="w-full sm:w-48">
                             <select
                                 v-model="statusFilter"
@@ -278,7 +279,7 @@ const markAsPaid = (sale) => {
                             </select>
                         </div>
 
-                        <!-- Date Filter -->
+                        <!-- Filtre Date -->
                         <div class="w-full sm:w-48">
                             <input
                                 type="date"
@@ -290,7 +291,7 @@ const markAsPaid = (sale) => {
                 </div>
             </div>
 
-            <!-- Sales Table -->
+            <!-- Tableau des Ventes -->
             <div class="bg-white rounded-lg border border-gray-200 shadow-xs flex flex-col">
                 <div class="overflow-x-auto flex-1">
                     <Table>
@@ -387,7 +388,7 @@ const markAsPaid = (sale) => {
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                             </svg>
-                                            Voir
+                                            Détails
                                         </Link>
                                         <button
                                             v-if="sale.status !== 'cancelled'"
@@ -397,7 +398,7 @@ const markAsPaid = (sale) => {
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
-                                            Cancel
+                                            Annuler
                                         </button>
                                     </div>
                                 </TableDataCell>
@@ -408,8 +409,8 @@ const markAsPaid = (sale) => {
                                         <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                                         </svg>
-                                        <p class="mt-2 text-sm">No sales found</p>
-                                        <p class="text-sm">Get started by creating a new sale</p>
+                                        <p class="mt-2 text-sm">Aucune vente trouvée</p>
+                                        <p class="text-sm">Commencez par créer une nouvelle vente</p>
                                     </div>
                                 </TableDataCell>
                             </TableRow>
@@ -419,20 +420,19 @@ const markAsPaid = (sale) => {
 
                 <!-- Pagination -->
                 <div class="px-6 py-4 border-t border-gray-200">
-    <div class="flex items-center justify-between">
-        <div class="text-sm text-gray-700" v-if="sales.meta.total > 0">
-            Affichage de <span class="font-medium">{{ sales.meta.from }}</span> à
-            <span class="font-medium">{{ sales.meta.to }}</span> sur
-            <span class="font-medium">{{ sales.meta.total }}</span> résultats
-        </div>
-        <Pagination v-if="sales.meta.links" :links="sales.meta.links" @change="handlePageChange" />
-    </div>
-</div>
-
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-700" v-if="sales.meta.total > 0">
+                            Affichage de <span class="font-medium">{{ sales.meta.from }}</span> à
+                            <span class="font-medium">{{ sales.meta.to }}</span> sur
+                            <span class="font-medium">{{ sales.meta.total }}</span> résultats
+                        </div>
+                        <Pagination v-if="sales.meta.links" :links="sales.meta.links" @change="handlePageChange" />
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Delete confirmation modal -->
+        <!-- Modal de confirmation d'annulation -->
         <Transition name="fade">
             <div v-if="showDeleteModal" class="fixed inset-0 z-50 overflow-y-auto">
                 <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -449,9 +449,9 @@ const markAsPaid = (sale) => {
                                     </svg>
                                 </div>
                                 <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                    <h3 class="text-lg leading-6 font-medium text-gray-900">Cancel Sale</h3>
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900">Annuler la vente</h3>
                                     <div class="mt-2">
-                                        <p class="text-sm text-gray-500">Are you sure you want to cancel this sale? This action cannot be undone.</p>
+                                        <p class="text-sm text-gray-500">Êtes-vous sûr de vouloir annuler cette vente ? Cette action est irréversible.</p>
                                     </div>
                                 </div>
                             </div>
@@ -461,13 +461,13 @@ const markAsPaid = (sale) => {
                                 @click="deleteSale"
                                 class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
                             >
-                                confirm
+                                Confirmer
                             </PrimaryButton>
                             <button
                                 @click="closeDeleteModal"
                                 class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                             >
-                                back
+                                Retour
                             </button>
                         </div>
                     </div>

@@ -63,7 +63,7 @@
                   <p class="text-sm text-gray-500">{{ stock.location }}</p>
                 </div>
               </div>
-              <span class="px-2 py-1 text-xs font-semibold rounded-full" :class="stock.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+              <span class="px-2 py-1 text-xs font-semibold rounded-full" :class="stock.status === 'good' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
                 {{ stock.status }}
               </span>
             </div>

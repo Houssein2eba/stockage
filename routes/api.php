@@ -4,6 +4,7 @@ use App\Http\Controllers\ClientsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Notifications\NotificationController;
 use App\Http\Controllers\Pdf\FactureController;
+use App\Http\Controllers\RolesController;
 use App\Http\Controllers\Sales\SalesController;
 use App\Http\Controllers\Users\UsersController;
 use App\Http\Resources\RolesResource;
@@ -143,11 +144,9 @@ Route::prefix('clients')->group(function () {
 
     });
    Route::prefix('roles')->group(function () {
-       Route::get('/',function(){
-           return response()->json([
-               'roles'=>RolesResource::collection(Role::all())
-           ]);
-       })->name('roles.index');
+       Route::get('/',[RolesController::class,'index'])
+       ->name('roles.index');
+       Route::delete('/{id}',[RolesController::class,'destroy']);
    });
 
     Route::prefix('users')->name('users.')->group(function () {

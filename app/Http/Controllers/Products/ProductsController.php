@@ -429,7 +429,7 @@ public function exportSingle($stockId)
             ->causedBy(auth()->user())
             ->performedOn($product)
             ->withProperties(['attributes' => $attributes])
-            ->log('Product Created');
+            ->log('Ajouter un produit');
     });
 
     return to_route('products.index');
@@ -481,7 +481,7 @@ public function exportSingle($stockId)
                 ->causedBy(auth()->user())
                 ->performedOn($product)
                 ->withProperties(['old' => $old, 'attributes' => $attributes])
-                ->log('Product Updated');
+                ->log('Modifier un produit');
         });
 
         return to_route('products.index');
@@ -507,7 +507,7 @@ public function exportSingle($stockId)
             ->causedBy(auth()->user())
             ->performedOn($product)
             ->withProperties(['old' => $old])
-            ->log('Product Deleted');
+            ->log('Supprimer un produit');
         return back();
     }
 

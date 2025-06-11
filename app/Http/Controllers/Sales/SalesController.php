@@ -165,7 +165,7 @@ public function store(OrderRequest $request)
                 ->withProperties([
                     'attributes' => $order->only(['reference', 'client_id', 'status', 'total_amount']),
                 ])
-                ->log('Order Created');
+                ->log('Ajouter une vente');
 
             return $order->id;
         });
@@ -257,31 +257,54 @@ public function store(OrderRequest $request)
                 ->causedBy(auth()->user())
                 ->performedOn($order)
                 ->withProperties(['old' => $old, 'attributes' => $attributes])
-                ->log('Order Updated');
+                ->log('Modifier une vente');
 
             return back();
         });
     }
 
-    public function destroy($id)
-    {
-        DB::transaction(function () use ($id) {
-            $order = Order::findOrFail($id);
-            $old = $order->toArray();
-            $order->update(['status' => 'cancelled']);
+public function destroy($id)
+{
+    DB::transaction(function () use ($id) {
+        $order = Order::with('products')->findOrFail($id);
+        $old = $order->toArray();
+        
+        // Restituer les quantités des produits
+        foreach ($order->products as $product) {
+            $product->increment('quantity', $product->pivot->quantity);
+            
+            // Si vous utilisez également la gestion des stocks, mettez à jour le stock
+            if (isset($product->pivot->stock_id)) {
+                $product->stocks()->updateExistingPivot($product->pivot->stock_id, [
+                    'products_quantity' => DB::raw('products_quantity + ' . $product->pivot->quantity),
+                    'type' => 'in', // Marquer comme entrée de stock
+                    'stock_date' => now(),
+                ]);
+            }
+        }
 
+        $order->update(['status' => 'cancelled']);
 
-            unset($old['id'], $old['created_at'], $old['updated_at']);
+        unset($old['id'], $old['created_at'], $old['updated_at']);
 
-            activity()
-                ->causedBy(auth()->user())
-                ->performedOn($order)
-                ->withProperties(['old' => $old,'attributes' => $order->toArray()])
-                ->log('Order Cancelled');
-        });
+        activity()
+            ->causedBy(auth()->user())
+            ->performedOn($order)
+            ->withProperties([
+                'old' => $old,
+                'attributes' => $order->toArray(),
+                'restored_quantities' => $order->products->map(function($product) {
+                    return [
+                        'product_id' => $product->id,
+                        'quantity_restored' => $product->pivot->quantity
+                    ];
+                })
+            ])
+            ->log('Annuler une vente et restituer les quantités');
+    });
 
-        return back();
-    }
+    return back();
+}
     public function markAsPaid(Request $request,Order $id)
     {
          $order=Order::findOrFail($id->id);

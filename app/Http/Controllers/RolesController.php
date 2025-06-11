@@ -17,6 +17,13 @@ class RolesController extends Controller
 {
     public function index(Request $request)
     {
+        if($request->wantsJson()){
+            return response()->json([
+                'roles'=>RolesResource::collection(Role::all()
+                ->where('name', '!=', 'admin')),
+                'roles_count'=>Role::where('name', '!=', 'admin')->count(),
+            ]);
+        }
         $request->validate([
             'search' => 'nullable|string',
             'sort' => 'nullable|string|in:name,users_count',
@@ -129,7 +136,7 @@ class RolesController extends Controller
         return to_route('roles.index');
     }
 
-    public function destroy($id)
+    public function destroy(Request $request,$id)
     {
         $role = Role::findOrFail($id);
         $old = $role->toArray();
@@ -142,7 +149,9 @@ class RolesController extends Controller
                 'old' => $old
             ])
             ->log('Deleted role');
-
+         if($request->wantsJson()){
+            return response()->json(['message' => 'Role deleted successfully.']);
+         }
         return to_route('roles.index');
     }
 }

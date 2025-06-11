@@ -65,7 +65,7 @@ class CategoriesController extends Controller
                 ->causedBy(auth()->user())
                 ->performedOn($category)
                 ->withProperties(['attributes' => $attributes])
-                ->log('Category Created');
+                ->log('Ajouter une category');
             DB::commit();
         }catch (\Exception $e){
             DB::rollBack();
@@ -85,9 +85,9 @@ class CategoriesController extends Controller
                 ->causedBy(auth()->user())
                 ->performedOn($category)
                 ->withProperties(['old' => $old])
-                ->log('Category Deleted');
+                ->log('Supprimer une category');
         }
-        return back()->withErrors('Category not found');
+        return back()->withErrors("Category n'existe pas");
     }
 
     public function update(CategoriesRequest $request){
@@ -102,7 +102,7 @@ class CategoriesController extends Controller
             ->causedBy(auth()->user())
             ->performedOn($category)
             ->withProperties(['old' => $old, 'attributes' => $attributes])
-            ->log('Category Updated');
+            ->log('Modifier une category');
         return back();
     }
 }
