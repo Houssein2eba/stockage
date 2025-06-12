@@ -38,7 +38,7 @@ const tableHeaders = computed(() => [
     { label: 'Produit', field: 'product_name', sortable: false },
     { label: 'Type', field: 'type', sortable: false },
     { label: 'Quantité', field: 'quantity', sortable: true },
-    { label: 'Date', field: 'crated_at', sortable: true },
+    { label: 'Date', field: 'stock_date', sortable: true },
 
 
 ]);

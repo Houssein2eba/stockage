@@ -118,7 +118,7 @@ public function index(Request $request)
             });
             })
          ->when($request->date, function ($query, $date) {
-                $query->whereDate('created_at', $date);
+                $query->whereDate('stock_date', $date);
             })
             ->when($request->type, function ($query, $type) {
                 $query->where('type', $type);
@@ -131,7 +131,8 @@ public function index(Request $request)
             }, function ($query) {
                 $query->latest();
             })
-
+            ->latest()
+            ->orderBy('stock_date', 'desc')
         ->paginate(10)
         ->withQueryString();
 

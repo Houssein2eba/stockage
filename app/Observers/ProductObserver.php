@@ -30,7 +30,7 @@ class ProductObserver
     $low_threshold = 10;
 
     if ($current_quantity <= $low_threshold && $previous_quantity != $last_notified_quantity) {
-        $message = "Product {$product->name} is low on stock. Current quantity: {$current_quantity}";
+        $message = "Le produit {$product->name} est en rupture de stock. Quantité actuelle : {$current_quantity}";
 
         // Optimize by sending to all users at once
         $users = User::select('id')->get(); // Only get IDs
