@@ -162,14 +162,7 @@ class UsersController extends Controller
             ]);
         }
 
-        activity()
-            ->causedBy(auth()->user())
-            ->performedOn(new User)
-            ->withProperties([
-                'old' => ['name' => $userName],
-                'new' => [],
-            ])
-            ->log('Deleted user');
+
 
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
     }

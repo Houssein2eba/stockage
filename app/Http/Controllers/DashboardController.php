@@ -25,11 +25,14 @@ class DashboardController extends Controller
 
         // Get popular products (top 5 most sold)
         $popular = Product::withSum('orders as total_quantity', 'order_details.quantity')
-        ->withSum('orders as total_amount', 'order_details.total_amount')
-        ->where('total_quantity', '>', 0)
-            ->orderByDesc('total_quantity')
-            ->take(5)
-            ->get();
+    ->withSum('orders as total_amount', 'order_details.total_amount')
+    ->get()
+    ->filter(function ($product) {
+        return $product->total_quantity > 0;
+    })
+    ->sortByDesc('total_quantity')
+    ->take(5)
+    ->values();
         // Return as collection using ProductResource
 
 
@@ -77,12 +80,21 @@ $stats['clientCount'] = Client::count();
             return response()->json($stats);
           }
 
-        // Monthly sales data for chart using SQLite date functions
-        $chartData = OrderDetail::selectRaw("strftime('%Y-%m', created_at) as month, COUNT(*) as count, SUM(total_amount) as total")
-            ->where('created_at', '>=', Carbon::now()->subYear())
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
+        // Monthly sales data for chart
+    $chartData = DB::table('order_details')
+        ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count, SUM(total_amount) as total")
+        ->where('created_at', '>=', Carbon::now()->subMonths(12))
+        ->groupBy('month')
+        ->orderBy('month')
+        ->get()
+        ->map(function ($item) {
+            return [
+                'month' => $item->month,
+                'count' => (int) $item->count,
+                'total' => (float) $item->total,
+            ];
+        });
+
 
         return Inertia::render('Dashboard', [
             'stats' => $stats,

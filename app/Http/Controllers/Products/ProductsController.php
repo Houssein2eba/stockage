@@ -421,15 +421,7 @@ public function exportSingle($stockId)
 
 
 
-        // Activity log
-        $attributes = $product->toArray();
-        unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
 
-        activity()
-            ->causedBy(auth()->user())
-            ->performedOn($product)
-            ->withProperties(['attributes' => $attributes])
-            ->log('Ajouter un produit');
     });
 
     return to_route('products.index');
@@ -449,7 +441,7 @@ public function exportSingle($stockId)
     public function update(ProductsRequest $request, $id)
     {
         $request->validated();
-        $product = Product::findOrFail($id);
+        $product = Product::where('id', $id)->lockForUpdate()->firstOrFail();
         DB::transaction(function () use ($request, $product) {
             $old = $product->toArray();
 
@@ -474,14 +466,7 @@ public function exportSingle($stockId)
                 ]
             ]);
             $product->refresh();
-            $attributes = $product->toArray();
-            unset($old['id'], $old['created_at'], $old['updated_at']);
-            unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
-            activity()
-                ->causedBy(auth()->user())
-                ->performedOn($product)
-                ->withProperties(['old' => $old, 'attributes' => $attributes])
-                ->log('Modifier un produit');
+            
         });
 
         return to_route('products.index');
@@ -502,12 +487,7 @@ public function exportSingle($stockId)
 
         $product->categories()->detach();
         $product->delete();
-        unset($old['id'], $old['created_at'], $old['updated_at']);
-        activity()
-            ->causedBy(auth()->user())
-            ->performedOn($product)
-            ->withProperties(['old' => $old])
-            ->log('Supprimer un produit');
+
         return back();
     }
 

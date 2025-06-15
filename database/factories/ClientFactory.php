@@ -18,7 +18,7 @@ class ClientFactory extends Factory
     {
         return [
             'name' => $this->faker->name(),
-            'number' => $this->faker->unique()->phoneNumber,
+            'number' => $this->faker->unique()->regexify('[2-4][0-9]{7}'),
 
         ];
     }

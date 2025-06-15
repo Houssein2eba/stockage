@@ -10,26 +10,15 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Order extends Model
 {
-    use HasUuids, LogsActivity;
+    use HasUuids;
 
     protected $guarded = ['id','created_at','updated_at'];
 
-    protected $fillable = [
-        'reference',
-        'client_id',
-        'payment_id',
-        'status'
-    ];
+
 
     protected $appends = ['total_amount'];
 
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnly(['reference', 'client_id', 'payment_id', 'status'])
-            ->logOnlyDirty()
-            ->dontSubmitEmptyLogs();
-    }
+    
 
     public function client()
     {
@@ -52,7 +41,7 @@ class Order extends Model
     return $this->hasMany(OrderDetail::class);
 }
 
-    
+
 
     public function getTotalAmountAttribute()
     {

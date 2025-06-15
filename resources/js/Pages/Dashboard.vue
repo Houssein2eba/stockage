@@ -7,6 +7,7 @@ import TableHeaderCell from "@/Components/TableHeaderCell.vue";
 import TableDataCell from "@/Components/TableDataCell.vue";
 import {Link} from '@inertiajs/vue3';
 import { useToast } from 'vue-toastification';
+import MonthlySalesChart from '@/Components/MonthlySalesChart.vue';
 import { ref } from 'vue';
 import { formatPrice } from '@/utils/format';
 
@@ -151,6 +152,16 @@ const props = defineProps({
                         </div>
                     </div>
                 </div>
+                <!-------month ----->
+            <!-- Graphique des ventes mensuelles -->
+            <div class="mb-8 bg-white rounded-lg shadow-md">
+            <div class="flex items-center justify-between px-6 py-4 border-b">
+                <h3 class="text-lg font-semibold text-gray-700">Ventes mensuelles (12 derniers mois)</h3>
+            </div>
+            <div class="p-6">
+                <MonthlySalesChart :chart-data="chartData" />
+            </div>
+            </div>
 
                 <!-- Ventes récentes -->
                 <div class="mb-8 bg-white rounded-lg shadow-md">

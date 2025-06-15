@@ -147,6 +147,42 @@ Route::prefix('clients')->group(function () {
        Route::get('/',[RolesController::class,'index'])
        ->name('roles.index');
        Route::delete('/{id}',[RolesController::class,'destroy']);
+
+       Route::get('/permissions',function(){
+        $permissions=\Spatie\Permission\Models\Permission::get();
+        Log::info($permissions);
+        return response()->json([
+            'permissions'=>$permissions
+        ]);
+       });
+       Route::post('/permissions',function(Request $request){
+        Log::info($request->all());
+        $validated=$request->validate([
+            'role' =>'required|string|unique:roles,name',
+            'permissions' =>'required|array',
+            'permissions.*' => 'uuid|exists:permissions,id',
+        ],
+        [
+            'permissions.*.exists' => 'le permission n\'existe pas',
+            'role.unique' => 'le role existe déjà',
+            'role.required' => 'le role est obligatoire',
+            'permissions.required' => 'les permissions sont obligatoires',
+        ]
+
+    );
+    DB::transaction(function () use ($validated){
+        $role = Role::create([
+            'name' => $validated['role'],
+            'guard_name' => 'web', // important si tu utilises plusieurs guards
+        ]);
+
+        $role->syncPermissions($validated['permissions']);
+    });
+     return response()->json([
+        'message' => 'Role est créé avec succès',
+        ]);
+
+       });
    });
 
     Route::prefix('users')->name('users.')->group(function () {

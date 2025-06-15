@@ -30,18 +30,17 @@ class OrderRequest extends FormRequest
 
 
         return [
-             // client data
-        'client.id' => ['nullable', 'uuid', 'exists:clients,id'],
-        'stock.id' => ['required', 'uuid', 'exists:stocks,id'],
-
-        // paid field
-        'paid' => $isClient ? ['in:1,0', 'boolean'] : ['in:1', 'boolean'],
-
-        // items array
+        'client' => ['nullable', 'array'],
+        'client.id' => ['required_with:client', 'uuid'],
+        'stock' => ['required', 'array'],
+        'stock.id' => ['required', 'uuid'], // ajuste selon les champs nécessaires
         'products' => ['required', 'array', 'min:1'],
-        'products.*.product.id' => ['required', 'uuid','exists:products,id'],
+        'products.*.product' => ['required', 'array'],
+        'products.*.product.id' => ['required', 'uuid'],
         'products.*.quantity' => ['required', 'integer', 'min:1'],
-
+        'products.*.total_amount' => ['required', 'numeric'],
+        'paid' => ['required', 'boolean'],
+        'order_total_amount' => ['required', 'numeric'],
         ];
 
 

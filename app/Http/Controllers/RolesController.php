@@ -19,8 +19,8 @@ class RolesController extends Controller
     {
         if($request->wantsJson()){
             return response()->json([
-                'roles'=>RolesResource::collection(Role::all()
-                ->where('name', '!=', 'admin')),
+                'roles'=>RolesResource::collection(Role::with('permissions')
+                ->where('name', '!=', 'admin')->get()),
                 'roles_count'=>Role::where('name', '!=', 'admin')->count(),
             ]);
         }
@@ -46,7 +46,7 @@ class RolesController extends Controller
             ->where('name', '!=', 'admin')
             ->paginate(PAGINATION)
             ->withQueryString();
-          
+
         return Inertia::render('Roles/Index', [
             'roles' => RolesResource::collection($roles),
         ]);
@@ -71,16 +71,7 @@ class RolesController extends Controller
             $permissions = collect($request->permissions)->pluck('name');
             $role->syncPermissions($permissions);
 
-            $attributes = $role->toArray();
 
-            unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
-            activity()
-                ->causedBy(auth()->user())
-                ->performedOn($role)
-                ->withProperties([
-                    'attributes' => $attributes,
-                ])
-                ->log('Created role');
         });
 
         return to_route('roles.index');
@@ -118,19 +109,8 @@ class RolesController extends Controller
             $permissions = collect($request->permissions)->pluck('name');
             $role->syncPermissions($permissions);
 
-            $old = $role->getOriginal();
             $role->refresh();
-            $attributes = $role->toArray();
-            unset($old['id'], $old['created_at'], $old['updated_at']);
-            unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
-            activity()
-                ->causedBy(auth()->user())
-                ->performedOn($role)
-                ->withProperties([
-                    'old' => $old,
-                    'attributes' => $attributes
-                ])
-                ->log('Updated role');
+
         });
 
         return to_route('roles.index');
@@ -141,14 +121,7 @@ class RolesController extends Controller
         $role = Role::findOrFail($id);
         $old = $role->toArray();
         $role->delete();
-        unset($old['id'], $old['created_at'], $old['updated_at']);
-        activity()
-            ->causedBy(auth()->user())
-            ->performedOn($role)
-            ->withProperties([
-                'old' => $old
-            ])
-            ->log('Deleted role');
+
          if($request->wantsJson()){
             return response()->json(['message' => 'Role deleted successfully.']);
          }

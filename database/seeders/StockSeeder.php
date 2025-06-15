@@ -52,7 +52,6 @@ class StockSeeder extends Seeder
                 ]);
                 $product->stocks()->updateExistingPivot($stock->id, [
                     'products_quantity' => $product->quantity,
-
                     'stock_date' => now(), // Only if you want to explicitly clear it
                 ]);
 

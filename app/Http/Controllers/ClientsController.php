@@ -135,13 +135,7 @@ class ClientsController extends Controller
                 'number' => $request->number,
             ]);
 
-            $attributes = $client->toArray();
-            unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
-            activity()
-                ->performedOn($client)
-                ->causedBy(auth()->user())
-                ->withProperties(['attributes' => $attributes])
-                ->log('Client Created');
+
 
                 return $client;
         });
@@ -183,14 +177,7 @@ class ClientsController extends Controller
             ]);
 
 
-            $attributes = $client->toArray();
-            unset($old['id'], $old['created_at'], $old['updated_at']);
-            unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
-            activity()
-                ->performedOn($client)
-                ->causedBy(auth()->user())
-                ->withProperties(['old' => $old, 'attributes' => $attributes])
-                ->log('Client Updated');
+
 
                 return $client;
         });
@@ -210,29 +197,21 @@ class ClientsController extends Controller
 
         $client = Client::findOrFail($id);
         DB::transaction(function () use ($client) {
-            $old = $client->toArray();
+
             $client->delete();
-            unset($old['id'], $old['created_at'], $old['updated_at']);
-            activity()
-                ->performedOn($client)
-                ->causedBy(auth()->user())
-                ->withProperties(['old' => $old])
-                ->log('Client Deleted');
+
         });
 
         return back();
     }
 
     public function export(){
-        activity()->causedBy(auth()->user())->log('Clients Exported')
 
-        ;
         return \Maatwebsite\Excel\Facades\Excel::download(new ClientsExport(), 'clients.xlsx');
     }
     public function exportclient($id){
         $client = Client::findOrFail($id);
-        activity()->causedBy(auth()->user())->log('Client Exported')
-        ;
+
         return \Maatwebsite\Excel\Facades\Excel::download(new ClientExport($client), 'client.xlsx');
     }
 }

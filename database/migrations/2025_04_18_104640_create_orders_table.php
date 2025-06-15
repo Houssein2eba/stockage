@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('reference')->unique();
             $table->foreignUuid('client_id')->nullable()->constrained()->nullOnDelete();
-
+            $table->decimal('order_total_amount', 10, 2);
             $table->enum('status', ['pending', 'paid', 'cancelled'])->default('pending');
             $table->timestamps();
         });

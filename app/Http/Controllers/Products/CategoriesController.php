@@ -59,50 +59,33 @@ class CategoriesController extends Controller
             DB::beginTransaction();
             $category = Category::create($request->all());
             $category->refresh();
-            $attributes = $category->toArray();
-            unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
-            activity()
-                ->causedBy(auth()->user())
-                ->performedOn($category)
-                ->withProperties(['attributes' => $attributes])
-                ->log('Ajouter une category');
+
             DB::commit();
         }catch (\Exception $e){
             DB::rollBack();
             return back()->withErrors('Error creating category: ' . $e->getMessage());
         }
-        
+
         return back();
     }
     public function destroy($id){
 
         $category=Category::find($id);
         if($category){
-            $old = $category->toArray();
+            
             $category->delete();
-            unset($old['id'], $old['created_at'], $old['updated_at']);
-            activity()
-                ->causedBy(auth()->user())
-                ->performedOn($category)
-                ->withProperties(['old' => $old])
-                ->log('Supprimer une category');
+
         }
         return back()->withErrors("Category n'existe pas");
     }
 
     public function update(CategoriesRequest $request){
         $category=Category::find($request->id);
-        $old = $category ? $category->toArray() : [];
+
         $category->update($request->all());
         $category->refresh();
-        $attributes = $category->toArray();
-        unset($old['id'], $old['created_at'], $old['updated_at']);
-        unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
-        activity()
-            ->causedBy(auth()->user())
-            ->performedOn($category)
-            ->withProperties(['old' => $old, 'attributes' => $attributes])
-            ->log('Modifier une category');
+
+
         return back();
     }
 }

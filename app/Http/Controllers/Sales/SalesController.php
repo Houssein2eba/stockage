@@ -24,6 +24,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Log;
 
 class SalesController extends Controller
 {
@@ -33,61 +34,67 @@ class SalesController extends Controller
 
     }
     public function index(Request $request)
-    {
-        // dd($request->all());
-        $request->validate([
-            'search' => 'nullable|string',
-            'status' => 'nullable|string|in:paid,pending',
-            'page' => 'nullable|integer',
-            'date' => 'nullable|date',
-            'direction' => 'nullable|in:asc,desc',
-            'sort' => 'nullable|in:id,reference,client,total_amount,status,created_at'
-        ]);
+{
+    $request->validate([
+        'search' => 'nullable|string',
+        'status' => 'nullable|string|in:paid,pending,cancelled',
+        'page' => 'nullable|integer',
+        'date' => 'nullable|date',
+        'direction' => 'nullable|in:asc,desc',
+        'sort' => 'nullable|in:id,reference,client_id,order_total_amount,status,created_at'
+    ]);
 
-        $orders = Order::with(['client', 'products'])
-            ->withSum('products as total_amount', 'order_details.total_amount')
-            ->when($request->search, function ($query, $search) {
-                $query->where('reference', 'LIKE', "%{$search}%")
-                    ->orWhereHas('client', function ($query) use ($search) {
-                        $query->where('name', 'LIKE', "%{$search}%");
-                    });
-            })
-            ->when($request->status, function ($query, $status) {
-                $query->where('status', $status);
-            })
-            ->when($request->date, function ($query, $date) {
-                $created_at = date('Y-m-d', strtotime($date));
-                $query->whereDate('created_at', $created_at);
-            })
-            ->when($request->sort === 'total_amount', function ($query) use ($request) {
-                $query->orderBy('total_amount', $request->direction ?? 'asc');
-            }, function ($query) use ($request) {
-                if ($request->sort === 'date') {
-                    $query->orderBy($request->sort, $request->direction ?? 'asc');
-                }elseif ($request->sort === 'reference') {
-                    $query->orderBy($request->sort, $request->direction ?? 'asc');
-                } else {
-                    $query->orderBy($request->sort, $request->direction ?? 'asc');
-                }
-            })
-            ->orderBy('created_at', 'desc')
-            ->paginate(PAGINATION)
-            ->withQueryString();
+    $orders = Order::with(['client', 'products'])
+        ->withSum('products as total_amount', 'order_details.total_amount')
 
-        // Calculate statistics
-        $stats = [
-            'totalRevenue' => OrderDetail::sum('total_amount'),
-            'totalSales' => Order::count(),
-            'todaySales' => Order::whereDate('created_at', today())->count(),
-            'pendingPayments' => Order::where('status', 'pending')->count()
-        ];
+        ->when($request->search, function ($query, $search) {
+            $query->where('reference', 'LIKE', "%{$search}%")
+                ->orWhereHas('client', function ($query) use ($search) {
+                    $query->where('name', 'LIKE', "%{$search}%");
+                });
+        })
 
-        return inertia('Sales/Index', [
-            'sales' => OrderResource::collection($orders),
-            'stats' => $stats,
-            'filters' => $request->only(['search', 'status', 'date'])
-        ]);
-    }
+        ->when($request->status, function ($query, $status) {
+            $query->where('status', $status);
+        })
+
+        ->when($request->date, function ($query, $date) {
+            $query->whereDate('created_at', date('Y-m-d', strtotime($date)));
+        })
+
+        // Sorting
+        ->when($request->sort === 'order_total_amount' || $request->sort === 'total_amount', function ($query) use ($request) {
+            $query->orderBy('total_amount', $request->direction ?? 'asc');
+        })
+
+        ->when(
+            $request->filled('sort') && !in_array($request->sort, ['order_total_amount', 'total_amount']),
+            function ($query) use ($request) {
+                $query->orderBy($request->sort, $request->direction ?? 'asc');
+            }
+        )
+
+        // Always order by latest if no specific sort
+        ->orderBy('created_at', 'desc')
+
+        ->paginate(PAGINATION)
+        ->withQueryString();
+
+    // Statistiques utiles
+    $stats = [
+        'totalRevenue' => DB::table('order_details')->sum('total_amount'),
+        'totalSales' => Order::count(),
+        'todaySales' => Order::whereDate('created_at', today())->count(),
+        'pendingPayments' => Order::where('status', 'pending')->count()
+    ];
+
+    return inertia('Sales/Index', [
+        'sales' => OrderResource::collection($orders),
+        'stats' => $stats,
+        'filters' => $request->only(['search', 'status', 'date', 'sort', 'direction'])
+    ]);
+}
+
 
     public function show($id)
     {
@@ -110,76 +117,110 @@ class SalesController extends Controller
             'stocks' => ClearStockResource::collection($stocks),
         ]);
     }
-public function store(OrderRequest $request)
-{
-    $data = $request->validated();
+    public function store(OrderRequest $request)
+    {
+        $data = $request->validated();
 
-    try {
-        $orderId = DB::transaction(function () use ($data) {
-            // 1. Create the order
-            $order = Order::create([
-                'reference' => Order::generateReference(),
-                'client_id' => $data['client']['id'] ?? null,
-                'status' => $data['paid'] ? 'paid' : 'pending',
-            ]);
+        try {
+            $orderId = DB::transaction(function () use ($data) {
+                Log::info('Début transaction création commande');
 
-            $orderTotal = 0;
-            $productData = [];
-            foreach($data['products'] as $products){
-
-                $product=Product::findOrFail($products['product']['id']);
-                if ($product->quantity < $products['quantity']) {
-                    return back()->with('error', "Insufficient stock for product: {$product->name}");
-                }
-                // 2. Calculate total amount for each product
-                $totalAmount = $product->price * $products['quantity'];
-                $orderTotal += $totalAmount;
-                // 3. Prepare product data for pivot table
-                $productData[$product->id] = [
-                    'quantity' => $products['quantity'],
-                    'total_amount' => $totalAmount
-                ];
-
-                // 4. Update product quantity
-                $product->decrement('quantity', $products['quantity']);
-                // 5 stock pivot
-
-                $product->stocks()->updateExistingPivot($data['stock']['id'], [
-                    'products_quantity' => $products['quantity'],
-                    'type' => 'out',
-
-                    'stock_date' => now(), // Only if you want to explicitly clear it
+                // Create the main order
+                $order = Order::create([
+                    'reference' => Order::generateReference(),
+                    'client_id' => $data['client']['id'] ?? null,
+                    'stock_id' => $data['stock']['id'] ?? null,
+                    'status' => $data['paid'] ? 'paid' : 'pending',
+                    'order_total_amount' => $data['order_total_amount']
                 ]);
 
+                Log::info('Commande créée', ['order_id' => $order->id]);
 
-            }
+                $orderTotal = 0;
+                $productData = [];
 
+                // Validate products exist
+                if (empty($data['products'])) {
+                    throw new \Exception('Aucun produit sélectionné');
+                }
 
-            // 6. Attach products to order
-            $order->products()->attach($productData);
+                foreach ($data['products'] as $productItem) {
+                    // Lock product for update to prevent concurrent modifications
+                    $product = Product::where('id', $productItem['product']['id'])
+                                    ->lockForUpdate()
+                                    ->first();
 
-            // 7. Log
-            activity()
-                ->causedBy(auth()->user())
-                ->performedOn($order)
-                ->withProperties([
-                    'attributes' => $order->only(['reference', 'client_id', 'status', 'total_amount']),
-                ])
-                ->log('Ajouter une vente');
+                    if (!$product) {
+                        throw new \Exception('Produit introuvable avec ID ' . $productItem['product']['id']);
+                    }
 
-            return $order->id;
-        });
+                    // Check stock availability
+                    if ($product->quantity < $productItem['quantity']) {
+                        throw new \Exception("Stock insuffisant pour le produit : {$product->name}");
+                    }
 
-        return to_route('sales.show', $orderId);
+                    // Calculate amounts
+                    $totalAmount = $productItem['total_amount'] ?? ($product->price * $productItem['quantity']);
+                    $orderTotal += $totalAmount;
 
-    } catch (\Exception $e) {
-        return back()->with('error', $e->getMessage());
+                    // Prepare pivot data for many-to-many relationship
+                    $productData[$product->id] = [
+                        'quantity' => $productItem['quantity'],
+                        'total_amount' => $totalAmount,
+
+                    ];
+
+                    // Update product stock quantity
+                    $product->decrement('quantity', $productItem['quantity']);
+
+                    // Update stock movement record
+                    if (isset($data['stock']['id'])) {
+                        $product->stocks()->updateExistingPivot($data['stock']['id'], [
+                            'products_quantity' => DB::raw('products_quantity - ' . $productItem['quantity']),
+                            'type' => 'out',
+                            'stock_date' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+
+                    Log::info('Produit traité', [
+                        'product_id' => $product->id,
+                        'quantity' => $productItem['quantity'],
+                        'total_amount' => $totalAmount
+                    ]);
+                }
+
+                // Attach products to order with pivot data
+                $order->products()->attach($productData);
+
+                // Update order total amount
+                $order->update([
+                    'total_amount' => $orderTotal
+                ]);
+
+                Log::info('Commande finalisée avec produits attachés', [
+                    'order_id' => $order->id,
+                    'total_amount' => $orderTotal,
+                    'products_count' => count($productData),
+                ]);
+
+                return $order->id;
+            });
+
+            Log::info('Transaction réussie', ['order_id' => $orderId]);
+
+            return to_route('sales.show', $orderId);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur lors de la création de la commande', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'data' => $data
+            ]);
+
+            return back()->with('error', $e->getMessage());
+        }
     }
-}
-
-
-
-
 
 
 
@@ -203,7 +244,7 @@ public function store(OrderRequest $request)
     public function update(OrderRequest $request, $id)
     {
         return DB::transaction(function () use ($request, $id) {
-            $order = Order::findOrFail($id);
+            $order = Order::where('id', $id)->lockForUpdate()->first();
             $old = $order->toArray();
             $order->load('products');
 
@@ -249,15 +290,7 @@ public function store(OrderRequest $request)
             }
 
             $order->refresh();
-            $attributes = $order->toArray();
-            unset($old['id'], $old['created_at'], $old['updated_at']);
-            unset($attributes['id'], $attributes['created_at'], $attributes['updated_at']);
 
-            activity()
-                ->causedBy(auth()->user())
-                ->performedOn($order)
-                ->withProperties(['old' => $old, 'attributes' => $attributes])
-                ->log('Modifier une vente');
 
             return back();
         });
@@ -268,11 +301,11 @@ public function destroy($id)
     DB::transaction(function () use ($id) {
         $order = Order::with('products')->findOrFail($id);
         $old = $order->toArray();
-        
+
         // Restituer les quantités des produits
         foreach ($order->products as $product) {
             $product->increment('quantity', $product->pivot->quantity);
-            
+
             // Si vous utilisez également la gestion des stocks, mettez à jour le stock
             if (isset($product->pivot->stock_id)) {
                 $product->stocks()->updateExistingPivot($product->pivot->stock_id, [
@@ -287,20 +320,20 @@ public function destroy($id)
 
         unset($old['id'], $old['created_at'], $old['updated_at']);
 
-        activity()
-            ->causedBy(auth()->user())
-            ->performedOn($order)
-            ->withProperties([
-                'old' => $old,
-                'attributes' => $order->toArray(),
-                'restored_quantities' => $order->products->map(function($product) {
-                    return [
-                        'product_id' => $product->id,
-                        'quantity_restored' => $product->pivot->quantity
-                    ];
-                })
-            ])
-            ->log('Annuler une vente et restituer les quantités');
+        // activity()
+        //     ->causedBy(auth()->user())
+        //     ->performedOn($order)
+        //     ->withProperties([
+        //         'old' => $old,
+        //         'attributes' => $order->toArray(),
+        //         'restored_quantities' => $order->products->map(function($product) {
+        //             return [
+        //                 'product_id' => $product->id,
+        //                 'quantity_restored' => $product->pivot->quantity
+        //             ];
+        //         })
+        //     ])
+        //     ->log('Annuler une vente et restituer les quantités');
     });
 
     return back();
@@ -317,10 +350,7 @@ public function destroy($id)
                 'status' => 200
             ]);
          }
-        activity()
-            ->causedBy(auth()->user())
-            ->performedOn($order)
-            ->log('Order Marked as Paid');
+
 
         return back();
     }
