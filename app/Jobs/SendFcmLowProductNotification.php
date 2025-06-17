@@ -19,7 +19,7 @@ class SendFcmLowProductNotification implements ShouldQueue
     public function __construct(String $message)
     {
         $this->message = $message;
-        Log::info('creating job');
+        Log::info('creating job '.$message.'/');
     }
 
     /**
@@ -27,48 +27,28 @@ class SendFcmLowProductNotification implements ShouldQueue
      */
     public function handle(): void
 {
-    Log::info('sending notification');
     $credentialsPath = config('services.firebase.credentials');
+if (!file_exists($credentialsPath)) {
+    logger("Firebase credentials not found at: " . $credentialsPath);
+    return;
+}else{
+    logger("Firebase credentials found at: ". $credentialsPath);
+}
+        $factory = (new Factory)->withServiceAccount(config('services.firebase.credentials'));
 
-    if (!file_exists($credentialsPath)) {
-        logger("Firebase credentials not found at: $credentialsPath");
-        return;
-    }
 
-    $factory = (new Factory)->withServiceAccount($credentialsPath);
-    $messaging = $factory->createMessaging();
+        $messaging = $factory->createMessaging();
 
-    // Get all valid tokens, not just the latest one
-    $tokens = Fcm::whereNotNull('token')->pluck('token')->toArray();
+        $token = Fcm::latest()->value('token');
+        Log::info("token: ".$token);
+                    $messages = [
+                'token' => $token,
+                'notification' => [
+                    'title' => "low product",
+                    'body' => $this->message,
+                ],
+            ];
+            $messaging->send($messages);
 
-    if (empty($tokens)) {
-        logger('No valid FCM tokens found.');
-        return;
-    }
-
-    $message = [
-        'tokens' => $tokens, // Send to multiple devices
-        'notification' => [
-            'title' => 'Low Product Alert',
-            'body' => $this->message,
-        ],
-    ];
-
-    try {
-        $messaging->send($message);
-        Log::info('Notification sent successfully');
-    } catch (\Exception $e) {
-        Log::error('Failed to send notification: ' . $e->getMessage());
-
-        // Optionally remove invalid tokens
-        $failedTokens = [];
-        if (method_exists($e, 'failedTokens')) {
-            $failedTokens = $e->failedTokens();
-        }
-
-        if (!empty($failedTokens)) {
-            Fcm::whereIn('token', $failedTokens)->delete();
-        }
-    }
 }
 }
