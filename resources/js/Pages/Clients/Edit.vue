@@ -92,12 +92,12 @@ const submit = () => {
                     </div>
 
                     <div class="flex items-center justify-end gap-4">
-                        <a
+                        <Link
                             :href="route('clients.index')"
                             class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
                             Annuler
-                        </a>
+                    </Link>
                         <PrimaryButton
                             :class="{ 'opacity-25': form.processing }"
                             :disabled="form.processing"

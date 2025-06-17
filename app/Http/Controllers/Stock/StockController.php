@@ -132,8 +132,11 @@ public function index(Request $request)
                 $query->latest();
             })
             ->latest()
-            ->orderBy('stock_date', 'desc')
-        ->paginate(10)
+            ->orderBy('stock_date', 'desc');
+            if($request->wantsJson()) {
+                return response()->json(['movements'=>MovementResource::collection($movements->get())]);
+            }
+        $movements = $movements->paginate(10)
         ->withQueryString();
 
     return Inertia::render('Stock/Show', [

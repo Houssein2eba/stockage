@@ -154,7 +154,7 @@ onUnmounted(() => {
           <!-- Lien Dashboard -->
           <li>
             <SidebarLink
-              href="/dashboard"
+              :href="route('dashboard')"
               :active="route().current('dashboard')"
               class="hover:bg-blue-50 transition-all duration-200"
             >
@@ -171,7 +171,7 @@ onUnmounted(() => {
           </li>
 
           <!-- Dropdown Utilisateurs -->
-          <li v-if="hasPermission('view_users')">
+          <li v-if="page.props.auth.permissions.includes('view_users')">
             <div class="relative">
               <button
                 @click="toggleDropdown('users')"
@@ -210,7 +210,7 @@ onUnmounted(() => {
                   >
                     Tous les utilisateurs
                   </SidebarLink>
-                  <SidebarLink v-if="hasPermission('create_users')"
+                  <SidebarLink v-if="page.props.auth.permissions.includes('create_users')"
                     :href="route('users.create')"
                     :active="route().current('users.create')"
                     class="text-sm hover:bg-blue-50"
@@ -223,7 +223,7 @@ onUnmounted(() => {
           </li>
 
           <!-- Dropdown Clients -->
-          <li v-if="hasPermission('view_clients')">
+          <li v-if="page.props.auth.permissions.includes('view_clients')">
             <div class="relative">
               <button
                 @click="toggleDropdown('clients')"
@@ -263,7 +263,7 @@ onUnmounted(() => {
                     Tous les clients
                   </SidebarLink>
                   <SidebarLink
-                  v-if="hasPermission('create_clients')"
+                  v-if="page.props.auth.permissions.includes('create_clients')"
                     :href="route('clients.create')"
                     :active="route().current('clients.create')"
                     class="text-sm hover:bg-blue-50"
@@ -276,7 +276,7 @@ onUnmounted(() => {
           </li>
 
           <!-- Dropdown Produits -->
-          <li v-if="hasPermission('view_products')">
+          <li v-if="page.props.auth.permissions.includes('view_products')">
             <div class="relative">
               <button
                 @click="toggleDropdown('products')"
@@ -309,7 +309,7 @@ onUnmounted(() => {
               >
                 <div v-if="dropdowns.products.value" class="ml-8 mt-1.5 space-y-1.5 overflow-hidden">
                   <SidebarLink
-                    v-if="hasPermission('view_categories')"
+                    v-if="page.props.auth.permissions.includes('view_categories')"
                     :href="route('categories.index')"
                     :active="route().current('categories.index')"
                     class="text-sm hover:bg-blue-50"
@@ -329,7 +329,7 @@ onUnmounted(() => {
           </li>
 
           <!-- Dropdown Rôles -->
-          <li v-if="hasRole('admin')">
+          <li v-if="page.props.auth.roles.name === 'admin'">
             <div class="relative">
               <button
                 @click="toggleDropdown('posts')"
@@ -423,7 +423,7 @@ onUnmounted(() => {
               { route: 'stocks.index', icon: 'M12 14l9-5-9-5-9 5 9 5z', label: 'Stocks', permission: 'view_stocks' },
             ]" :key="link.route">
               <Link
-                v-if="!link.permission || hasPermission(link.permission)"
+                v-if="!link.permission || page.props.auth.permissions.includes(link.permission)"
                 :href="route(link.route)"
                 class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors"
                 :class="{ 'bg-blue-50 text-blue-600': route().current(link.route) }"
@@ -436,7 +436,7 @@ onUnmounted(() => {
             </template>
 
             <!-- Cloche de notification -->
-            <div class="relative" v-if="hasPermission('view_notifications')">
+            <div class="relative" v-if="page.props.auth.permissions.includes('view_notifications')">
               <button
                 @click="toggleNotifications"
                 class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors relative"

@@ -19,7 +19,7 @@ class MovementResource extends JsonResource
             'type' => $this->type,
             'quantity' => $this->products_quantity,
             'stock_date' => $this->stock_date,
-            
+            'stock_name' => $this->stock->name ?? null,
             'product_id' => $this->product_id,
             'product_name' => $this->product->name ?? null,
             'created_at' => $this->created_at,

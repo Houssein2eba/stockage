@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Models\Admin;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductStock;
+use App\Observers\OrderObserver;
 use App\Observers\ProductObserver;
 use App\Observers\ProductStockObserver;
 use Illuminate\Database\Eloquent\Model;
@@ -44,6 +46,7 @@ class AppServiceProvider extends ServiceProvider
        Model::automaticallyEagerLoadRelationships();
 
        Product::observe(ProductObserver::class);
+       Order::observe(OrderObserver::class);
     //    ProductStock::observe(ProductStockObserver::class);
 
 

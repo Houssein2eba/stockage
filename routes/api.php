@@ -115,6 +115,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         })->name('notifications.markAsRead');
         Route::delete('/{id}',[NotificationController::class,'destroy'])->name('notifications.destroy');
     });
+        Route::get('/orders', [SalesController::class,'index'])->name('clients.index');
+
 
     // Client routes
 Route::prefix('clients')->group(function () {
@@ -228,6 +230,7 @@ Route::prefix('clients')->group(function () {
     //Stock routes
     Route::prefix('stocks')->name('stocks.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Stock\StockController::class, 'index'])->name('index');
+        Route::get('/{id}',[\App\Http\Controllers\Stock\StockController::class,'show'])->name('show');
         });
 
 

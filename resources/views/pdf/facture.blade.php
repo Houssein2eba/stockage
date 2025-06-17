@@ -129,7 +129,7 @@
             <div class="invoice-info">
                 <div class="invoice-number">#{{ $order->reference }}</div>
                 <div>Date: {{ $order->created_at->format('d/m/Y') }}</div>
-                
+
                 <div class="status-container">
                     <span>Status:
                         {{ ucfirst($order->status) }}
@@ -164,19 +164,19 @@
                 @foreach($order->products as $product)
                     <tr>
                         <td>{{ $product->name }}</td>
-                        <td class="text-right">{{ number_format($product->price, 2, ',', ' ') }} USD</td>
+                        <td class="text-right">{{ number_format($product->price, 2, ',', ' ') }} MRU</td>
                         <td class="text-right">{{ $product->pivot->quantity }}</td>
-                        <td class="text-right">{{ number_format($product->pivot->total_amount, 2, ',', ' ') }} USD</td>
+                        <td class="text-right">{{ number_format($product->pivot->total_amount, 2, ',', ' ') }} MRU</td>
                     </tr>
                 @endforeach
                 <tr class="total-row">
                     <td colspan="3" class="text-right">Total</td>
-                    <td class="text-right">{{ number_format($order->total_amount, 2, ',', ' ') }} USD</td>
+                    <td class="text-right">{{ number_format($order->total_amount, 2, ',', ' ') }} MRU</td>
                 </tr>
             </tbody>
         </table>
 
-        
+
 
         <!-- Footer -->
         <div class="footer">

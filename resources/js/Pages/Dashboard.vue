@@ -55,7 +55,7 @@ const props = defineProps({
                             </div>
                         </div>
                         <div class="mt-4">
-                            <a href="/products" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Voir tous les produits</a>
+                            <Link :href="route('products.index')" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Voir tous les produits</Link>
                         </div>
                     </div>
 
@@ -215,7 +215,7 @@ const props = defineProps({
                 <div class="mb-8 bg-white rounded-lg shadow-md">
                     <div class="flex items-center justify-between px-6 py-4 border-b">
                         <h3 class="text-lg font-semibold text-gray-700">Produits populaires</h3>
-                        <a href="/sales" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Voir tout</a>
+                        <Link :href="route('products.index')" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Voir tout</Link>
                     </div>
                     <div class="p-6">
                         <Table class="w-full">

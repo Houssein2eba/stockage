@@ -75,9 +75,12 @@ class SalesController extends Controller
         )
 
         // Always order by latest if no specific sort
-        ->orderBy('created_at', 'desc')
+        ->orderBy('created_at', 'desc');
+        if($request->wantsJson()){
+            return response()->json(["orders" => OrderResource::collection($orders->get())]);
+        }
 
-        ->paginate(PAGINATION)
+        $orders = $orders->paginate(PAGINATION)
         ->withQueryString();
 
     // Statistiques utiles
@@ -123,7 +126,6 @@ class SalesController extends Controller
 
         try {
             $orderId = DB::transaction(function () use ($data) {
-                Log::info('Début transaction création commande');
 
                 // Create the main order
                 $order = Order::create([
@@ -134,7 +136,6 @@ class SalesController extends Controller
                     'order_total_amount' => $data['order_total_amount']
                 ]);
 
-                Log::info('Commande créée', ['order_id' => $order->id]);
 
                 $orderTotal = 0;
                 $productData = [];
@@ -183,11 +184,7 @@ class SalesController extends Controller
                         ]);
                     }
 
-                    Log::info('Produit traité', [
-                        'product_id' => $product->id,
-                        'quantity' => $productItem['quantity'],
-                        'total_amount' => $totalAmount
-                    ]);
+                    
                 }
 
                 // Attach products to order with pivot data
@@ -198,11 +195,7 @@ class SalesController extends Controller
                     'total_amount' => $orderTotal
                 ]);
 
-                Log::info('Commande finalisée avec produits attachés', [
-                    'order_id' => $order->id,
-                    'total_amount' => $orderTotal,
-                    'products_count' => count($productData),
-                ]);
+                
 
                 return $order->id;
             });

@@ -294,7 +294,7 @@ const form = useForm({
     stock: null,
     products: [{
         product: null,
-        quantity: 1,
+        quantity: 0,
         unit_price: 0,
         total_amount: 0
     }],
@@ -333,7 +333,7 @@ const hasAvailableProducts = computed(() => {
 const updateAvailableProducts = () => {
     form.products = [{
         product: null,
-        quantity: 1,
+        quantity: 0,
         unit_price: 0,
         total_amount: 0
     }]
@@ -404,7 +404,7 @@ const addProduct = () => {
 
     form.products.push({
         product: null,
-        quantity: 1,
+        quantity: 0,
         unit_price: 0,
         total_amount: 0
     })

@@ -34,6 +34,8 @@ class HandleInertiaRequests extends Middleware
     {
 
     $user = auth()->user() ?? null;
+    $userPermissions = $user ? $user->getPermissionsViaRoles()->pluck('name')->toArray() : [];
+    $userRole= $user ? $user->roles->first() : null;
 
 
 
@@ -41,8 +43,8 @@ class HandleInertiaRequests extends Middleware
 
         'auth' => [
             'user' => $user ?? null,
-            'permissions' =>$user ? PermissionsResource::collection($user->getPermissionsViaRoles())  : [],
-            'roles' => $user ? new RolesResource($user->roles->first()) : [],
+            'permissions' =>$user ? $userPermissions : [],
+            'roles' => $user ? $userRole : null,
             'notifications' => fn () => $request->user()
             ? $request->user()->unreadNotifications
             : null,
