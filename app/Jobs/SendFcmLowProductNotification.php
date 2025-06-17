@@ -3,15 +3,13 @@
 namespace App\Jobs;
 
 use App\Models\Fcm;
-use App\Services\FirebaseService;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Kreait\Firebase\Factory;
 use Log;
 class SendFcmLowProductNotification implements ShouldQueue
 {
-    use Queueable,Dispatchable;
+    use Queueable;
 
     protected String $message;
 
@@ -27,16 +25,50 @@ class SendFcmLowProductNotification implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(FirebaseService $firebase): void{
-           $tokens = Fcm::pluck('token')->toArray();
+    public function handle(): void
+{
+    Log::info('sending notification');
+    $credentialsPath = config('services.firebase.credentials');
 
-        foreach ($tokens as $token) {
-            $firebase->sendToToken(
+    if (!file_exists($credentialsPath)) {
+        logger("Firebase credentials not found at: $credentialsPath");
+        return;
+    }
 
-                $token,
-                'Faible ',
-                $this->message,
-            );
+    $factory = (new Factory)->withServiceAccount($credentialsPath);
+    $messaging = $factory->createMessaging();
+
+    // Get all valid tokens, not just the latest one
+    $tokens = Fcm::whereNotNull('token')->pluck('token')->toArray();
+
+    if (empty($tokens)) {
+        logger('No valid FCM tokens found.');
+        return;
+    }
+
+    $message = [
+        'tokens' => $tokens, // Send to multiple devices
+        'notification' => [
+            'title' => 'Low Product Alert',
+            'body' => $this->message,
+        ],
+    ];
+
+    try {
+        $messaging->send($message);
+        Log::info('Notification sent successfully');
+    } catch (\Exception $e) {
+        Log::error('Failed to send notification: ' . $e->getMessage());
+
+        // Optionally remove invalid tokens
+        $failedTokens = [];
+        if (method_exists($e, 'failedTokens')) {
+            $failedTokens = $e->failedTokens();
+        }
+
+        if (!empty($failedTokens)) {
+            Fcm::whereIn('token', $failedTokens)->delete();
         }
     }
+}
 }
