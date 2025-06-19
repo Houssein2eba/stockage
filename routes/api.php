@@ -6,6 +6,7 @@ use App\Http\Controllers\Notifications\NotificationController;
 use App\Http\Controllers\Pdf\FactureController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\Sales\SalesController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Users\UsersController;
 use App\Http\Resources\RolesResource;
 use App\Http\Resources\UserApiResource;
@@ -115,8 +116,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         })->name('notifications.markAsRead');
         Route::delete('/{id}',[NotificationController::class,'destroy'])->name('notifications.destroy');
     });
-        Route::get('/orders', [SalesController::class,'index'])->name('clients.index');
 
+        Route::get('/orders', [SalesController::class,'index'])->name('clients.index');
 
     // Client routes
 Route::prefix('clients')->group(function () {
@@ -145,6 +146,12 @@ Route::prefix('clients')->group(function () {
 
 
     });
+
+   Route::prefix('/settings')->group(function () {
+       Route::get('/',[SettingController::class,'index'])->name('settings.index');
+       Route::put('/',[SettingController::class,'update'])->name('settings.update');
+   });
+
    Route::prefix('roles')->group(function () {
        Route::get('/',[RolesController::class,'index'])
        ->name('roles.index');
@@ -197,6 +204,15 @@ Route::prefix('clients')->group(function () {
              'number'=>['required','regex:/^([2-4][0-9]{7})$/',Rule::unique('users','number')],
              'password' => 'required|string',
              'role_id'=>'exists:roles,id',
+          ],[
+            'name.required' => 'Le nom est obligatoire',
+            'email.required' => 'L\'email est obligatoire',
+            'email.unique' => 'L\'email est deja utilisé',
+            'number.required' => 'Le numéro est obligatoire',
+            'number.regex' => 'Le numéro doit commencer par 2, 3 ou 4',
+            'number.unique' => 'Le numéro est deja utilisé',
+            'password.required' => 'Le mot de passe est obligatoire',
+            'role_id.exists' => 'Le role n\'existe pas',
           ]);
 
          $user= DB::transaction(function () use ($validated){
@@ -243,5 +259,7 @@ Route::prefix('clients')->group(function () {
         ]);
     })->name('logout');
 });
+
+        Route::get('/ordersout', [SalesController::class,'index'])->name('clients.index');
 
 

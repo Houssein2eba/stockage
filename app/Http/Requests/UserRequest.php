@@ -35,4 +35,20 @@ class UserRequest extends FormRequest
             'role.name'=>'exists:roles,name',
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'role.name.exists' => 'Le role n\'existe pas',
+            'name.required' => 'Le nom est obligatoire',
+            'email.required' => 'L\'email est obligatoire',
+            'email.email' => 'L\'email doit être une adresse email valide',
+            'email.unique' => 'L\'email est déjà utilisé',
+            'number.required' => 'Le numéro est obligatoire',
+            'number.regex' => 'Le numéro doit commencer par 2, 3 ou 4 suivi de 7 chiffres',
+            'number.unique' => 'Le numéro est déjà utilisé',
+            'password.required' => 'Le mot de passe est obligatoire',
+
+        ];
+    }
 }

@@ -50,14 +50,15 @@ public function rules(): array
 public function messages()
 {
     return [
-        'category.*.id.required' => 'Please select at least one category.',
-        'stock.*.id.required' => 'Please select at least one stock.',
-        'stock.*.id.exists' => 'The selected stock does not exist.',
-        'image.image' => 'The image must be a valid image file.',
-        'image.max' => 'The image must not be larger than 2MB.',
-        'name.required' => 'The product name is required.',
-        'name.string' => 'The product name must be a string.',
-    ];
+    'category.*.id.required' => 'Veuillez sélectionner au moins une catégorie.',
+    'stock.*.id.required' => 'Veuillez sélectionner au moins un stock.',
+    'stock.*.id.exists' => 'Le stock sélectionné n’existe pas.',
+    'image.image' => 'L’image doit être un fichier image valide.',
+    'image.max' => 'L’image ne doit pas dépasser 2 Mo.',
+    'name.required' => 'Le nom du produit est obligatoire.',
+    'name.string' => 'Le nom du produit doit être une chaîne de caractères.',
+];
+
 }
 
 }

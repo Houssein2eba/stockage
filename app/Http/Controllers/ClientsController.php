@@ -167,7 +167,13 @@ class ClientsController extends Controller
         $validated = $request->validate([
             'name' => 'required|string',
             'number' => 'required|string|unique:clients,number,' . $id,
-        ]);
+        ],
+        [
+            'name.required' => 'Le nom est obligatoire',
+            'number.required' => 'Le numéro est obligatoire',
+            'number.unique' => 'Le numéro est déjà utilisé',
+        ]
+    );
         $client=DB::transaction(function () use ($validated, $id) {
             $client = Client::findOrFail($id);
             $old = $client->toArray();

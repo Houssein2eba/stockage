@@ -34,6 +34,12 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ],[
+            'name.required' => 'Le nom est obligatoire',
+            'email.required' => 'L\'email est obligatoire',
+            'email.unique' => 'L\'email est deja utilisé',
+            'password.required' => 'Le mot de passe est obligatoire',
+            'password.confirmed' => 'Les mots de passe doivent être identiques',
         ]);
 
         $user = User::create([

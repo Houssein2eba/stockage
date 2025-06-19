@@ -22,6 +22,12 @@ class CategoriesController extends Controller
             'sort' => 'nullable|string|in:name,description,products_count',
             'direction' => 'nullable|string|in:asc,desc',
             'page' => 'nullable|integer|min:1',
+        ],[
+            'search.string' => 'Le champ de recherche doit être une chaîne de caractères.',
+            'sort.in' => 'Le champ de tri doit être "name", "description" ou "products_count".',
+            'direction.in' => 'Le champ de direction doit être "asc" ou "desc".',
+            'page.integer' => 'Le numéro de page doit être un entier.',
+            'page.min' => 'Le numéro de page doit être au moins 1.',
         ]);
         $categories = Category::query()
             ->withCount('products')
@@ -72,7 +78,7 @@ class CategoriesController extends Controller
 
         $category=Category::find($id);
         if($category){
-            
+
             $category->delete();
 
         }

@@ -11,6 +11,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\Sales\SalesController;
 
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Stock\StockController;
 use App\Http\Controllers\Users\UsersController;
 use App\Http\Controllers\Notifications\NotificationController;
@@ -154,6 +155,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $order->update(['status' => $request->status]);
         return redirect()->back()->with('success', 'Order status updated successfully.');
     })->name('orders.status')->middleware('permission:update_sales');
+
+    // Settings
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::get('/', [SettingController::class, 'index'])->name('index');
+        Route::put('/', [SettingController::class, 'update'])->name('update');
+    });
+
 });
 
 // Fallback Route

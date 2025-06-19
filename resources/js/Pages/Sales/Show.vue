@@ -8,11 +8,10 @@
                 <!-- Company Header -->
                 <div class="flex justify-between mb-8">
                     <div>
-                        <h1 class="text-3xl font-bold text-gray-900">FACTURE</h1>
-                        <p class="text-sm text-gray-600 mt-1">Système de Gestion de Stock</p>
-                        <p class="text-sm text-gray-600">123 Rue Principale, Ville</p>
-                        <p class="text-sm text-gray-600">Téléphone: +222 00 00 00 00</p>
-                        <p class="text-sm text-gray-600">Email: contact@gestionstock.com</p>
+                        <h1 class="text-3xl font-bold text-gray-900">{{props.setting.company_name}}</h1>
+                        <p class="text-sm text-gray-600">Address: {{ props.setting.address }}</p>
+                        <p class="text-sm text-gray-600">Téléphone: {{ props.setting.phone }}</p>
+                        <p class="text-sm text-gray-600">Email: {{ props.setting.email }}</p>
                     </div>
                     <div class="text-right">
                         <div class="text-4xl font-bold text-blue-600">#{{ sale.reference }}</div>
@@ -82,7 +81,7 @@
                         Retour
                     </Link>
                     <button
-                        
+
                         class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-200"
                     >
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,7 +90,7 @@
                         <a :href="route('sales.invoice', props.sale.id)" target="_blank">
   Télécharger la facture
 </a>
-                        
+
                     </button>
 
                 </div>
@@ -110,6 +109,10 @@ import { useToast } from 'vue-toastification'
 
 const props = defineProps({
     sale: {
+        type: Object,
+        required: true
+    },
+    setting: {
         type: Object,
         required: true
     }

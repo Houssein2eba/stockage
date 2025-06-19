@@ -42,9 +42,10 @@ class ClientRequest extends FormRequest
      */
     public function messages(): array
     {
-        return [
-            'number.regex' => 'The phone number must start with 2, 3, or 4 followed by 7 digits.',
-            'number.unique' => 'This phone number is already registered.'
-        ];
+return [
+    'number.regex' => 'Le numéro de téléphone doit commencer par 2, 3 ou 4 suivi de 7 chiffres.',
+    'number.unique' => 'Ce numéro de téléphone est déjà enregistré.',
+];
+
     }
 }

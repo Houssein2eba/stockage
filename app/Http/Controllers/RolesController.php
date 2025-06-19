@@ -97,6 +97,12 @@ class RolesController extends Controller
             'permissions' => 'required|array',
             'permissions.*.name'=>'string|exists:permissions,name',
             'permissions.*.id' => 'exists:permissions,id',
+        ],[
+            'name.required' => 'Le nom est obligatoire',
+            'name.unique' => 'Le nom est déjà utilisé',
+            'permissions.required' => 'Les permissions sont obligatoires',
+            'permissions.*.name.exists' => 'La permission n\'existe pas',
+            'permissions.*.id.exists' => 'La permission n\'existe pas',
         ]);
 
         $role = Role::findOrFail($id);

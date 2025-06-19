@@ -21,11 +21,23 @@ class StoreRoleRequest extends FormRequest
      */
     public function rules(): array
     {
-        
+
         return [
             'name' => 'required|string|max:255|unique:roles',
             'permissions' => 'array|min:1|required',
-            
+
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'name.required' => 'Le nom du role est obligatoire.',
+            'name.string' => 'Le nom du role doitêtre une chaîne de caractères.',
+            'name.max' => 'Le nom du role ne doit pas dépasser 255 caractères.',
+            'name.unique' => 'Ce role existe déjà.',
+            'permissions.required' => 'Veuillez sélectionner au moins une permission.',
+            'permissions.min' => 'Veuillez sélectionner au moins une permission.',
         ];
     }
 }

@@ -120,16 +120,17 @@
         <!-- Header -->
         <div class="header">
             <div class="company-info">
-                <div class="company-name">INVOICE</div>
-                <div>Stock Management System</div>
-                <div>123 Main Street, City</div>
-                <div>Phone: +1 800 123 4567</div>
-                <div>Email: contact@stockmanagement.com</div>
+                @php
+                    $settings = \App\Models\Setting::get()->first();
+                @endphp
+                <div class="company-name">{{ $settings->company_name }}</div>
+                <div>Address: {{ $settings->address }}</div>
+                <div>Téléphone: {{ $settings->phone }}</div>
+                <div>Email: {{ $settings->email }}</div>
             </div>
             <div class="invoice-info">
                 <div class="invoice-number">#{{ $order->reference }}</div>
                 <div>Date: {{ $order->created_at->format('d/m/Y') }}</div>
-
                 <div class="status-container">
                     <span>Status:
                         {{ ucfirst($order->status) }}

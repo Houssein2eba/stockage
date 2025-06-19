@@ -47,6 +47,8 @@ class ProfileController extends Controller
     {
         $request->validate([
             'password' => ['required', 'current_password'],
+        ],[
+            'password.current_password' => 'Le mot de passe est incorrect.',
         ]);
 
         $user = $request->user();
@@ -61,5 +63,5 @@ class ProfileController extends Controller
         return Redirect::to('/');
     }
 
-    
+
 }

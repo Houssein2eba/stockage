@@ -157,6 +157,9 @@ public function store(Request $request)
     $request->validate([
         'name' => 'required|string|max:255',
         'location' => 'required|string|max:255',
+    ],[
+        'name.required' => 'Le nom est obligatoire',
+        'location.required' => 'La localisation est obligatoire',
     ]);
 
     $stock = Stock::create($request->only('name', 'location'));

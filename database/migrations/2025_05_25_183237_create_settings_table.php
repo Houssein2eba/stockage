@@ -13,8 +13,11 @@ return new class extends Migration
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->integer('low_stock')->default(10);
-            $table->integer('low_product')->default(50);
+            $table->string('company_name')->default('My Company');
+            $table->string('address')->default('My Address');
+            $table->string('email')->default('Wd2Tq@example.com');
+            $table->string('phone')->default('XXXXXXXX');
+            $table->integer('min_quantity')->default(10);
             $table->timestamps();
         });
     }

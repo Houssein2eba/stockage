@@ -9,6 +9,7 @@ use App\Http\Resources\OrderResource;
 
 use App\Http\Resources\ProductResource;
 use App\Http\Requests\OrderRequest;
+use App\Http\Resources\SettingResource;
 use App\Http\Resources\StockResource;
 use App\Models\Client;
 use App\Models\Order;
@@ -16,6 +17,7 @@ use App\Models\OrderDetail;
 
 use App\Models\Product;
 use App\Models\ProductStock;
+use App\Models\Setting;
 use App\Models\Stock;
 use App\Observers\ProductStockObserver;
 use App\Services\ProductMonitorService;
@@ -76,12 +78,21 @@ class SalesController extends Controller
 
         // Always order by latest if no specific sort
         ->orderBy('created_at', 'desc');
-        if($request->wantsJson()){
-            return response()->json(["orders" => OrderResource::collection($orders->get())]);
-        }
 
-        $orders = $orders->paginate(PAGINATION)
+
+        $orders = $orders->paginate(2)
         ->withQueryString();
+        if($request->wantsJson()){
+            return response()->json([
+            "orders" => OrderResource::collection($orders),
+            "meta" => [
+                "current_page" => $orders->currentPage(),
+                "last_page" => $orders->lastPage(),
+                "per_page" => $orders->perPage(),
+                "total" => $orders->total(),
+            ]
+    ]);
+        }
 
     // Statistiques utiles
     $stats = [
@@ -104,7 +115,8 @@ class SalesController extends Controller
         $order = Order::with(['client', 'products'])->findOrFail($id);
 
         return inertia('Sales/Show', [
-            'sale' => new OrderResource($order)
+            'sale' => new OrderResource($order),
+            'setting'=> new SettingResource(Setting::first()),
         ]);
     }
 
@@ -184,7 +196,7 @@ class SalesController extends Controller
                         ]);
                     }
 
-                    
+
                 }
 
                 // Attach products to order with pivot data
@@ -195,7 +207,7 @@ class SalesController extends Controller
                     'total_amount' => $orderTotal
                 ]);
 
-                
+
 
                 return $order->id;
             });

@@ -33,12 +33,13 @@ class CategoriesRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.required' => 'The name field is required.',
-            'name.string' => 'The name field must be a string.',
-            'name.max' => 'The name field may not be greater than 255 characters.',
-            'name.unique' => 'The name has already been taken.',
-            'description.string' => 'The description field must be a string.',
-            'description.max' => 'The description field may not be greater than 255 characters.',
-        ];
+    'name.required' => 'Le champ nom est obligatoire.',
+    'name.string' => 'Le champ nom doit être une chaîne de caractères.',
+    'name.max' => 'Le champ nom ne doit pas dépasser 255 caractères.',
+    'name.unique' => 'Ce nom est déjà utilisé.',
+    'description.string' => 'Le champ description doit être une chaîne de caractères.',
+    'description.max' => 'Le champ description ne doit pas dépasser 255 caractères.',
+];
+
     }
 }
