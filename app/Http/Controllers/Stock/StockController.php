@@ -133,11 +133,18 @@ public function index(Request $request)
             })
             ->latest()
             ->orderBy('stock_date', 'desc');
-            if($request->wantsJson()) {
-                return response()->json(['movements'=>MovementResource::collection($movements->get())]);
-            }
-        $movements = $movements->paginate(10)
+            
+        $movements = $movements->paginate(5)
         ->withQueryString();
+        if($request->wantsJson()) {
+                return response()->json([
+                    'movements'=>MovementResource::collection($movements),
+                    'meta'=> [
+                        'current_page' => $movements->currentPage(),
+                        'last_page' => $movements->lastPage(),
+                    ]
+                ]);
+            }
 
     return Inertia::render('Stock/Show', [
         'movements' => MovementResource::collection($movements),

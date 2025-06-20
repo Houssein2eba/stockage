@@ -80,7 +80,7 @@ class SalesController extends Controller
         ->orderBy('created_at', 'desc');
 
 
-        $orders = $orders->paginate(2)
+        $orders = $orders->paginate(PAGINATION)
         ->withQueryString();
         if($request->wantsJson()){
             return response()->json([

@@ -11,54 +11,53 @@ class PermissionSeeder extends Seeder
     public function run(): void
     {
         // Create permissions grouped by module
-        $permissions= [
+$permissions = [
     // Clients
-    'view_clients',
-    'create_clients',
-    'export_clients',
-    'update_clients',
-    'delete_clients',
+    'voirClients',
+    'creerClients',
+    'exporterClients',
+    'modifierClients',
+    'supprimerClients',
 
-    // Sales
-    'view_sales',
-    'create_sales',
-    'mark_as_paid',
-    'update_sales',
-    'delete_sales',
-    'generate_invoice',
+    // Ventes
+    'voirVentes',
+    'creerVentes',
+    'marquerPaye',
+    'modifierVentes',
+    'supprimerVentes',
+    'genererFacture',
 
     // Stocks
-    'view_stocks',
-    'create_stocks',
-    'update_stocks',
-    'delete_stocks',
+    'voirStocks',
+    'creerStocks',
+    'modifierStocks',
+    'supprimerStocks',
 
-    // Users
-    'view_users',
-    'create_users',
-    'update_users',
-    'delete_users',
-    'export_users',
+    // Utilisateurs
+    'voirUtilisateurs',
+    'creerUtilisateurs',
+    'modifierUtilisateurs',
+    'supprimerUtilisateurs',
+    'exporterUtilisateurs',
 
-    // Activity Logs
-    'view_activity_log',
+    // Journal
+    'voirJournal',
 
-    // Products
-    'view_products',
-    'create_products',
-    'export_products',
-    'update_products',
-    'delete_products',
+    // Produits
+    'voirProduits',
+    'creerProduits',
+    'exporterProduits',
+    'modifierProduits',
+    'supprimerProduits',
 
-    // Categories
-    'view_categories',
-    'create_categories',
-    'update_categories',
-    'delete_categories',
+    // Catégories
+    'voirCategories',
+    'creerCategories',
+    'modifierCategories',
+    'supprimerCategories',
 
     // Notifications
-    'view_notifications',
-
+    'voirNotifications'
 ];
 
 
