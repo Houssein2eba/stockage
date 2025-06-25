@@ -35,7 +35,7 @@ const page = ref(props.sales?.meta?.current_page || 1);
 const tableHeaders = computed(() => [
     { label: 'Référence', field: 'reference', sortable: true },
     { label: 'Client', field: 'client_id', sortable: true },
-    { label: 'Total', field: 'total_amount', sortable: true },
+    { label: 'Total', field: 'order_total_amount', sortable: true },
     { label: 'Statut', field: 'status', sortable: true },
     { label: 'Date', field: 'created_at', sortable: true },
     { label: 'Actions', field: null, sortable: false }
@@ -358,9 +358,9 @@ const markAsPaid = (sale) => {
                                             'bg-red-100 text-red-800': sale.status === 'cancelled'
                                         }"
                                     >
-                                        {{ 
-                                            sale.status === 'paid' ? 'Payé' : 
-                                            sale.status === 'pending' ? 'En attente' : 
+                                        {{
+                                            sale.status === 'paid' ? 'Payé' :
+                                            sale.status === 'pending' ? 'En attente' :
                                             'Annulé'
                                         }}
                                     </span>

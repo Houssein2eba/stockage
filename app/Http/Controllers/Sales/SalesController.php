@@ -37,6 +37,7 @@ class SalesController extends Controller
     }
     public function index(Request $request)
 {
+
     $request->validate([
         'search' => 'nullable|string',
         'status' => 'nullable|string|in:paid,pending,cancelled',
@@ -65,8 +66,8 @@ class SalesController extends Controller
         })
 
         // Sorting
-        ->when($request->sort === 'order_total_amount' || $request->sort === 'total_amount', function ($query) use ($request) {
-            $query->orderBy('total_amount', $request->direction ?? 'asc');
+        ->when(in_array($request->sort, ['order_total_amount', 'total_amount']), function ($query) use ($request) {
+            $query->orderBy('order_total_amount', $request->direction ?? 'asc');
         })
 
         ->when(
@@ -169,7 +170,7 @@ class SalesController extends Controller
 
                     // Check stock availability
                     if ($product->quantity < $productItem['quantity']) {
-                        throw new \Exception("Stock insuffisant pour le produit : {$product->name}");
+                        throw new \Exception('Quantité insuffisante pour ' . $product->name . '. Stock disponible: ' . $product->quantity);
                     }
 
                     // Calculate amounts
@@ -180,7 +181,6 @@ class SalesController extends Controller
                     $productData[$product->id] = [
                         'quantity' => $productItem['quantity'],
                         'total_amount' => $totalAmount,
-
                     ];
 
                     // Update product stock quantity
