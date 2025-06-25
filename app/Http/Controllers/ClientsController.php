@@ -42,9 +42,14 @@ class ClientsController extends Controller
             $query->where('name', 'like', '%'. $request->search. '%')
                 ->orWhere('number', 'like', '%'. $request->search. '%');
         })->
-        get();
+        paginate(6)->withQueryString();
         return response()->json([
             'clients' => ClientResource::collection($clients),
+            'users_count' => Client::count(),
+            'meta'=>[
+                'current_page'=>$clients->currentPage(),
+                'last_page'=>$clients->lastPage(),
+            ]
         ]);
       }
 

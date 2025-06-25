@@ -100,7 +100,7 @@ onUnmounted(() => {
 const { hasPermission } = usePermission();
 const { hasRole } = usePermission();
 console.log(page.props.auth.permissions);
-console.log(hasPermission('view_users'));
+console.log(hasPermission('voirUtilisateurs'));
 
 // Interrogation des notifications
 let pollInterval;
@@ -171,7 +171,7 @@ onUnmounted(() => {
           </li>
 
           <!-- Dropdown Utilisateurs -->
-          <li v-if="page.props.auth.permissions.includes('view_users')">
+          <li v-if="page.props.auth.permissions.includes('voirUtilisateurs')">
             <div class="relative">
               <button
                 @click="toggleDropdown('users')"
@@ -210,7 +210,7 @@ onUnmounted(() => {
                   >
                     Tous les utilisateurs
                   </SidebarLink>
-                  <SidebarLink v-if="page.props.auth.permissions.includes('create_users')"
+                  <SidebarLink v-if="page.props.auth.permissions.includes('creerUtilisateur')"
                     :href="route('users.create')"
                     :active="route().current('users.create')"
                     class="text-sm hover:bg-blue-50"
@@ -223,7 +223,7 @@ onUnmounted(() => {
           </li>
 
           <!-- Dropdown Clients -->
-          <li v-if="page.props.auth.permissions.includes('view_clients')">
+          <li v-if="page.props.auth.permissions.includes('voirClients')">
             <div class="relative">
               <button
                 @click="toggleDropdown('clients')"
@@ -263,7 +263,7 @@ onUnmounted(() => {
                     Tous les clients
                   </SidebarLink>
                   <SidebarLink
-                  v-if="page.props.auth.permissions.includes('create_clients')"
+                  v-if="page.props.auth.permissions.includes('creerClients')"
                     :href="route('clients.create')"
                     :active="route().current('clients.create')"
                     class="text-sm hover:bg-blue-50"
@@ -276,7 +276,7 @@ onUnmounted(() => {
           </li>
 
           <!-- Dropdown Produits -->
-          <li v-if="page.props.auth.permissions.includes('view_products')">
+          <li v-if="page.props.auth.permissions.includes('voirProduits')">
             <div class="relative">
               <button
                 @click="toggleDropdown('products')"
@@ -309,7 +309,7 @@ onUnmounted(() => {
               >
                 <div v-if="dropdowns.products.value" class="ml-8 mt-1.5 space-y-1.5 overflow-hidden">
                   <SidebarLink
-                    v-if="page.props.auth.permissions.includes('view_categories')"
+                    v-if="page.props.auth.permissions.includes('voirCategories')"
                     :href="route('categories.index')"
                     :active="route().current('categories.index')"
                     class="text-sm hover:bg-blue-50"
@@ -417,10 +417,9 @@ onUnmounted(() => {
 
           <div class="flex items-center gap-2">
             <template v-for="link in [
-              { route: 'activity.index', icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', label: 'Activité', permission: 'view_activity_log' },
               { route: 'profile.edit', icon: 'M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z', label: 'Profil', permission: null },
-              { route: 'sales.index', icon: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z', label: 'Ventes', permission: 'view_sales' },
-              { route: 'stocks.index', icon: 'M20 7H4V5h16v2zm0 2H4v10h16V9zM3 5H1v12h2V5zm18 0h2v12h-2V5z', label: 'Stocks', permission: 'view_stocks' },
+              { route: 'sales.index', icon: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z', label: 'Ventes', permission: 'voirVentes' },
+              { route: 'stocks.index', icon: 'M20 7H4V5h16v2zm0 2H4v10h16V9zM3 5H1v12h2V5zm18 0h2v12h-2V5z', label: 'Stocks', permission: 'voirStocks' },
               {route:'settings.index', icon:'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z', label:'Paramètres', permission:null},
             ]" :key="link.route">
               <Link
@@ -437,7 +436,7 @@ onUnmounted(() => {
             </template>
 
             <!-- Cloche de notification -->
-            <div class="relative" v-if="page.props.auth.permissions.includes('view_notifications')">
+            <div class="relative" v-if="page.props.auth.permissions.includes('voirNotifications')">
               <button
                 @click="toggleNotifications"
                 class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors relative"

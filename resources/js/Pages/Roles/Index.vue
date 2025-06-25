@@ -123,6 +123,41 @@ const deleteRole = () => {
         },
     });
 };
+
+const formatPermissionLabel = (permissionKey) => {
+  // Dictionnaire de traductions spécifiques si nécessaire
+  const specialTranslations = {
+    'marquerPaye': 'Marquer comme payé',
+    'genererFacture': 'Générer facture',
+    // Ajoutez d'autres traductions spéciales si nécessaire
+  };
+
+  // Si une traduction spéciale existe, on l'utilise
+  if (specialTranslations[permissionKey]) {
+    return specialTranslations[permissionKey];
+  }
+
+  // Sinon, on formate automatiquement
+  let formatted = permissionKey
+    // Insère un espace avant les majuscules
+    .replace(/([A-Z])/g, ' $1')
+    // Met en minuscules sauf la première lettre
+    .toLowerCase()
+    // Met en majuscule la première lettre de chaque mot
+    .replace(/(^|\s)\S/g, (match) => match.toUpperCase())
+    // Nettoyage des espaces multiples
+    .trim();
+
+  // Remplace certains termes pour un meilleur français
+  formatted = formatted
+    .replace('Creer', 'Créer')
+    .replace('Modifier', 'Modifier')
+    .replace('Voir', 'Voir')
+    .replace('Supprimer', 'Supprimer')
+    .replace('Exporter', 'Exporter');
+
+  return formatted;
+};
 </script>
 
 <template>
@@ -222,7 +257,7 @@ const deleteRole = () => {
                                                 :key="permission.id"
                                                 class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800"
                                             >
-                                                {{ permission.name }}
+                                                {{ formatPermissionLabel(permission.name )}}
                                             </span>
                                         </div>
                                     </TableDataCell>

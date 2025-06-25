@@ -74,18 +74,14 @@ $permissions = [
         // Create manager role with limited permissions
         $managerRole = Role::create(['name' => 'manager']);
         $managerRole->givePermissionTo([
-            'view_products',
-            'view_sales', 'create_sales',
-            'view_clients', 'create_clients',
+            'voirProduits', 'creerProduits', 'modifierProduits', 'supprimerProduits',
             
         ]);
 
         // Create cashier role with basic permissions
         $cashierRole = Role::create(['name' => 'cashier']);
         $cashierRole->givePermissionTo([
-            'view_products',
-            'view_sales', 'create_sales',
-            'view_clients', 'create_clients',
+            'voirProduits',
             
         ]);
     }
