@@ -56,6 +56,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{id}/edit', [ClientsController::class, 'edit'])->name('edit')->middleware('permission:modifierClients');
         Route::put('/{id}', [ClientsController::class, 'update'])->name('update')->middleware('permission:modifierClients');
         Route::delete('/{id}', [ClientsController::class, 'destroy'])->name('destroy')->middleware('permission:supprimerClients');
+        Route::post('/bulk-destroy', [ClientsController::class, 'bulkDestroy'])->name('bulkDestroy')->middleware('permission:supprimerClients');
     });
 
     // Sales
@@ -91,6 +92,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{id}/edit', [UsersController::class, 'edit'])->name('edit')->middleware('permission:modifierUtilisateurs');
         Route::put('/{id}', [UsersController::class, 'update'])->name('update')->middleware('permission:modifierUtilisateurs');
         Route::delete('/{id}', [UsersController::class, 'delete'])->name('delete')->middleware('permission:supprimerUtilisateurs');
+        Route::post('/bulk-destroy', [UsersController::class, 'bulkDestroy'])->name('bulkDestroy')->middleware('permission:supprimerUtilisateurs');
         Route::get('/export', [UsersController::class, 'export'])->name('export')->middleware('permission:exporterUtilisateurs');
     });
 

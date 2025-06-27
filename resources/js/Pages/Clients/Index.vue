@@ -25,21 +25,37 @@ const props = defineProps({
     }
 });
 
-const form = useForm({});
+const form = useForm({
+    ids: [],
+});
 const toast = useToast();
 const search = ref(props.filters?.search || '');
 const sort = ref({ field: props.filters?.sort || 'created_at', direction: props.filters?.direction || 'desc' });
 const page = ref(props.clients?.meta?.current_page || 1);
+const selectedClients = ref([]);
 
 // Configuration des en-têtes du tableau
 const tableHeaders = computed(() => [
     { label: 'Nom', field: 'name', sortable: true },
     { label: 'Numéro', field: 'number', sortable: true },
-    { label: 'Commandes', field: 'orders_count', sortable: true },
+    { label: 'Ventes', field: 'orders_count', sortable: true },
     { label: 'Dettes', field: 'depts_amount', sortable: true },
     { label: 'Modifier', field: null, sortable: false },
     { label: 'Supprimer', field: null, sortable: false }
 ]);
+
+const allSelected = computed({
+    get() {
+        return props.clients.data.length > 0 && selectedClients.value.length === props.clients.data.length;
+    },
+    set(value) {
+        if (value) {
+            selectedClients.value = props.clients.data.map(c => c.id);
+        } else {
+            selectedClients.value = [];
+        }
+    }
+});
 
 // Surveillance des changements de recherche
 watch([search], debounce(() => {
@@ -89,23 +105,68 @@ const confirmDelete = (clientId) => {
     showDeleteModal.value = true;
 };
 
-const deleteClient = () => {
-    form.delete(route('clients.destroy', clientToDelete.value), {
-        onSuccess: () => {
-            toast.success('Client supprimé avec succès');
-            showDeleteModal.value = false;
-            clientToDelete.value = null;
-        },
-        onError: (errors) => {
-            Object.keys(errors).forEach((key) => {
-                toast.error(errors[key], {
-                    position: 'top-right',
-                    timeout: 5000,
-                });
-            });
-        },
-    });
+const confirmDeleteSelected = () => {
+    clientToDelete.value = selectedClients.value;
+    showDeleteModal.value = true;
 };
+
+const deleteClient = () => {
+    const isBulk = Array.isArray(clientToDelete.value);
+    const ids = isBulk ? clientToDelete.value : [clientToDelete.value];
+
+    if (ids.length === 0) {
+        showDeleteModal.value = false;
+        return;
+    }
+
+    if (isBulk) {
+        form.ids = ids;
+        form.post(route('clients.bulkDestroy'), {
+            onSuccess: () => {
+                toast.success('Clients supprimés avec succès');
+                showDeleteModal.value = false;
+                clientToDelete.value = null;
+                selectedClients.value = [];
+            },
+            onError: (errors) => {
+                Object.keys(errors).forEach((key) => {
+                    toast.error(errors[key]);
+                });
+                showDeleteModal.value = false;
+            },
+        });
+    } else {
+        useForm({}).delete(route('clients.destroy', clientToDelete.value), {
+            onSuccess: () => {
+                toast.success('Client supprimé avec succès');
+                showDeleteModal.value = false;
+                clientToDelete.value = null;
+            },
+            onError: (errors) => {
+                Object.keys(errors).forEach((key) => {
+                    toast.error(errors[key]);
+                });
+                showDeleteModal.value = false;
+            },
+        });
+    }
+};
+
+const closeModal = () => {
+    showDeleteModal.value = false;
+    clientToDelete.value = null;
+};
+
+const modalTitle = computed(() => {
+    return Array.isArray(clientToDelete.value) ? `Supprimer ${selectedClients.value.length} clients` : 'Supprimer le Client';
+});
+
+const modalText = computed(() => {
+    if (Array.isArray(clientToDelete.value)) {
+        return `Êtes-vous sûr de vouloir supprimer les ${clientToDelete.value.length} clients sélectionnés ? Cette action est irréversible.`;
+    }
+    return 'Êtes-vous sûr de vouloir supprimer ce client ? Cette action est irréversible.';
+});
 
 // Gestion de la pagination
 const handlePageChange = (url) => {
@@ -159,6 +220,16 @@ const exportExcel = () => {
                         </span>
                     </div>
                     <button
+                        @click="confirmDeleteSelected"
+                        :disabled="selectedClients.length === 0"
+                        class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Supprimer la sélection ({{ selectedClients.length }})
+                    </button>
+                    <button
                         @click="exportExcel"
                         class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors"
                     >
@@ -207,6 +278,13 @@ const exportExcel = () => {
                 <Table>
                     <template #header>
                         <TableRow>
+                            <TableHeaderCell class="w-4 px-4 sm:px-6">
+                                <input
+                                    type="checkbox"
+                                    v-model="allSelected"
+                                    class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500"
+                                />
+                            </TableHeaderCell>
                             <TableHeaderCell
                                 v-for="header in tableHeaders"
                                 :key="header.field || header.label"
@@ -244,6 +322,14 @@ const exportExcel = () => {
                     </template>
                     <template #body>
                         <TableRow v-for="client in props.clients.data" :key="client.id" class="hover:bg-gray-50/50 transition-colors">
+                            <TableDataCell class="w-4 px-4 sm:px-6">
+                                <input
+                                    type="checkbox"
+                                    :value="client.id"
+                                    v-model="selectedClients"
+                                    class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500"
+                                />
+                            </TableDataCell>
                             <TableDataCell class="px-4 sm:px-6 py-4">
                                 <Link
                                     :href="route('clients.show', client.id)"
@@ -325,9 +411,9 @@ const exportExcel = () => {
                                         </svg>
                                     </div>
                                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                        <h3 class="text-lg leading-6 font-medium text-gray-900">Supprimer le Client</h3>
+                                        <h3 class="text-lg leading-6 font-medium text-gray-900">{{ modalTitle }}</h3>
                                         <div class="mt-2">
-                                            <P>Êtes-vous sûr de vouloir supprimer ce client ? Cette action est irréversible.</P>
+                                            <P>{{ modalText }}</P>
                                         </div>
                                     </div>
                                 </div>
@@ -348,7 +434,7 @@ const exportExcel = () => {
                                     </span>
                                 </PrimaryButton>
                                 <button
-                                    @click="showDeleteModal = false"
+                                    @click="closeModal"
                                     class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                                 >
                                     Annuler

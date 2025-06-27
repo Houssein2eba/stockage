@@ -77,14 +77,7 @@ class UsersController extends Controller
 
             $user->assignRole($request->role);
 
-            activity()
-                ->causedBy(auth()->user())
-                ->performedOn($user)
-                ->withProperties([
-                    'new' => $request->validated(),
-                    'old' => [],
-                ])
-                ->log('Created user');
+           
         });
 
         return to_route('users.index');
@@ -119,14 +112,7 @@ class UsersController extends Controller
 
             $user->syncRoles([$request->input('role.name')]);
 
-            activity()
-                ->causedBy(auth()->user())
-                ->performedOn(new User)
-                ->withProperties([
-                    'new' => $request->validated(),
-                    'old' => $oldData,
-                ])
-                ->log('Updated user');
+            
         });
 
         return redirect()->route('users.index');
@@ -165,5 +151,33 @@ class UsersController extends Controller
 
 
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:users,id',
+        ]);
+
+        $idsToDelete = collect($validated['ids'])->reject(function ($id) {
+            return $id == auth()->id();
+        });
+
+        if ($idsToDelete->count() > 0) {
+            DB::transaction(function () use ($idsToDelete) {
+                User::whereIn('id', $idsToDelete)->delete();
+            });
+        }
+        
+        $deletedCount = $idsToDelete->count();
+        $totalCount = count($validated['ids']);
+        
+        if ($deletedCount < $totalCount) {
+             return redirect()->route('users.index')->with('warning', 'Some users could not be deleted (e.g., the current user).');
+        }
+
+
+        return redirect()->route('users.index')->with('success', 'Users deleted successfully.');
     }
 }

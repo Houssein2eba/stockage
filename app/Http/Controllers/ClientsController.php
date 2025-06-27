@@ -216,6 +216,20 @@ class ClientsController extends Controller
         return back();
     }
 
+    public function bulkDestroy(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:clients,id',
+        ]);
+
+        DB::transaction(function () use ($validated) {
+            Client::whereIn('id', $validated['ids'])->delete();
+        });
+
+        return back()->with('success', 'Clients supprimés avec succès.');
+    }
+
     public function export(){
 
         return \Maatwebsite\Excel\Facades\Excel::download(new ClientsExport(), 'clients.xlsx');
