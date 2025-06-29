@@ -30,11 +30,7 @@ use Log;
 
 class SalesController extends Controller
 {
-    public function __construct(public ProductMonitorService $productMonitorService, public StockMonitorService $stockMonitorService){
-        $this->productMonitorService = $productMonitorService;
-        $this->stockMonitorService = $stockMonitorService;
 
-    }
     public function index(Request $request)
 {
 
@@ -69,14 +65,12 @@ class SalesController extends Controller
         ->when(in_array($request->sort, ['order_total_amount', 'total_amount']), function ($query) use ($request) {
             $query->orderBy('order_total_amount', $request->direction ?? 'asc');
         })
-
         ->when(
             $request->filled('sort') && !in_array($request->sort, ['order_total_amount', 'total_amount']),
             function ($query) use ($request) {
                 $query->orderBy($request->sort, $request->direction ?? 'asc');
             }
         )
-
         // Always order by latest if no specific sort
         ->orderBy('created_at', 'desc');
 

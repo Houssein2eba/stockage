@@ -25,24 +25,25 @@ class OrderRequest extends FormRequest
     {
 
 
-        $isClient = $this->client==null ? false : true;
-        // dd($this);
+        $isClient = $this->client !== null;
 
-
-        return [
+    return [
         'client' => ['nullable', 'array'],
         'client.id' => ['required_with:client', 'uuid'],
         'stock' => ['required', 'array'],
-        'stock.id' => ['required', 'uuid'], // ajuste selon les champs nécessaires
+        'stock.id' => ['required', 'uuid'],
         'products' => ['required', 'array', 'min:1'],
         'products.*.product' => ['required', 'array'],
         'products.*.product.id' => ['required', 'uuid'],
         'products.*.quantity' => ['required', 'integer', 'min:1'],
         'products.*.total_amount' => ['required', 'numeric'],
-        'paid' => ['required', 'boolean'],
+         'paid' => array_filter([
+            'required',
+            'boolean',
+            !$isClient ? 'in:1' : null  // Non-clients must have paid = 1
+        ]),
         'order_total_amount' => ['required', 'numeric'],
-        ];
-
+    ];
 
     }
     public function messages()
