@@ -18,7 +18,9 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-define('PAGINATION', 7);
+if (!defined('PAGINATION')) {
+    define('PAGINATION', 7);
+}
 
 // Public Routes
 Route::get('/', function () {
@@ -120,7 +122,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/create', [ProductsController::class, 'create'])->name('create')->middleware('permission:creerProduits');
         Route::post('/', [ProductsController::class, 'store'])->name('store')->middleware('permission:creerProduits');
         Route::get('/export', [ProductsController::class, 'export'])->name('export')->middleware('permission:exporterProduits');
-        Route::get('lowStock', [ProductsController::class, 'lowStock'])->name('lowStock')->middleware('permission:exporterProduits');
+        Route::get('lowStock', [ProductsController::class, 'lowStock'])->name('lowStock');
         Route::get('/single-export/{id}', [ProductsController::class, 'exportSingle'])->name('single_export')->middleware('permission:exporterProduits');
         Route::get('/{id}/show', [ProductsController::class, 'show'])->name('show')->middleware('permission:voirProduits');
         Route::get('/{id}/edit', [ProductsController::class, 'edit'])->name('edit')->middleware('permission:modifierProduits');

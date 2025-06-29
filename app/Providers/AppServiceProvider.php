@@ -43,7 +43,7 @@ class AppServiceProvider extends ServiceProvider
 
        JsonResource::withoutWrapping();
 
-       Model::automaticallyEagerLoadRelationships();
+       //    Model::automaticallyEagerLoadRelationships();
 
        Product::observe(ProductObserver::class);
        Order::observe(OrderObserver::class);

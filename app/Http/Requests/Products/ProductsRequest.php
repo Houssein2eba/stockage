@@ -40,6 +40,7 @@ public function rules(): array
         'stock' => ['required', 'array', 'min:1'],
         'stock.id' => ['required', 'uuid','exists:stocks,id'],
         'expiry_date' => ['nullable', 'date'],
+        'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
 
     ];
 
@@ -58,6 +59,7 @@ public function messages()
     'name.required' => 'Le nom du produit est obligatoire.',
     'name.string' => 'Le nom du produit doit être une chaîne de caractères.',
 ];
+
 
 }
 

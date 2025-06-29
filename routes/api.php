@@ -50,6 +50,7 @@ use Spatie\Permission\Models\Role;
             $field='number';
         }
 
+        $user = null;
         if(Auth::attempt([$field=> $login['credential'],'password'=>$login['password']])){
             $user=Auth::user()->load('roles');
 

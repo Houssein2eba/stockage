@@ -152,7 +152,7 @@ public function index(Request $request)
 }
 
 //export excel
-public function export()
+public function export(Request $request)
 {
 
 
@@ -390,33 +390,33 @@ public function exportSingle($stockId)
 
     public function store(ProductsRequest $request)
 {
-
-    DB::transaction(function () use ($request) {
+    $data = $request->validated();
+    DB::transaction(function () use ($request, $data) {
         $url = $request->hasFile('image')
             ? $request->file('image')->store('products', 'public')
             : 'products/product.png';
 
         // Create the product
         $product = Product::create([
-            'name'        => $request->name,
-            'description' => $request->description,
-            'price'       => $request->price,
-            'cost'        => $request->cost,
-            'quantity'   => $request->quantity,
+            'name'        => $data['name'],
+            'description' => $data['description'],
+            'price'       => $data['price'],
+            'cost'        => $data['cost'],
+            'quantity'   => $data['quantity'],
             'image'       => $url,
         ]);
 
         // Attach categories
         $product->categories()->attach(
-            collect($request->category)->pluck('id')
+            collect($data['category'])->pluck('id')
         );
 
 
 
-        $product->stocks()->attach($request['stock']['id'], [
-            'stock_date' =>  Carbon::parse($request->expiry_date),
+        $product->stocks()->attach($data['stock']['id'], [
+            'stock_date' =>  Carbon::parse($data['expiry_date']),
             'type' => 'in',
-            'products_quantity' => $request->quantity,
+            'products_quantity' => $data['quantity'],
         ]);
 
 
@@ -440,29 +440,29 @@ public function exportSingle($stockId)
 
     public function update(ProductsRequest $request, $id)
     {
-        $request->validated();
+        $data = $request->validated();
         $product = Product::where('id', $id)->lockForUpdate()->firstOrFail();
-        DB::transaction(function () use ($request, $product) {
+        DB::transaction(function () use ($request, $product, $data) {
             $old = $product->toArray();
 
 
                 $product->update([
-                    'name' => $request->name,
-                    'description' => $request->description,
-                    'price' => $request->price,
-                    'quantity' => $request->quantity,
-                    'expiry_date' => Carbon::parse($request->expiry_date),
-                    'cost'=> $request->cost,
+                    'name' => $data['name'],
+                    'description' => $data['description'],
+                    'price' => $data['price'],
+                    'quantity' => $data['quantity'],
+                    'expiry_date' => Carbon::parse($data['expiry_date']),
+                    'cost'=> $data['cost'],
                 ]);
 
-            $product->categories()->sync(collect($request->category)->pluck('id'));
+            $product->categories()->sync(collect($data['category'])->pluck('id'));
 
             $product->stocks()->syncWithoutDetaching([
-                $request['stock']['id'] => [
-                    'stock_date' => Carbon::parse($request->expiry_date),
+                $data['stock']['id'] => [
+                    'stock_date' => Carbon::parse($data['expiry_date']),
 
                     'type' => 'in',
-                    'products_quantity' => $request->quantity,
+                    'products_quantity' => $data['quantity'],
                 ]
             ]);
             $product->refresh();
@@ -470,6 +470,23 @@ public function exportSingle($stockId)
         });
 
         return to_route('products.index');
+    }
+    
+    public function updateImage(Request $request, $id)
+    {
+        $request->validate([
+            'image' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+        ]);
+        $product = Product::findOrFail($id);
+        if ($request->hasFile('image')) {
+            if ($product->image && $product->image !== 'products/product.png') {
+                Storage::disk('public')->delete($product->image);
+            }
+            $url = $request->file('image')->store('products', 'public');
+            $product->image = $url;
+            $product->save();
+        }
+        return back();
     }
 
     public function destroy($id)

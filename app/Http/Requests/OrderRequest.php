@@ -42,7 +42,7 @@ class OrderRequest extends FormRequest
             'boolean',
             !$isClient ? 'in:1' : null  // Non-clients must have paid = 1
         ]),
-        'order_total_amount' => ['required', 'numeric'],
+        'order_total_amount' => ['required', 'numeric', 'min:0'],
     ];
 
     }

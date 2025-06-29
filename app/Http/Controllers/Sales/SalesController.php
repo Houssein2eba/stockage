@@ -152,53 +152,92 @@ class SalesController extends Controller
                     throw new \Exception('Aucun produit sélectionné');
                 }
 
-                foreach ($data['products'] as $productItem) {
-                    // Lock product for update to prevent concurrent modifications
-                    $product = Product::where('id', $productItem['product']['id'])
-                                    ->lockForUpdate()
-                                    ->first();
+                $productIds = collect($data['products'])->pluck('product.id')->toArray();
+                $products = Product::whereIn('id', $productIds)->lockForUpdate()->get()->keyBy('id');
 
-                    if (!$product) {
-                        throw new \Exception('Produit introuvable avec ID ' . $productItem['product']['id']);
+                // Validate products exist and check stock availability
+                foreach ($data['products'] as $productItem) {
+                    $productId = $productItem['product']['id'];
+                    $quantity = $productItem['quantity'];
+
+                    if (!isset($products[$productId])) {
+                        throw new \Exception('Produit introuvable avec ID ' . $productId);
                     }
 
-                    // Check stock availability
-                    if ($product->quantity < $productItem['quantity']) {
+                    $product = $products[$productId];
+
+                    if ($product->quantity < $quantity) {
                         throw new \Exception('Quantité insuffisante pour ' . $product->name . '. Stock disponible: ' . $product->quantity);
                     }
 
                     // Calculate amounts
-                    $totalAmount = $productItem['total_amount'] ?? ($product->price * $productItem['quantity']);
+                    $totalAmount = $productItem['total_amount'] ?? ($product->price * $quantity);
                     $orderTotal += $totalAmount;
 
                     // Prepare pivot data for many-to-many relationship
-                    $productData[$product->id] = [
-                        'quantity' => $productItem['quantity'],
+                    $productData[$productId] = [
+                        'quantity' => $quantity,
                         'total_amount' => $totalAmount,
                     ];
 
-                    // Update product stock quantity
-                    $product->decrement('quantity', $productItem['quantity']);
+                    // Prepare for bulk update of product quantities
+                    $product->quantity -= $quantity;
+                }
 
-                    // Update stock movement record
-                    if (isset($data['stock']['id'])) {
-                        $product->stocks()->updateExistingPivot($data['stock']['id'], [
-                            'products_quantity' => DB::raw('products_quantity - ' . $productItem['quantity']),
-                            'type' => 'out',
-                            'stock_date' => now(),
-                            'updated_at' => now(),
-                        ]);
-                    }
+                // Bulk update product quantities
+                $cases = [];
+                $ids = [];
+                foreach ($products as $product) {
+                    $cases[] = "WHEN '{$product->id}' THEN {$product->quantity}";
+                    $ids[] = "'{$product->id}'";
+                }
 
+                if (!empty($cases)) {
+                    $idsString = implode(',', $ids);
+                    $casesString = implode(' ', $cases);
 
+                    DB::statement("UPDATE products SET quantity = CASE id {$casesString} END WHERE id IN ({$idsString})");
                 }
 
                 // Attach products to order with pivot data
                 $order->products()->attach($productData);
 
-                // Update order total amount
+                // Update stock movement record (bulk update if possible, otherwise keep loop)
+                if (isset($data['stock']['id'])) {
+                    $stockId = $data['stock']['id'];
+                    $productStockUpdates = [];
+
+                    foreach ($data['products'] as $productItem) {
+                        $productId = $productItem['product']['id'];
+                        $quantity = $productItem['quantity'];
+
+                        $productStockUpdates[] = [
+                            'product_id' => $productId,
+                            'stock_id' => $stockId,
+                            'products_quantity' => DB::raw('products_quantity - ' . $quantity),
+                            'type' => 'out',
+                            'stock_date' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
+
+                    // Perform bulk update for product_stocks pivot table
+                    foreach ($productStockUpdates as $updateData) {
+                        DB::table('product_stocks')
+                            ->where('product_id', $updateData['product_id'])
+                            ->where('stock_id', $updateData['stock_id'])
+                            ->update([
+                                'products_quantity' => $updateData['products_quantity'],
+                                'type' => $updateData['type'],
+                                'stock_date' => $updateData['stock_date'],
+                                'updated_at' => $updateData['updated_at'],
+                            ]);
+                    }
+                }
+
+                // Update order total amount (if needed, otherwise remove)
                 $order->update([
-                    'total_amount' => $orderTotal
+                    'order_total_amount' => $orderTotal
                 ]);
 
 
@@ -247,45 +286,93 @@ class SalesController extends Controller
             $old = $order->toArray();
             $order->load('products');
 
-            // Calculate total amount
-            $totalAmount = collect($request->items)->sum(function ($item) {
-                $product = Product::find($item['product']['id']);
-                return $product->price * $item['quantity'];
-            });
+            $productIds = collect($request->items)->pluck('product.id')->toArray();
+            $products = Product::whereIn('id', $productIds)->lockForUpdate()->get()->keyBy('id');
 
-            // Restore previous quantities
+            $oldProductQuantities = [];
             foreach ($order->products as $product) {
-                $product->increment('quantity', $product->pivot->quantity);
+                $oldProductQuantities[$product->id] = $product->pivot->quantity;
+            }
+
+            $totalAmount = 0;
+            $newProductQuantities = [];
+            $orderDetails = [];
+
+            foreach ($request->items as $item) {
+                $productId = $item['product']['id'];
+                $quantity = $item['quantity'];
+
+                if (!isset($products[$productId])) {
+                    throw new \Exception('Produit introuvable avec ID ' . $productId);
+                }
+
+                $product = $products[$productId];
+
+                // Calculate total amount
+                $itemTotalAmount = $item['total_amount'] ?? ($product->price * $quantity);
+                $totalAmount += $itemTotalAmount;
+
+                // Prepare order details for sync
+                $orderDetails[$productId] = [
+                    'quantity' => $quantity,
+                    'total_amount' => $itemTotalAmount,
+                ];
+
+                // Calculate new quantity for bulk update
+                $oldQuantity = $oldProductQuantities[$productId] ?? 0;
+                $newProductQuantities[$productId] = ($product->quantity + $oldQuantity) - $quantity;
+
+                if ($newProductQuantities[$productId] < 0) {
+                    throw new \Exception("Quantité insuffisante pour " . $product->name);
+                }
+            }
+
+            // Bulk update product quantities
+            $cases = [];
+            $ids = [];
+            foreach ($newProductQuantities as $id => $qty) {
+                $cases[] = "WHEN '{$id}' THEN {$qty}";
+                $ids[] = "'{$id}'";
+            }
+
+            if (!empty($cases)) {
+                $idsString = implode(',', $ids);
+                $casesString = implode(' ', $cases);
+                DB::statement("UPDATE products SET quantity = CASE id {$casesString} END WHERE id IN ({$idsString})");
             }
 
             // Update order main info
             $order->update([
                 'client_id' => $request->client ? $request->client['id'] : null,
-
-                'total_amount' => $totalAmount,
+                'order_total_amount' => $totalAmount,
                 'status' => $request->status ?? ($request->paid ? 'paid' : 'pending')
             ]);
 
             // Sync new products with order details
-            $orderDetails = collect($request->items)->mapWithKeys(function ($item) {
-                return [
-                    $item['product']['id'] => [
-                        'id' => Str::uuid(),
-                        'quantity' => $item['quantity'],
-                        'total_amount' => Product::find($item['product']['id'])->price * $item['quantity']
-                    ]
-                ];
-            })->all();
-
             $order->products()->sync($orderDetails);
 
-            // Update new quantities
-            foreach ($request->items as $item) {
-                $product = Product::find($item['product']['id']);
-                if ($product->quantity < $item['quantity']) {
-                    throw new \Exception("Insufficient stock for product: {$product->name}");
+            // Update stock movement record (if applicable)
+            if (isset($order->stock_id)) {
+                $stockId = $order->stock_id;
+                foreach ($request->items as $item) {
+                    $productId = $item['product']['id'];
+                    $quantity = $item['quantity'];
+                    $oldQuantity = $oldProductQuantities[$productId] ?? 0;
+
+                    $quantityDifference = $quantity - $oldQuantity;
+
+                    if ($quantityDifference !== 0) {
+                        DB::table('product_stocks')
+                            ->where('product_id', $productId)
+                            ->where('stock_id', $stockId)
+                            ->update([
+                                'products_quantity' => DB::raw('products_quantity - ' . $quantityDifference),
+                                'type' => $quantityDifference > 0 ? 'out' : 'in',
+                                'stock_date' => now(),
+                                'updated_at' => now(),
+                            ]);
+                    }
                 }
-                $product->decrement('quantity', $item['quantity']);
             }
 
             $order->refresh();
@@ -301,17 +388,47 @@ public function destroy($id)
         $order = Order::with('products')->findOrFail($id);
         $old = $order->toArray();
 
-        // Restituer les quantités des produits
-        foreach ($order->products as $product) {
-            $product->increment('quantity', $product->pivot->quantity);
+        $productQuantitiesToRestore = [];
+        $productStockUpdates = [];
 
-            // Si vous utilisez également la gestion des stocks, mettez à jour le stock
-            if (isset($product->pivot->stock_id)) {
-                $product->stocks()->updateExistingPivot($product->pivot->stock_id, [
-                    'products_quantity' => DB::raw('products_quantity + ' . $product->pivot->quantity),
-                    'type' => 'in', // Marquer comme entrée de stock
-                    'stock_date' => now(),
-                ]);
+        foreach ($order->products as $product) {
+            $productQuantitiesToRestore[$product->id] = ($productQuantitiesToRestore[$product->id] ?? 0) + $product->pivot->quantity;
+
+            if (isset($order->stock_id)) {
+                $productStockUpdates[$product->id] = (
+                    $productStockUpdates[$product->id] ?? 0
+                ) + $product->pivot->quantity;
+            }
+        }
+
+        // Bulk update product quantities
+        $cases = [];
+        $ids = [];
+        foreach ($productQuantitiesToRestore as $productId => $quantity) {
+            $cases[] = "WHEN '{$productId}' THEN quantity + {$quantity}";
+            $ids[] = "'{$productId}'";
+        }
+
+        if (!empty($cases)) {
+            $idsString = implode(',', $ids);
+            $casesString = implode(' ', $cases);
+            DB::statement("UPDATE products SET quantity = CASE id {$casesString} END WHERE id IN ({$idsString})");
+        }
+
+        // Bulk update product_stocks pivot table
+        if (isset($order->stock_id) && !empty($productStockUpdates)) {
+            $stockId = $order->stock_id;
+            $cases = [];
+            $ids = [];
+            foreach ($productStockUpdates as $productId => $quantity) {
+                $cases[] = "WHEN '{$productId}' THEN products_quantity + {$quantity}";
+                $ids[] = "'{$productId}'";
+            }
+
+            if (!empty($cases)) {
+                $idsString = implode(',', $ids);
+                $casesString = implode(' ', $cases);
+                DB::statement("UPDATE product_stocks SET products_quantity = CASE product_id {$casesString} END, type = 'in', stock_date = NOW(), updated_at = NOW() WHERE product_id IN ({$idsString}) AND stock_id = '{$stockId}'");
             }
         }
 
