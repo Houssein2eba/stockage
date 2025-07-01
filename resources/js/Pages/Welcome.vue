@@ -92,9 +92,9 @@ function handleImageError() {
                                 </svg>
                             </div>
                             <div>
-                                <h2 class="text-xl font-semibold text-black dark:text-white">Gestion des Commandes</h2>
+                                <h2 class="text-xl font-semibold text-black dark:text-white">Gestion des  Ventes</h2>
                                 <p class="mt-4 text-gray-600 dark:text-gray-400">
-                                    Traitez les commandes efficacement, suivez leur statut et gérez les informations clients.
+                                    Traitez les ventes efficacement, suivez leur statut et gérez les informations clients.
                                 </p>
                             </div>
                         </div>
@@ -130,7 +130,7 @@ function handleImageError() {
                 </main>
 
                 <footer class="py-16 text-center text-sm text-black dark:text-white/70">
-                    Système de Gestion de Stock 
+                    Système de Gestion de Stock
                 </footer>
             </div>
         </div>

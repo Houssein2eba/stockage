@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Sales;
 
+use App\Exports\OrdersExport;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ClearStockResource;
 use App\Http\Resources\ClientResource;
@@ -27,6 +28,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SalesController extends Controller
 {
@@ -469,5 +471,10 @@ public function destroy($id)
 
 
         return back();
+    }
+
+    public function export()
+    {
+        return Excel::download(new OrdersExport, 'ventes.xlsx');
     }
 }

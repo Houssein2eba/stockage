@@ -72,6 +72,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/{id}', [SalesController::class, 'update'])->name('update')->middleware('permission:modifierVentes');
         Route::delete('/{id}', [SalesController::class, 'destroy'])->name('destroy')->middleware('permission:supprimerVentes');
         Route::get('/{id}/invoice', [FactureController::class, 'generatePdf'])->name('invoice')->middleware('permission:genererFacture');
+        Route::get('/export', [SalesController::class, 'export'])->name('export')->middleware('permission:exporterVentes');
     });
 
     // Stocks

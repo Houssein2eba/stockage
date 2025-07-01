@@ -3,7 +3,7 @@ import AuthLayout from "@/layouts/AuthLayout.vue";
 import { Head, Link } from "@inertiajs/vue3";
 import { useToast } from "vue-toastification";
 
-import {formatPrix} from "@/utils/format.js";
+import {formatPrice} from "@/utils/format.js";
 const props = defineProps({
     product: Object
 });
